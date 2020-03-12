@@ -1,0 +1,55 @@
+
+This drawing is at a scale of 1 pixel = 10km. The earth's radius here is 636
+pixels and the height of the satellite 85 pixels. The scan angle phi is 54
+degrees. The drawing is not really precise but accurate enough as a
+visualization of the Satellite/Earth/Scanner relationship.
+
+These are the symbols used in this drawing:
+
+R    = Radius of Earth = 6357km
+H    = Altitude of Satellite = 85km
+phi  = Scanner angle
+beta = The angle subtended by the interception point of phi at the Earth's
+       surface and the center of Earth.
+x    = The distance between the interception point above and a line from the 
+       center of Earth to the Satellite.
+y    = The distance of the above line from the sub satellite point.
+
+To calculate beta we start with the following relationship:
+
+ x = R * sin(beta) = (H + y) * tan(phi)  (1)
+ 
+ y = R - R * cos(beta) = R * (1 - cos(beta))   (2)
+
+ R * sin(beta) = (H + R * (1 - cos(beta))) * tan(phi)
+ 
+ R * sin(beta) - H * tan(phi) - R * tan(phi) + R * cos(beta) * tan(phi) = 0 (3)
+
+ Dividing (3) by R and re-arranging:
+
+ sin(beta) - H / R * tan(phi) - tan(phi) + cos(beta) * tan(phi) = 0
+
+ sin(beta) + cos(beta) * tan(phi) - ( 1 + H / R ) * tan(phi) = 0  (4)
+
+ To solve for beta we use the Newton-Raphson numerical method:
+ Xn+1 = Xn - f(X) / f'(X)
+
+ Here we have:
+
+ f(X)  = sin(beta) + cos(beta) * tan(phi) - ( 1 + H / R ) * tan(phi)
+ f'(X) = cos(beta) - sin(beta) * tan(phi)
+ beta(n+1) = beta(n) - f(beta) / f'(beta)  (5)
+
+ This algorithm is used to calculate beta for a given value of phi.
+ The new number of pixels in the rectified image is calculated from:
+ N = n * (R * beta_max) / (H * phi_max)  (6)
+ where phi_max = 0.9425 rad (54 degrees) and beta_max the corresponding value.
+
+ This is because the satellite's scanner effectively projects the ever-longer
+ segments along the arc on the earth's surface to pixels of constant size
+ along an arc of radius H.
+
+ DISCLAIMER! Last time I performed any calculations like the above, was
+ during my college years, early 1970's!! So please view the above with
+ caution!
+

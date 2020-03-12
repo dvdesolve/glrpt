@@ -1,0 +1,25 @@
+
+This is the working directory of "glrpt" and it must be available in the
+user's home directory. Here is a description of files in this directory:
+
+"glrpt.glade" is the GTK3/Glade3 GUI description file and it is loaded
+dynamically when glrpt is started. This file contains the complete description
+of the Graphical User Interface and it can be modified by the user, provided
+it is not damaged. The various widgets describe here can be moved to different
+positions in the GUI and their attributes can be changed to some extend.
+However, this should only be done by users with some knowledge of this file.
+
+The "images" directory is where glrpt stores any images produced by decoding
+the signal from a Meteor M2 type satellite. This directory can be replaced by
+a relative link to any other directory chosen by the user, but the link's name
+should be "images".
+
+"glrpt" now has the ability to use more than one configuration file, usually
+this will be a per-satellite or a per-mode configuration. File names can be
+chosen by the user but the must end in ".cfg" if they are to be recognized.
+"glrpt" strips this extension from the file names and displays the result in
+its "Select Satellite" menu item. Unfortunately the library function that
+lists the "glrpt" directory doesn't seem to follow a strict alphabetical order
+so these files may appear in any order. Configuration files MUST be reviewed
+and edited by the user, as applicable.
+

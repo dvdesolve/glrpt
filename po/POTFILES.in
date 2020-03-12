@@ -1,0 +1,16 @@
+# List of source files containing translatable strings.
+src/Glrpt/callback_func.c
+src/Glrpt/utils.c
+src/Glrpt/interface.c
+src/Glrpt/rc_config.c
+src/Glrpt/main.c
+src/Glrpt/clahe.c
+src/Glrpt/display.c
+src/Glrpt/image.c
+src/Glrpt/jpeg.c
+src/lrpt_decode/met_jpg.c
+src/lrpt_decode/rectify_meteor.c
+src/lrpt_demod/demod.c
+src/sdr/SoapySDR.c
+src/sdr/ifft.c
+
