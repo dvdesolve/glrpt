@@ -482,7 +482,7 @@ Demodulator_Run( gpointer data )
     Display_Icon( frame_icon, "gtk-no" );
     ClearFlag( FRAME_OK_ICON );
     Display_Icon( pll_lock_icon, "gtk-no" );
-    Show_Message( _("Receiving & Decoding Ended"), "green" );
+    Show_Message( "Receiving & Decoding Ended", "green" );
     Set_Check_Menu_Item( "decode_images_menuitem",  FALSE );
     return( FALSE );
   }

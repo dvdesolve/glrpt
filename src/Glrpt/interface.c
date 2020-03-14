@@ -34,7 +34,7 @@ Gtk_Builder( GtkBuilder **builder, gchar **object_ids )
   if( !ret )
   {
     fprintf( stderr,
-        _("glrpt: Failed to add objects to builder:\n%s\n"),
+        "glrpt: Failed to add objects to builder:\n%s\n",
         gerror->message );
     exit( -1 );
   }
@@ -42,7 +42,7 @@ Gtk_Builder( GtkBuilder **builder, gchar **object_ids )
   /* Connect signals if gmodule is supported */
   if( !g_module_supported() )
   {
-    fprintf( stderr, _("glrpt: lib gmodule not supported\n") );
+    fprintf( stderr, "glrpt: lib gmodule not supported\n" );
     exit( -1 );
   }
   gtk_builder_connect_signals( *builder, NULL );
@@ -62,7 +62,7 @@ Builder_Get_Object( GtkBuilder *builder, gchar *name )
   if( object == NULL )
   {
     fprintf( stderr,
-        _("!! glrpt: builder failed to get named object: %s\n"),
+        "!! glrpt: builder failed to get named object: %s\n",
         name );
     exit( -1 );
   }

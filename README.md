@@ -13,10 +13,9 @@ In order to use `glrpt` one should have the following dependencies satisfied:
 - `SoapySDR` (install RTL-SDR and/or Airspy modules to have support for your hardware)
 
 Also if you want to compile `glrpt` by hand be sure to have the following installed:
-- `gcc`
+- `gcc` (4.8 or higher)
 - `make`
-- `automake`
-- `autoconf`
+- `cmake` (3.12 or higher)
 
 ## Installation
 First of all check if `glrpt` is already in your distro repository. For example, on Arch Linux you can install it [from AUR](https://aur.archlinux.org/packages/glrpt/). If there is no package for your distro then you must compile it by hands.
@@ -30,8 +29,9 @@ cd glrpt
 
 Prepare your build (for example, the following will install `glrpt` into `/usr` instead of `/usr/local`):
 ```
-./autogen.sh
-./configure --prefix=/usr
+mkdir build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=/usr ..
 ```
 
 Build and install `glrpt`:

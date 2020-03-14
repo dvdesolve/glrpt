@@ -1573,7 +1573,7 @@ jepg_encoder_compress_image_to_file(
       &encoder, pFile, width, height, comp_params );
   if( !ret )
   {
-    Show_Message( _("Error: jpeg_encoder_init() failed"), "red" );
+    Show_Message( "Error: jpeg_encoder_init() failed", "red" );
     return( FALSE );
   }
 
@@ -1581,14 +1581,14 @@ jepg_encoder_compress_image_to_file(
       &encoder, pImage_data, width, height, num_channels );
   if( !ret )
   {
-    Show_Message( _("Error: jpeg_encoder_read_image() failed"), "red" );
+    Show_Message( "Error: jpeg_encoder_read_image() failed", "red" );
     return( FALSE );
   }
 
   ret = jpeg_encoder_compress_image( &encoder );
   if( !ret )
   {
-    Show_Message( _("Error: jpeg_encoder_compress_image() failed"), "red" );
+    Show_Message( "Error: jpeg_encoder_compress_image() failed", "red" );
     return( FALSE );
   }
 

@@ -125,7 +125,7 @@ main( int argc, char *argv[] )
   Qpsk_Drawingarea_Size_Alloc( &alloc );
 
   char ver[28];
-  snprintf( ver, sizeof(ver), _("Welcome to %s"), PACKAGE_STRING );
+  snprintf( ver, sizeof(ver), "Welcome to %s", PACKAGE_STRING );
   Show_Message( ver, "bold" );
 
   /* Find configuration file(s) and open the first as default */
@@ -148,7 +148,7 @@ main( int argc, char *argv[] )
 Initialize_Top_Window( void )
 {
   /* The scrolled window image container */
-  gchar text[32];
+  gchar text[37];
 
   /* Show current satellite */
   GtkLabel *label = GTK_LABEL(
@@ -181,7 +181,7 @@ Initialize_Top_Window( void )
   /* Error, not enough memory */
   if( scaled_image_pixbuf == NULL)
   {
-    Show_Message( _("Memory allocation for pixbuf failed - Quit"), "red" );
+    Show_Message( "Memory allocation for pixbuf failed - Quit", "red" );
     Error_Dialog();
     return;
   }
@@ -229,23 +229,23 @@ static void sig_handler( int signal )
   switch( signal )
   {
     case SIGINT:
-      fprintf( stderr, "%s\n", _("glrpt: Exiting via User Interrupt") );
+      fprintf( stderr, "%s\n", "glrpt: Exiting via User Interrupt" );
       exit(-1);
 
     case SIGSEGV:
-      fprintf( stderr, "%s\n", _("glrpt: Segmentation Fault") );
+      fprintf( stderr, "%s\n", "glrpt: Segmentation Fault" );
       exit(-1);
 
     case SIGFPE:
-      fprintf( stderr, "%s\n", _("glrpt: Floating Point Exception") );
+      fprintf( stderr, "%s\n", "glrpt: Floating Point Exception" );
       exit(-1);
 
     case SIGABRT:
-      fprintf( stderr, "%s\n", _("glrpt: Abort Signal received") );
+      fprintf( stderr, "%s\n", "glrpt: Abort Signal received" );
       exit(-1);
 
     case SIGTERM:
-      fprintf( stderr, "%s\n", _("glrpt: Termination Request received") );
+      fprintf( stderr, "%s\n", "glrpt: Termination Request received" );
       exit(-1);
   }
 
