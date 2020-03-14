@@ -24,7 +24,7 @@ static int last_frame = 0;
 Parse_70( uint8_t *p )
 {
   int h, m, s;
-  gchar txt[10];
+  gchar txt[12];
 
   h  = p[8];
   m  = p[9];
