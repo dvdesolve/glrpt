@@ -89,13 +89,13 @@ Filename( char *fpath )
 Usage( void )
 {
   fprintf( stderr, "%s\n",
-      _("Usage: glrpt [-hv]") );
+      "Usage: glrpt [-hv]" );
 
   fprintf( stderr, "%s\n",
-      _("       -h: Print this usage information and exit"));
+      "       -h: Print this usage information and exit");
 
   fprintf( stderr, "%s\n",
-      _("       -v: Print version number and exit"));
+      "       -v: Print version number and exit");
 
 } /* End of Usage() */
 
@@ -146,7 +146,7 @@ void mem_alloc( void **ptr, size_t req )
   *ptr = malloc( req );
   if( *ptr == NULL )
   {
-    perror( _("glrpt: A memory allocation request failed") );
+    perror( "glrpt: A memory allocation request failed" );
     exit( -1 );
   }
   memset( *ptr, 0, req );
@@ -159,7 +159,7 @@ void mem_realloc( void **ptr, size_t req )
   *ptr = realloc( *ptr, req );
   if( *ptr == NULL )
   {
-    perror( _("glrpt: A memory allocation request failed") );
+    perror( "glrpt: A memory allocation request failed" );
     exit( -1 );
   }
 } /* End of void mem_realloc() */
@@ -190,11 +190,11 @@ Open_File( FILE **fp, char *fname, const char *mode )
   if( *fp == NULL )
   {
     snprintf( mesg, sizeof(mesg),
-        _("glrpt: Failed to open file %s"), fname );
+        "glrpt: Failed to open file %s", fname );
     perror( mesg );
 
     snprintf( mesg, sizeof(mesg),
-        _("Failed to open file\n%s"), Filename(fname) );
+        "Failed to open file\n%s", Filename(fname) );
     Show_Message( mesg, "red" );
     Error_Dialog();
     return( FALSE );
@@ -222,7 +222,7 @@ Save_Image_JPEG(
 
   /* Open image file, abort on error */
   snprintf( mesg, sizeof(mesg),
-      _("Saving Image: %s"), Filename(file_name) );
+      "Saving Image: %s", Filename(file_name) );
   Show_Message( mesg, "black" );
 
   /* Compress image data to jpeg file, report failure */
@@ -231,7 +231,7 @@ Save_Image_JPEG(
   if( !ret )
   {
     snprintf( mesg, sizeof(mesg),
-        _("Failed saving image: %s"), Filename(file_name) );
+        "Failed saving image: %s", Filename(file_name) );
     Show_Message( mesg, "red" );
   }
 
@@ -258,18 +258,18 @@ Save_Image_Raw(
 
 
   /* Open image file, abort on error */
-  snprintf( mesg, sizeof(mesg), _("Saving Image: %s"), Filename(fname) );
+  snprintf( mesg, sizeof(mesg), "Saving Image: %s", Filename(fname) );
   Show_Message( mesg, "black" );
   if( !Open_File(&fp, fname, "w") ) return;
 
   /* Write header in Ch-A output PPM files */
   ret = fprintf( fp, "%s\n%s\n%d %d\n%d\n", type,
-      _("# Created by glrpt"), width, height, max_val );
+      "# Created by glrpt", width, height, max_val );
   if( ret < 0 )
   {
     fclose( fp );
-    perror( _("glrpt: Error writing image to file") );
-    Show_Message( _("Error writing image to file"), "red" );
+    perror( "glrpt: Error writing image to file" );
+    Show_Message( "Error writing image to file", "red" );
     Error_Dialog();
     return;
   }
@@ -285,8 +285,8 @@ Save_Image_Raw(
   if( fw != size )
   {
     fclose( fp );
-    perror( _("glrpt: Error writing image to file") );
-    Show_Message( _("Error writing image to file"), "red" );
+    perror( "glrpt: Error writing image to file" );
+    Show_Message( "Error writing image to file", "red" );
     Error_Dialog();
     return;
   }

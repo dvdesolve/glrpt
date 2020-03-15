@@ -63,7 +63,7 @@ Save_Images( int type )
         gboolean ret = jepg_encoder_compression_parameters(
             &comp_params, rc_data.jpeg_quality, Y_ONLY, TRUE );
         if( !ret )
-          Show_Message( _("Bad compression parameters"), "red" );
+          Show_Message( "Bad compression parameters", "red" );
 
         /* Save unprocessed image */
         fname[0] = '\0';
@@ -111,7 +111,7 @@ Save_Images( int type )
       compression_params_t comp_params;
       gboolean ret = jepg_encoder_compression_parameters(
           &comp_params, rc_data.jpeg_quality, H2V2, FALSE );
-      if( !ret ) Show_Message( _("Bad compression parameters"), "red" );
+      if( !ret ) Show_Message( "Bad compression parameters", "red" );
 
       /* Save unprocessed image */
       fname[0] = '\0';
@@ -182,8 +182,8 @@ Mj_Dump_Image( void )
                   NUM_GREYBINS, CLIP_LIMIT ) )
             {
               Show_Message(
-                  _("Failed to perform C.L.A.H.E.\n"\
-                    "Image Contrast Enhancement"), "red" );
+                  "Failed to perform C.L.A.H.E.\n"\
+                    "Image Contrast Enhancement", "red" );
             }
           } /* if( isFlagSet(IMAGE_CLAHE) ) */
         } /* for( idx = 0; idx < CHANNEL_IMAGE_NUM; idx++ ) */
@@ -359,7 +359,7 @@ Mj_Dec_Mcus(
     dc_cat = Get_DC( (uint16_t)(Bio_Peek_n_Bits(&b, 16)) );
     if( dc_cat == -1 )
     {
-      Show_Message( _("Bad DC huffman code!"), "red" );
+      Show_Message( "Bad DC huffman code!", "red" );
       return;
     }
     Bio_Advance_n_Bits( &b, dc_cat_off[dc_cat] );
@@ -374,7 +374,7 @@ Mj_Dec_Mcus(
       ac = Get_AC( (uint16_t)(Bio_Peek_n_Bits(&b, 16)) );
       if( ac == -1 )
       {
-        Show_Message( _("Bad DC huffman code!"), "red" );
+        Show_Message( "Bad DC huffman code!", "red" );
         return;
       }
       ac_len  = ac_table[ac].len;

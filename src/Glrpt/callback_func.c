@@ -44,7 +44,7 @@ Error_Dialog( void )
 Cancel_Timer( gpointer data )
 {
   alarm( 0 );
-  Show_Message( _("Cancelling Decode Timer"), "orange" );
+  Show_Message( "Cancelling Decode Timer", "orange" );
   ClearFlag( ENABLE_DECODE_TIMER );
   ClearFlag( START_STOP_TIMER );
   ClearFlag( ALARM_ACTION_START );
@@ -52,7 +52,7 @@ Cancel_Timer( gpointer data )
   gtk_toggle_button_set_active(
       GTK_TOGGLE_BUTTON(start_togglebutton), FALSE );
 
-  Show_Message( _("Setting Decode Timer to Default"), "black" );
+  Show_Message( "Setting Decode Timer to Default", "black" );
   rc_data.decode_timer = rc_data.default_timer;
   Initialize_Top_Window();
 
@@ -206,7 +206,7 @@ Init_Reception( void )
   /* Initialize SoapySDR device */
   if( !SoapySDR_Init() )
   {
-    Show_Message( _("Failed to Initialize SoapySDR"), "red" );
+    Show_Message( "Failed to Initialize SoapySDR", "red" );
     Error_Dialog();
     return( FALSE );
   }
@@ -283,7 +283,7 @@ Start_Receiver_Menuitem_Toggled( GtkCheckMenuItem *menuitem )
     /* Display Device Driver in use */
     char mesg[MESG_SIZE];
     snprintf( mesg, sizeof(mesg),
-        _("Decoding from Device \"%s\""), rc_data.device_driver );
+        "Decoding from Device \"%s\"", rc_data.device_driver );
     Show_Message( mesg, "green" );
   } /* if( gtk_check_menu_item_get_active(menuitem) && */
 
@@ -324,13 +324,13 @@ Decode_Images_Menuitem_Toggled( GtkCheckMenuItem *menuitem )
     if( isFlagSet(ENABLE_DECODE_TIMER) )
     {
       snprintf( mesg, MESG_SIZE,
-          _("Decode Timer Started: %d sec"), rc_data.decode_timer );
+          "Decode Timer Started: %d sec", rc_data.decode_timer );
       Show_Message( mesg, "orange" );
       SetFlag( ALARM_ACTION_STOP );
       alarm( rc_data.decode_timer );
     }
 
-    Show_Message( _("Decoding of LRPT Images Started"), "black" );
+    Show_Message( "Decoding of LRPT Images Started", "black" );
     SetFlag( STATUS_DECODING );
     return;
   } /* if( gtk_check_menu_item_get_active(menuitem) && */
@@ -340,12 +340,12 @@ Decode_Images_Menuitem_Toggled( GtkCheckMenuItem *menuitem )
       isFlagSet(STATUS_DECODING) )
   {
     ClearFlag( STATUS_DECODING );
-    Show_Message( _("Decoder Timer Cancelled"), "orange" );
+    Show_Message( "Decoder Timer Cancelled", "orange" );
     alarm( 0 );
     ClearFlag( ALARM_ACTION_STOP );
     Medet_Deinit();
 
-    Show_Message( _("Decoding of LRPT Images Stopped"), "black" );
+    Show_Message( "Decoding of LRPT Images Stopped", "black" );
     Display_Icon( frame_icon, "gtk-no" );
     ClearFlag( FRAME_OK_ICON );
   } /* if( !gtk_check_menu_item_get_active(menuitem) && */
@@ -366,7 +366,7 @@ Alarm_Action( void )
       isFlagClear(STATUS_RECEIVING) )
   {
     /* Start SDR Receiver and Demodulator/Decoder */
-    Show_Message( _("Starting Receiver & Decoder"), "black" );
+    Show_Message( "Starting Receiver & Decoder", "black" );
 
     /* Set up alarm to stop ongoing action */
     ClearFlag( ALARM_ACTION_START );
@@ -399,7 +399,7 @@ Alarm_Action( void )
     /* Display Device Driver in use */
     char mesg[MESG_SIZE];
     snprintf( mesg, sizeof(mesg),
-        _("Decoding from %s Receiver"), rc_data.device_driver );
+        "Decoding from %s Receiver", rc_data.device_driver );
     Show_Message( mesg, "black" );
 
     /* Start demodulator by idle callback */
@@ -412,7 +412,7 @@ Alarm_Action( void )
   /* Stop Receive/Decode Operation */
   if( isFlagSet(ALARM_ACTION_STOP) )
   {
-    Show_Message( _("Decode Timer Expired"), "orange" );
+    Show_Message( "Decode Timer Expired", "orange" );
     ClearFlag( ALARM_ACTION_STOP );
     alarm( 0 );
 
@@ -453,12 +453,12 @@ Decode_Timer_Setup( void )
   if( rc_data.decode_timer > MAX_OPERATION_TIME )
   {
     snprintf( mesg, MESG_SIZE,
-        _("Decode Timer (%d sec) excessive?"), rc_data.decode_timer );
+        "Decode Timer (%d sec) excessive?", rc_data.decode_timer );
     Show_Message( mesg, "red" );
     Error_Dialog();
   }
   snprintf( mesg, MESG_SIZE,
-      _("Decode Timer set to %d sec"), rc_data.decode_timer );
+      "Decode Timer set to %d sec", rc_data.decode_timer );
   Show_Message( mesg, "orange" );
 
   gtk_widget_destroy( decode_timer_dialog );
@@ -526,7 +526,7 @@ Auto_Timer_OK_Clicked( void )
   /* Data sanity check */
   if( stop_sec <= sleep_sec )
   {
-    Show_Message( _("Stop time ahead of Start time"), "red" );
+    Show_Message( "Stop time ahead of Start time", "red" );
     Error_Dialog();
     return;
   }
@@ -538,15 +538,15 @@ Auto_Timer_OK_Clicked( void )
   if( rc_data.decode_timer > MAX_OPERATION_TIME )
   {
     snprintf( mesg, MESG_SIZE,
-        _("Decode Timer (%d sec) excessive?"), rc_data.decode_timer );
+        "Decode Timer (%d sec) excessive?", rc_data.decode_timer );
     Show_Message( mesg, "red" );
     Error_Dialog();
   }
 
   /* Notify sleeping */
   snprintf( mesg, MESG_SIZE,
-      _("Suspended till %02d:%02d UTC\n"\
-        "Decode Timer set to %d sec"),
+      "Suspended till %02d:%02d UTC\n"\
+        "Decode Timer set to %d sec",
       start_hrs, start_min, rc_data.decode_timer );
   Show_Message( mesg, "black" );
 
@@ -582,7 +582,7 @@ Hours_Entry( GtkEditable *editable )
   for( idx = 0; idx < len; idx++ )
     if( (buff[idx] < '0') || (buff[idx] > '9') )
     {
-      Show_Message( _("Non-numeric entry"), "red" );
+      Show_Message( "Non-numeric entry", "red" );
       Error_Dialog();
       return;
     }
@@ -591,7 +591,7 @@ Hours_Entry( GtkEditable *editable )
   ent = atoi( gtk_entry_get_text(GTK_ENTRY(editable)) );
   if( (ent < 0) || (ent > 23) )
   {
-    Show_Message( _("Value out of range"), "red" );
+    Show_Message( "Value out of range", "red" );
     Error_Dialog();
     return;
   }
@@ -619,7 +619,7 @@ Minutes_Entry( GtkEditable *editable )
   for( idx = 0; idx < len; idx++ )
     if( (buff[idx] < '0') || (buff[idx] > '9') )
     {
-      Show_Message( _("Non-numeric entry"), "red" );
+      Show_Message( "Non-numeric entry", "red" );
       Error_Dialog();
       return;
     }
@@ -628,7 +628,7 @@ Minutes_Entry( GtkEditable *editable )
   ent = atoi( gtk_entry_get_text(GTK_ENTRY(editable)) );
   if( (ent < 0) || (ent > 59) )
   {
-    Show_Message( _("Value out of range"), "red" );
+    Show_Message( "Value out of range", "red" );
     Error_Dialog();
     return;
   }
@@ -677,7 +677,7 @@ Fft_Drawingarea_Size_Alloc( GtkAllocation *allocation )
       allocation->width, allocation->height );
   if( wfall_pixbuf == NULL )
   {
-    Show_Message( _("Failed creating waterfall pixbuf"), "red" );
+    Show_Message( "Failed creating waterfall pixbuf", "red" );
     return;
   }
 
@@ -718,7 +718,7 @@ Qpsk_Drawingarea_Size_Alloc( GtkAllocation *allocation )
       GDK_COLORSPACE_RGB, FALSE, 8, allocation->width, allocation->height );
   if( qpsk_pixbuf == NULL )
   {
-    Show_Message( _("Failed creating QPSK Const pixbuf"), "red" );
+    Show_Message( "Failed creating QPSK Const pixbuf", "red" );
     return;
   }
 
@@ -777,8 +777,8 @@ BW_Entry_Activate( GtkEntry *entry )
   /* Prevent filter re-initialization when in use */
   if( isFlagSet(STATUS_SOAPYSDR_INIT) )
   {
-    Show_Message( _("Cannot change Filter Bandwidth"), "red" );
-    Show_Message( _("Filter is in use by SoapySDR"), "red" );
+    Show_Message( "Cannot change Filter Bandwidth", "red" );
+    Show_Message( "Filter is in use by SoapySDR", "red" );
     Error_Dialog();
     return;
   }
@@ -791,7 +791,7 @@ BW_Entry_Activate( GtkEntry *entry )
   if( (rc_data.sdr_filter_bw < MIN_BANDWIDTH) ||
       (rc_data.sdr_filter_bw > MAX_BANDWIDTH) )
   {
-    Show_Message( _("Invalid Roofing Filter Bandwidth"), "red" );
+    Show_Message( "Invalid Roofing Filter Bandwidth", "red" );
     Error_Dialog();
     return;
   }
@@ -799,7 +799,7 @@ BW_Entry_Activate( GtkEntry *entry )
   /* Show Bandwidth in messages */
   char text[48];
   snprintf( text, sizeof(text),
-      _("Low Pass Filter B/W %d kHz"), rc_data.sdr_filter_bw / 1000 );
+      "Low Pass Filter B/W %d kHz", rc_data.sdr_filter_bw / 1000 );
   Show_Message( text, "black" );
 
 } /* BW_Entry_Activate() */

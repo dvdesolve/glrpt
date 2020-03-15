@@ -202,7 +202,7 @@ Rectify_Grayscale_1(
           break;
 
         default:
-          fprintf(stderr, _("\nglrpt: A problem occurred spacing the pixels\n") );
+          fprintf(stderr, "\nglrpt: A problem occurred spacing the pixels\n" );
           break;
       } /* switch ( *( gap + idx) ) */
 
@@ -530,12 +530,12 @@ Rectify_Images( void )
   switch( rc_data.rectify_function )
   {
     case 1:
-      Show_Message( _("Using Rectify Function 1 (W2RG)"), "green" );
+      Show_Message( "Using Rectify Function 1 (W2RG)", "green" );
       Calculate_Pixel_Spacing_1( METEOR_IMAGE_WIDTH, &channel_image_width );
       break;
 
     case 2:
-      Show_Message( _("Using Rectify Function 2 (5B4AZ)"), "green" );
+      Show_Message( "Using Rectify Function 2 (5B4AZ)", "green" );
       Calculate_Pixel_Spacing_2( METEOR_IMAGE_WIDTH, &channel_image_width );
       break;
   }

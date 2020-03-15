@@ -166,7 +166,7 @@ SoapySDR_Set_Center_Freq( uint32_t center_freq )
       sdr, SOAPY_SDR_RX, 0, (double)center_freq, NULL );
   if( ret != SUCCESS )
   {
-    Show_Message( _("Failed to set Center Frequency"), "red" );
+    Show_Message( "Failed to set Center Frequency", "red" );
     Show_Message( SoapySDRDevice_lastError(), "red" );
     Error_Dialog();
     Display_Icon( status_icon, "gtk-no" );
@@ -176,7 +176,7 @@ SoapySDR_Set_Center_Freq( uint32_t center_freq )
   /* Display center frequency in messages */
   gchar mesg[ MESG_SIZE ];
   snprintf( mesg, sizeof(mesg),
-      _("Set SDR Frequency to %0.1fkHz"),
+      "Set SDR Frequency to %0.1fkHz",
       (double)center_freq / 1000.0 );
   Show_Message( mesg, "green" );
   Display_Icon( status_icon, "gtk-yes" );
@@ -200,7 +200,7 @@ SoapySDR_Set_Tuner_Gain_Mode( void )
     /* Check for support of auto gain control */
     if( !SoapySDRDevice_hasGainMode(sdr, SOAPY_SDR_RX, 0) )
     {
-      Show_Message( _("Device has no Auto Gain Control"), "red" );
+      Show_Message( "Device has no Auto Gain Control", "red" );
       Error_Dialog();
       Display_Icon( status_icon, "gtk-no" );
       return;
@@ -211,14 +211,14 @@ SoapySDR_Set_Tuner_Gain_Mode( void )
     ret = SoapySDRDevice_setGainMode( sdr, SOAPY_SDR_RX, 0, TRUE );
     if( ret != SUCCESS )
     {
-      Show_Message( _("Failed to Set Auto Gain Control"), "red" );
+      Show_Message( "Failed to Set Auto Gain Control", "red" );
       Show_Message( SoapySDRDevice_lastError(), "red" );
       Error_Dialog();
       Display_Icon( status_icon, "gtk-no" );
       return;
     }
 
-    Show_Message( _("Set Auto Gain Control"), "green" );
+    Show_Message( "Set Auto Gain Control", "green" );
   }
   else
   {
@@ -226,14 +226,14 @@ SoapySDR_Set_Tuner_Gain_Mode( void )
     ret = SoapySDRDevice_setGainMode( sdr, SOAPY_SDR_RX, 0, FALSE );
     if( ret != SUCCESS )
     {
-      Show_Message( _("Failed to Set Manual Gain Control"), "red" );
+      Show_Message( "Failed to Set Manual Gain Control", "red" );
       Show_Message( SoapySDRDevice_lastError(), "red" );
       Display_Icon( status_icon, "gtk-no" );
       Error_Dialog();
       return;
     }
 
-    Show_Message( _("Set Manual Gain Control"), "green" );
+    Show_Message( "Set Manual Gain Control", "green" );
     Display_Icon( status_icon, "gtk-yes" );
     SoapySDR_Set_Tuner_Gain( rc_data.tuner_gain );
   }
@@ -264,13 +264,13 @@ SoapySDR_Set_Tuner_Gain( double gain )
   int ret = SoapySDRDevice_setGain( sdr, SOAPY_SDR_RX, 0, gain );
   if( ret != SUCCESS )
   {
-    Show_Message( _("Failed to set Tuner Gain"), "red" );
+    Show_Message( "Failed to set Tuner Gain", "red" );
     Show_Message( SoapySDRDevice_lastError(), "red" );
     Display_Icon( status_icon, "gtk-no" );
     return;
   }
   snprintf( mesg, sizeof(mesg),
-      _("Set Tuner Gain to %d dB"), (int)gain );
+      "Set Tuner Gain to %d dB", (int)gain );
   Show_Message( mesg, "green" );
   Display_Icon( status_icon, "gtk-yes" );
 
@@ -301,7 +301,7 @@ SoapySDR_Init( void )
   results = SoapySDRDevice_enumerate( NULL, &length );
   if( length == 0 )
   {
-    Show_Message( _("No SoapySDR Device found"), "red" );
+    Show_Message( "No SoapySDR Device found", "red" );
     Error_Dialog();
     Display_Icon( status_icon, "gtk-no" );
     return( FALSE );
@@ -311,14 +311,14 @@ SoapySDR_Init( void )
    * if "auto" driver name specified in config */
   if( isFlagSet(AUTO_DETECT_SDR) )
   {
-    Show_Message( _("Will use Auto-Detected SDR Device"), "orange" );
+    Show_Message( "Will use Auto-Detected SDR Device", "orange" );
     idx = rc_data.device_index;
   }
   else
   {
     /* Look for device matching specified driver */
     snprintf( mesg, sizeof(mesg),
-        _("Searching for SDR Device \"%s\""), rc_data.device_driver );
+        "Searching for SDR Device \"%s\"", rc_data.device_driver );
     Show_Message( mesg, "green" );
 
     for( idx = 0; idx < length; idx++)
@@ -344,7 +344,7 @@ SoapySDR_Init( void )
     if( idx == length )
     {
       snprintf( mesg, sizeof(mesg),
-          _("No Device: \"%s\"  Index: %d found"),
+          "No Device: \"%s\"  Index: %d found",
           rc_data.device_driver, rc_data.device_index );
       Show_Message( mesg, "red" );
       Display_Icon( status_icon, "gtk-no" );
@@ -366,7 +366,7 @@ SoapySDR_Init( void )
 
   /* Report SoapySDR driver to be used */
   snprintf( mesg, sizeof(mesg),
-      _("Using Driver: \"%s\"  Device: %d"),
+      "Using Driver: \"%s\"  Device: %d",
       rc_data.device_driver, (int)idx );
   Show_Message( mesg, "black" );
 
@@ -374,7 +374,7 @@ SoapySDR_Init( void )
   sdr = SoapySDRDevice_make( &results[idx] );
   if( sdr == NULL )
   {
-    Show_Message( _("SoapySDRDevice_make() failed:"), "red" );
+    Show_Message( "SoapySDRDevice_make() failed:", "red" );
     Show_Message( SoapySDRDevice_lastError(), "red" );
     Display_Icon( status_icon, "gtk-no" );
     Error_Dialog();
@@ -387,7 +387,7 @@ SoapySDR_Init( void )
   GtkEntry *entry = GTK_ENTRY(
       Builder_Get_Object(main_window_builder, "sdr_tuner_entry") );
   gtk_entry_set_text( entry, hrd );
-  snprintf( mesg, sizeof(mesg), _("Instantiated SDR Device \"%s\""), hrd );
+  snprintf( mesg, sizeof(mesg), "Instantiated SDR Device \"%s\"", hrd );
   Show_Message( mesg, "green" );
   Display_Icon( status_icon, "gtk-yes" );
   free_ptr( (void **)&hrd );
@@ -399,21 +399,21 @@ SoapySDR_Init( void )
   /* Set the Frequency Correction factor for the device */
   if( SoapySDRDevice_hasFrequencyCorrection(sdr, SOAPY_SDR_RX, 0) )
   {
-    Show_Message( _("Device has Frequency Correction"), "black" );
+    Show_Message( "Device has Frequency Correction", "black" );
     if( rc_data.freq_correction )
     {
       ret = SoapySDRDevice_setFrequencyCorrection(
           sdr, SOAPY_SDR_RX, 0, rc_data.freq_correction );
       if( ret != SUCCESS )
       {
-        Show_Message( _("Failed to set Frequency Correction"), "red" );
+        Show_Message( "Failed to set Frequency Correction", "red" );
         Error_Dialog();
         Display_Icon( status_icon, "gtk-no" );
         return( FALSE );
       }
 
       snprintf( mesg, sizeof(mesg),
-          _("Set Frequency Correction to %d ppm"),
+          "Set Frequency Correction to %d ppm",
           rc_data.freq_correction );
       Show_Message( mesg, "green" );
       Display_Icon( status_icon, "gtk-yes" );
@@ -432,11 +432,11 @@ SoapySDR_Init( void )
    * but this can result in unfavorable sampling rates */
   temp = 4 * rc_data.symbol_rate;
   snprintf( mesg, sizeof(mesg),
-      _("QPSK Symbol Rate: %d Sy/s"), rc_data.symbol_rate );
+      "QPSK Symbol Rate: %d Sy/s", rc_data.symbol_rate );
   Show_Message( mesg, "green" );
 
   /* Select lowest sampling rate above minimum demod sampling rate */
-  Show_Message( _("Available Sample Rate Range(s)"), "black" );
+  Show_Message( "Available Sample Rate Range(s)", "black" );
   for( idx = 0; idx < length; idx++ )
   {
     snprintf( mesg, sizeof(mesg),
@@ -457,7 +457,7 @@ SoapySDR_Init( void )
       sdr, SOAPY_SDR_RX, 0, (double)rc_data.sdr_samplerate );
   if( ret != SUCCESS )
   {
-    Show_Message( _("Failed to set ADC Sample Rate"), "red" );
+    Show_Message( "Failed to set ADC Sample Rate", "red" );
     Show_Message( SoapySDRDevice_lastError(), "red" );
     Display_Icon( status_icon, "gtk-no" );
     Error_Dialog();
@@ -468,7 +468,7 @@ SoapySDR_Init( void )
   rc_data.sdr_samplerate =
     (uint32_t)( SoapySDRDevice_getSampleRate(sdr, SOAPY_SDR_RX, 0) );
   snprintf( mesg, sizeof(mesg),
-      _("Set Sampling Rate to %dS/s"), rc_data.sdr_samplerate );
+      "Set Sampling Rate to %dS/s", rc_data.sdr_samplerate );
   Show_Message( mesg, "green" );
 
   /* Find sample rate decimation factor which
@@ -493,33 +493,33 @@ SoapySDR_Init( void )
   rc_data.demod_samplerate =
     (double)rc_data.sdr_samplerate / (double)sdr_decimate;
   snprintf( mesg, sizeof(mesg),
-      _("Sampling Rate Decimation: %d"), sdr_decimate );
+      "Sampling Rate Decimation: %d", sdr_decimate );
   Show_Message( mesg, "green" );
   snprintf( mesg, sizeof(mesg),
-      _("Demod Sampling Rate: %8.1f"), rc_data.demod_samplerate );
+      "Demod Sampling Rate: %8.1f", rc_data.demod_samplerate );
   Show_Message( mesg, "green" );
 
   /* Set Tuner Gain Mode to auto or manual as per config file */
   SoapySDR_Set_Tuner_Gain_Mode();
 
   /* Set up receiving stream */
-  Show_Message( _("Setting up Receive Stream"), "black" );
+  Show_Message( "Setting up Receive Stream", "black" );
   ret = SoapySDRDevice_setupStream(
       sdr, &rxStream, SOAPY_SDR_RX, SOAPY_SDR_CS16, NULL, 0, NULL );
   if( ret != SUCCESS )
   {
-    Show_Message( _("Failed to set up Receive Stream"), "red" );
+    Show_Message( "Failed to set up Receive Stream", "red" );
     Show_Message( SoapySDRDevice_lastError(), "red" );
     Error_Dialog();
     Display_Icon( status_icon, "gtk-no" );
     return( FALSE );
   }
-  Show_Message( _("Receive Stream set up OK"), "green" );
+  Show_Message( "Receive Stream set up OK", "green" );
 
   /* Find stream MTU and use as read buffer size */
   stream_mtu = SoapySDRDevice_getStreamMTU( sdr, rxStream );
   snprintf( mesg, sizeof(mesg),
-      _("Receive Stream MTU: %d"), (int)stream_mtu );
+      "Receive Stream MTU: %d", (int)stream_mtu );
   Show_Message( mesg, "green" );
   rc_data.sdr_buf_length = (uint32_t)stream_mtu;
 
@@ -563,7 +563,7 @@ SoapySDR_Init( void )
   /* Wait a little for things to settle and set init OK flag */
   sleep( 1 );
   SetFlag( STATUS_SOAPYSDR_INIT );
-  Show_Message( _("SoapySDR Initialized OK"), "green" );
+  Show_Message( "SoapySDR Initialized OK", "green" );
   Display_Icon( status_icon, "gtk-yes" );
 
   return( TRUE );
@@ -585,7 +585,7 @@ SoapySDR_Activate_Stream( void )
   int ret = pthread_create( &pthread_id, NULL, SoapySDR_Stream, NULL );
   if( ret != SUCCESS )
   {
-    Show_Message( _("Failed to create Streaming thread"), "red" );
+    Show_Message( "Failed to create Streaming thread", "red" );
     Show_Message( SoapySDRDevice_lastError(), "red" );
     ClearFlag( STATUS_SOAPYSDR_INIT );
     Error_Dialog();
@@ -597,13 +597,13 @@ SoapySDR_Activate_Stream( void )
   ret = SoapySDRDevice_activateStream( sdr, rxStream, 0, 0, 0 );
   if( ret != SUCCESS )
   {
-    Show_Message( _("Failed to activate Receive Stream"), "red" );
+    Show_Message( "Failed to activate Receive Stream", "red" );
     Show_Message( SoapySDRDevice_lastError(), "red" );
     Error_Dialog();
     Display_Icon( status_icon, "gtk-no" );
     return( FALSE );
   }
-  Show_Message( _("Receive Stream activated OK"), "green" );
+  Show_Message( "Receive Stream activated OK", "green" );
   SetFlag( STATUS_STREAMING );
   Display_Icon( status_icon, "gtk-yes" );
 
@@ -628,7 +628,7 @@ SoapySDR_Close_Device( void )
     ret = SoapySDRDevice_deactivateStream( sdr, rxStream, 0, 0 );
     if( ret != SUCCESS )
     {
-      Show_Message( _("Failed to Deactivate Stream"), "red" );
+      Show_Message( "Failed to Deactivate Stream", "red" );
       Show_Message( SoapySDRDevice_lastError(), "red" );
       Error_Dialog();
     }
@@ -636,7 +636,7 @@ SoapySDR_Close_Device( void )
     ret = SoapySDRDevice_closeStream( sdr, rxStream );
     if( ret != SUCCESS )
     {
-      Show_Message( _("Failed to Close Stream"), "red" );
+      Show_Message( "Failed to Close Stream", "red" );
       Show_Message( SoapySDRDevice_lastError(), "red" );
       Error_Dialog();
     }
@@ -650,7 +650,7 @@ SoapySDR_Close_Device( void )
     ret = SoapySDRDevice_unmake( sdr );
     if( ret != SUCCESS )
     {
-      Show_Message( _("Failed to Close SDR device"), "red" );
+      Show_Message( "Failed to Close SDR device", "red" );
       Show_Message( SoapySDRDevice_lastError(), "red" );
       Error_Dialog();
     }

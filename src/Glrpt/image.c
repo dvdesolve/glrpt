@@ -48,8 +48,8 @@ Normalize_Image(
   if( image_size <= 0 )
   {
     Show_Message(
-        _("Image file seems empty\n"\
-          "Normalization not performed"), "red" );
+        "Image file seems empty\n"\
+          "Normalization not performed", "red" );
     Error_Dialog();
     return;
   }
@@ -89,14 +89,14 @@ Normalize_Image(
   if( val_range_in == 0 )
   {
     Show_Message(
-        _("Image seems flat\n"\
-          "Normalization not performed"), "red" );
+        "Image seems flat\n"\
+          "Normalization not performed", "red" );
     Error_Dialog();
     return;
   }
 
   /* Perform histogram normalization on images */
-  Show_Message( _("Performing Histogram Normalization"), "black" );
+  Show_Message( "Performing Histogram Normalization", "black" );
   val_range_out = range_high - range_low;
   for( pixel_cnt = 0; pixel_cnt < image_size; pixel_cnt++ )
   {
@@ -137,14 +137,14 @@ Flip_Image( uint8_t *image_buffer, uint32_t image_size )
   if( image_size <= 0 )
   {
     Show_Message(
-        _("Image file empty\n"\
-          "Rotation not performed"), "red" );
+        "Image file empty\n"\
+          "Rotation not performed", "red" );
     Error_Dialog();
     return;
   }
 
   /* Rotate image 180 degrees */
-  Show_Message( _("Rotating Image by 180 degrees"), "black" );
+  Show_Message( "Rotating Image by 180 degrees", "black" );
   for( idx = 0; idx < image_size / 2; idx++ )
   {
     idx_temp = image_buffer + idx;

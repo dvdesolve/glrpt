@@ -181,7 +181,7 @@ De_Interleave(
   if( *resync_siz && (*resync_siz < raw_siz) )
     mem_alloc( (void **)resync, (size_t)*resync_siz );
   else
-    Show_Message( _("Resync_Stream() failed"), "red" );
+    Show_Message( "Resync_Stream() failed", "red" );
 
   /* We de-interleave INTLV_BASE_LEN number of symbols, so that
    * all symbols in raw buffer up to this length are used up. */

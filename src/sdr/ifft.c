@@ -74,7 +74,7 @@ Initialize_IFFT( int16_t width )
   /* Abort if ifft_width is not a power of 2 */
   if( width & (width - 1) )
   {
-    Show_Message( _("FFT size is not a power of 2"), "red" );
+    Show_Message( "FFT size is not a power of 2", "red" );
     Error_Dialog();
     return( FALSE );
   }
