@@ -45,13 +45,13 @@ File_Name( char *file_name, uint32_t chn, const char *ext )
           "%simages/%s-Combo%s", rc_data.glrpt_dir, tim, ext );
     else /* Channel image */
       snprintf( file_name, MAX_FILE_NAME-1,
-          "%simages/%s-Ch%d%s", rc_data.glrpt_dir, tim, chn, ext );
+          "%simages/%s-Ch%u%s", rc_data.glrpt_dir, tim, chn, ext );
   }
   else /* Remove leading spaces from file_name */
   {
     int idx = 0;
     len = (int)strlen( file_name );
-    while( (file_name[idx] == ' ') && (idx < len) )
+    while( (idx < len) && (file_name[idx] == ' ') )
     {
       file_name++;
       idx++;
@@ -263,7 +263,7 @@ Save_Image_Raw(
   if( !Open_File(&fp, fname, "w") ) return;
 
   /* Write header in Ch-A output PPM files */
-  ret = fprintf( fp, "%s\n%s\n%d %d\n%d\n", type,
+  ret = fprintf( fp, "%s\n%s\n%u %u\n%u\n", type,
       "# Created by glrpt", width, height, max_val );
   if( ret < 0 )
   {

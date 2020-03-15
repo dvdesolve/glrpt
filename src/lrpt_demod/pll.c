@@ -128,11 +128,8 @@ Costas_Correct_Phase( Costas_t *self, double error )
   self->nco_phase += self->alpha * error;
   self->nco_phase  = fmod( self->nco_phase, M_2PI );
 
-  /* My addition: error / 10.0 to slow the changes
-   * to the PLL frequency when Costas loop is locked */
-  if( self->locked ) error /= LOCKED_ERROR_SCALE;
-
   /* Calculate sliding window average of phase error */
+  if( self->locked ) error /= LOCKED_ERR_SCALE;
   delta *= DELTA_WINSIZE_1;
   delta += self->beta * error;
   delta /= DELTA_WINSIZE;

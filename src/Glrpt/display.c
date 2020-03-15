@@ -258,7 +258,7 @@ Display_Demod_Params( Demod_t *demod )
   snprintf( txt, sizeof(txt), "%6.3f", gain );
   gtk_entry_set_text( GTK_ENTRY(agc_gain_entry), txt );
   Signal_Level( &level );
-  snprintf( txt, sizeof(txt), "%6d", level );
+  snprintf( txt, sizeof(txt), "%6u", level );
   gtk_entry_set_text( GTK_ENTRY(sig_level_entry), txt );
 
   /* Display Costas PLL Frequency FIXME */

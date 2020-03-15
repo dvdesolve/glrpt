@@ -29,9 +29,8 @@
 #define ERR_SCALE_QPSK      43.0    /* Scale factors to control magnitude of phase error */
 #define ERR_SCALE_DOQPSK    80.0
 #define ERR_SCALE_IDOQPSK   80.0
-
 #define LOCKED_BW_REDUCE    4.0     /* PLL Bandwidth reduction (in lock) */
-#define LOCKED_ERROR_SCALE  10.0    /* PLL phase error scale (reduction) (in lock) */
+#define LOCKED_ERR_SCALE    10.0    /* Phase error scale on lock */
 
 #endif
 

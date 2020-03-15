@@ -236,7 +236,7 @@ Load_Config( gpointer data )
     char mesg[MESG_SIZE];
     snprintf( mesg, sizeof(mesg),
         "Default decoding duration specified\n"\
-          "in glrptrc (%d sec) seems excessive\n",
+          "in glrptrc (%u sec) seems excessive\n",
         rc_data.decode_timer );
     Show_Message( mesg, "red" );
   }

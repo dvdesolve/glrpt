@@ -204,7 +204,7 @@ Enter_Filter_BW( void )
   GtkEntry *entry = GTK_ENTRY(
       Builder_Get_Object(main_window_builder, "sdr_bw_entry") );
   uint32_t bw = rc_data.sdr_filter_bw / 1000;
-  snprintf( text, sizeof(text), "%4d", bw );
+  snprintf( text, sizeof(text), "%4u", bw );
   gtk_entry_set_text( entry, text );
 
 } /* Enter_Filter_BW() */

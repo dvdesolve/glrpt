@@ -311,9 +311,6 @@ Decode_Images_Menuitem_Toggled( GtkCheckMenuItem *menuitem )
   if( gtk_check_menu_item_get_active(menuitem) &&
       isFlagClear(STATUS_DECODING) )
   {
-    /* Message string buffer */
-    char mesg[MESG_SIZE];
-
     /* Reset Scaled Images display */
     Display_Scaled_Image( NULL, 0, 0 );
 
@@ -323,8 +320,11 @@ Decode_Images_Menuitem_Toggled( GtkCheckMenuItem *menuitem )
     /* Start Timer if enabled */
     if( isFlagSet(ENABLE_DECODE_TIMER) )
     {
+      /* Message string buffer */
+      char mesg[MESG_SIZE];
+
       snprintf( mesg, MESG_SIZE,
-          "Decode Timer Started: %d sec", rc_data.decode_timer );
+          "Decode Timer Started: %u sec", rc_data.decode_timer );
       Show_Message( mesg, "orange" );
       SetFlag( ALARM_ACTION_STOP );
       alarm( rc_data.decode_timer );
@@ -453,12 +453,12 @@ Decode_Timer_Setup( void )
   if( rc_data.decode_timer > MAX_OPERATION_TIME )
   {
     snprintf( mesg, MESG_SIZE,
-        "Decode Timer (%d sec) excessive?", rc_data.decode_timer );
+        "Decode Timer (%u sec) excessive?", rc_data.decode_timer );
     Show_Message( mesg, "red" );
     Error_Dialog();
   }
   snprintf( mesg, MESG_SIZE,
-      "Decode Timer set to %d sec", rc_data.decode_timer );
+      "Decode Timer set to %u sec", rc_data.decode_timer );
   Show_Message( mesg, "orange" );
 
   gtk_widget_destroy( decode_timer_dialog );
@@ -538,15 +538,15 @@ Auto_Timer_OK_Clicked( void )
   if( rc_data.decode_timer > MAX_OPERATION_TIME )
   {
     snprintf( mesg, MESG_SIZE,
-        "Decode Timer (%d sec) excessive?", rc_data.decode_timer );
+        "Decode Timer (%u sec) excessive?", rc_data.decode_timer );
     Show_Message( mesg, "red" );
     Error_Dialog();
   }
 
   /* Notify sleeping */
   snprintf( mesg, MESG_SIZE,
-      "Suspended till %02d:%02d UTC\n"\
-        "Decode Timer set to %d sec",
+      "Suspended till %02u:%02u UTC\n"\
+        "Decode Timer set to %u sec",
       start_hrs, start_min, rc_data.decode_timer );
   Show_Message( mesg, "black" );
 
@@ -797,9 +797,9 @@ BW_Entry_Activate( GtkEntry *entry )
   }
 
   /* Show Bandwidth in messages */
-  char text[48];
+  char text[MESG_SIZE];
   snprintf( text, sizeof(text),
-      "Low Pass Filter B/W %d kHz", rc_data.sdr_filter_bw / 1000 );
+      "Low Pass Filter B/W %u kHz", rc_data.sdr_filter_bw / 1000 );
   Show_Message( text, "black" );
 
 } /* BW_Entry_Activate() */

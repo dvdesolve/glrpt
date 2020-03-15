@@ -7,7 +7,7 @@ visualization of the Satellite/Earth/Scanner relationship.
 These are the symbols used in this drawing:
 
 R    = Radius of Earth = 6357km
-H    = Altitude of Satellite = 85km
+H    = Altitude of Satellite = 850km
 phi  = Scanner angle
 beta = The angle subtended by the interception point of phi at the Earth's
        surface and the center of Earth.

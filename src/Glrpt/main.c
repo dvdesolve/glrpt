@@ -124,7 +124,7 @@ main( int argc, char *argv[] )
   gtk_widget_get_allocation( qpsk_drawingarea, &alloc );
   Qpsk_Drawingarea_Size_Alloc( &alloc );
 
-  char ver[28];
+  char ver[32];
   snprintf( ver, sizeof(ver), "Welcome to %s", PACKAGE_STRING );
   Show_Message( ver, "bold" );
 
@@ -148,7 +148,7 @@ main( int argc, char *argv[] )
 Initialize_Top_Window( void )
 {
   /* The scrolled window image container */
-  gchar text[37];
+  gchar text[48];
 
   /* Show current satellite */
   GtkLabel *label = GTK_LABEL(

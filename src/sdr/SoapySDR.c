@@ -43,8 +43,8 @@ SoapySDR_Stream( void *pid )
   double temp_i, temp_q;
 
   uint32_t
-    buf_cnt       = 0,  /* Index to current data ring buffer */
     sdr_decim_cnt = 0,  /* Samples decimation counter */
+    buf_cnt       = 0,  /* Index to current data ring buffer */
     samp_buf_idx  = 0,  /* Output samples buffer index */
     strm_buf_idx  = rc_data.sdr_buf_length; /* Streaming buffer index */
 
@@ -52,7 +52,7 @@ SoapySDR_Stream( void *pid )
   /* Data transfer timeout in uSec,
    * 10x longer to avoid dropped samples */
   timeout  = (long)stream_mtu * 10000000;
-  timeout /=  (long)rc_data.sdr_samplerate;
+  timeout /= (long)rc_data.sdr_samplerate;
 
   /* Loop around SoapySDRDevice_readStream()
    * till reception stopped by the user */
@@ -344,7 +344,7 @@ SoapySDR_Init( void )
     if( idx == length )
     {
       snprintf( mesg, sizeof(mesg),
-          "No Device: \"%s\"  Index: %d found",
+          "No Device: \"%s\"  Index: %u found",
           rc_data.device_driver, rc_data.device_index );
       Show_Message( mesg, "red" );
       Display_Icon( status_icon, "gtk-no" );
@@ -432,7 +432,7 @@ SoapySDR_Init( void )
    * but this can result in unfavorable sampling rates */
   temp = 4 * rc_data.symbol_rate;
   snprintf( mesg, sizeof(mesg),
-      "QPSK Symbol Rate: %d Sy/s", rc_data.symbol_rate );
+      "QPSK Symbol Rate: %u Sy/s", rc_data.symbol_rate );
   Show_Message( mesg, "green" );
 
   /* Select lowest sampling rate above minimum demod sampling rate */
@@ -468,7 +468,7 @@ SoapySDR_Init( void )
   rc_data.sdr_samplerate =
     (uint32_t)( SoapySDRDevice_getSampleRate(sdr, SOAPY_SDR_RX, 0) );
   snprintf( mesg, sizeof(mesg),
-      "Set Sampling Rate to %dS/s", rc_data.sdr_samplerate );
+      "Set Sampling Rate to %uS/s", rc_data.sdr_samplerate );
   Show_Message( mesg, "green" );
 
   /* Find sample rate decimation factor which
@@ -493,7 +493,7 @@ SoapySDR_Init( void )
   rc_data.demod_samplerate =
     (double)rc_data.sdr_samplerate / (double)sdr_decimate;
   snprintf( mesg, sizeof(mesg),
-      "Sampling Rate Decimation: %d", sdr_decimate );
+      "Sampling Rate Decimation: %u", sdr_decimate );
   Show_Message( mesg, "green" );
   snprintf( mesg, sizeof(mesg),
       "Demod Sampling Rate: %8.1f", rc_data.demod_samplerate );

@@ -45,7 +45,7 @@ Normalize_Image(
 
 
   /* Abort for "empty" image buffers */
-  if( image_size <= 0 )
+  if( image_size == 0 )
   {
     Show_Message(
         "Image file seems empty\n"\
@@ -134,7 +134,7 @@ Flip_Image( uint8_t *image_buffer, uint32_t image_size )
   uint8_t temp;
 
   /* Abort for "empty" image buffers */
-  if( image_size <= 0 )
+  if( image_size == 0 )
   {
     Show_Message(
         "Image file empty\n"\
