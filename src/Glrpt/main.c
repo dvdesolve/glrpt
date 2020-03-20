@@ -70,9 +70,9 @@ main( int argc, char *argv[] )
   rc_data.satellite_name[0] = '\0';
 
   /* Create glrpt window */
-  size_t s = sizeof(rc_data.glrpt_glade);
-  Strlcpy( rc_data.glrpt_glade, getenv("HOME"), s );
-  Strlcat( rc_data.glrpt_glade, "/glrpt/glrpt.glade", s );
+  snprintf( rc_data.glrpt_glade,
+      sizeof(rc_data.glrpt_glade), "%s/glrpt.glade", PACKAGE_DATADIR );
+
   main_window = create_main_window( &main_window_builder );
   gtk_window_set_title( GTK_WINDOW(main_window), PACKAGE_STRING );
   gtk_widget_show( main_window );

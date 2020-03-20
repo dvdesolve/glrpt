@@ -42,10 +42,10 @@ File_Name( char *file_name, uint32_t chn, const char *ext )
     /* Combination pseudo-color image */
     if( chn == 3 )
       snprintf( file_name, MAX_FILE_NAME-1,
-          "%simages/%s-Combo%s", rc_data.glrpt_dir, tim, ext );
+          "%s/images/%s-Combo%s", rc_data.glrpt_dir, tim, ext );
     else /* Channel image */
       snprintf( file_name, MAX_FILE_NAME-1,
-          "%simages/%s-Ch%u%s", rc_data.glrpt_dir, tim, chn, ext );
+          "%s/images/%s-Ch%u%s", rc_data.glrpt_dir, tim, chn, ext );
   }
   else /* Remove leading spaces from file_name */
   {

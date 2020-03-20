@@ -509,7 +509,7 @@ Find_Config_Files( gpointer data )
 
   /* Setup directory path to glrpt's working directory */
   snprintf( rc_data.glrpt_dir,
-      sizeof(rc_data.glrpt_dir), "%s/glrpt/", getenv("HOME") );
+      sizeof(rc_data.glrpt_dir), "%s/glrpt", getenv("HOME") );
 
   /* Build "Select Satellite" Menu item */
   if( !popup_menu )

@@ -109,6 +109,7 @@ add_executable(glrpt ${glrpt_SOURCES} ${glrpt_HEADERS})
 
 # some preprocessor definitions
 target_compile_definitions(glrpt PRIVATE PACKAGE_STRING="glrpt ${PROJECT_VERSION}")
+target_compile_definitions(glrpt PRIVATE PACKAGE_DATADIR="${CMAKE_INSTALL_FULL_DATAROOTDIR}/${PROJECT_NAME}")
 
 target_compile_definitions(glrpt PRIVATE _FORTIFY_SOURCE=2)
 
@@ -152,3 +153,4 @@ set_target_properties(glrpt PROPERTIES C_STANDARD 11)
 
 # install
 install(TARGETS glrpt RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(FILES ui/glrpt.glade DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME})

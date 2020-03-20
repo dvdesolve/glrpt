@@ -11,28 +11,7 @@
 #
 #  http://www.gnu.org/copyleft/gpl.txt
 #
- 
-cmake_minimum_required(VERSION 3.12)
 
-
-project(glrpt VERSION 2.4.4)
-
-
-include(GNUInstallDirs)
-
-# default build type
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
-endif()
-
-# prevent agressive and unsafe optimizations
-# (by default CMake uses -O3 level)
-set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
-set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
-
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
-
-
-add_subdirectory(src)
-add_subdirectory(share)
+add_subdirectory(config)
+add_subdirectory(doc)
+add_subdirectory(launcher)
