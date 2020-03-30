@@ -2,6 +2,7 @@
 <!-- Generated with glade 3.22.1 
 
 Copyright (C) Neoklis Kyriazis 2018
+Copyright (C) Viktor Drobot 2020
 
 This file is part of glrpt.
 
@@ -26,12 +27,12 @@ Author: Neoklis Kyriazis
   <!-- interface-license-type gplv3 -->
   <!-- interface-name glrpt -->
   <!-- interface-description Weather Satellite LRPT Image Receiver -->
-  <!-- interface-copyright Neoklis Kyriazis 2018 -->
-  <!-- interface-authors Neoklis Kyriazis -->
+  <!-- interface-copyright Neoklis Kyriazis 2018, Viktor Drobot 2020 -->
+  <!-- interface-authors Neoklis Kyriazis, Viktor Drobot -->
   <object class="GtkDialog" id="auto_timer_dialog">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="title" translatable="yes">Glrpt Auto Timer</property>
+    <property name="title" translatable="yes">glrpt Auto Timer</property>
     <property name="resizable">False</property>
     <property name="window_position">mouse</property>
     <property name="type_hint">dialog</property>
@@ -470,7 +471,7 @@ Author: Neoklis Kyriazis
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="border_width">4</property>
-    <property name="title" translatable="yes">Glrpt Error</property>
+    <property name="title" translatable="yes">glrpt Error</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">mouse</property>
@@ -564,7 +565,7 @@ Author: Neoklis Kyriazis
                 <property name="margin_top">4</property>
                 <property name="margin_bottom">4</property>
                 <property name="label" translatable="yes">An error has occured.
-Please check Glrpt messages for
+Please check glrpt messages for
 details and review the problem.</property>
                 <property name="track_visited_links">False</property>
               </object>
@@ -772,7 +773,7 @@ details and review the problem.</property>
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="events">GDK_PROXIMITY_OUT_MASK</property>
-    <property name="title" translatable="yes">Glrpt Exit</property>
+    <property name="title" translatable="yes">glrpt Exit</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">mouse</property>
@@ -871,7 +872,7 @@ details and review the problem.</property>
                     <property name="margin_top">4</property>
                     <property name="margin_bottom">4</property>
                     <property name="label" translatable="yes">An operation is in progress.
-Please confirm - Quit Glrpt?</property>
+Please confirm - Quit glrpt?</property>
                     <property name="track_visited_links">False</property>
                   </object>
                   <packing>
@@ -888,7 +889,7 @@ Please confirm - Quit Glrpt?</property>
                 <property name="can_focus">False</property>
                 <property name="margin_left">2</property>
                 <property name="margin_right">2</property>
-                <property name="label" translatable="yes">Quit Glrpt?</property>
+                <property name="label" translatable="yes">Quit glrpt?</property>
                 <property name="single_line_mode">True</property>
                 <property name="track_visited_links">False</property>
               </object>
@@ -915,7 +916,7 @@ Please confirm - Quit Glrpt?</property>
   <object class="GtkApplicationWindow" id="main_window">
     <property name="can_focus">False</property>
     <property name="border_width">4</property>
-    <property name="title" translatable="yes">Glrpt</property>
+    <property name="title" translatable="yes">glrpt</property>
     <property name="window_position">center</property>
     <property name="show_menubar">False</property>
     <signal name="delete-event" handler="on_main_window_delete_event" swapped="no"/>
@@ -1753,7 +1754,7 @@ Please confirm - Quit Glrpt?</property>
                     <property name="can_focus">False</property>
                     <property name="margin_left">2</property>
                     <property name="margin_right">2</property>
-                    <property name="label" translatable="yes">Glrpt Messages</property>
+                    <property name="label" translatable="yes">glrpt Messages</property>
                     <property name="single_line_mode">True</property>
                     <property name="track_visited_links">False</property>
                   </object>

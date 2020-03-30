@@ -18,7 +18,7 @@
 #include <SoapySDR/Device.h>
 #include <SoapySDR/Formats.h>
 #include "../common/common.h"
-#include "../Glrpt/display.h"
+#include "../glrpt/display.h"
 #include "ifft.h"
 
 /* Range of Gain slider */

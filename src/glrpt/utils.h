@@ -17,5 +17,9 @@
 
 #include "../common/common.h"
 
+/*****************************************************************************/
+
+gboolean MkdirRecurse(const char *path);
+
 #endif
 

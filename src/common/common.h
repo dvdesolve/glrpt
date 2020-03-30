@@ -76,9 +76,11 @@
 /* Runtime config data */
 typedef struct
 {
-  /* glrpt working directory and glade file */
+  /* glrpt confg directory, pictures directory and glade UI file */
   char
-    glrpt_dir[64],
+    glrpt_cfgs[64],
+/*    glrpt_ucfgs[64],*/
+    glrpt_pics[64],
     glrpt_glade[64];
 
   uint32_t

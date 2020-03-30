@@ -16,8 +16,8 @@
 #define MET_JPG_H   1
 
 #include "../common/common.h"
-#include "../Glrpt/image.h"
-#include "../Glrpt/clahe.h"
+#include "../glrpt/image.h"
+#include "../glrpt/clahe.h"
 #include "huffman.h"
 
 #define MCU_PER_PACKET  14

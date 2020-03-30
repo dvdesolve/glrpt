@@ -150,7 +150,7 @@ Load_Config( gpointer data )
 
   /* Setup file path to glrptrc and working dir */
   snprintf( rc_fpath, sizeof(rc_fpath),
-      "%s/%s.cfg", rc_data.glrpt_dir, rc_data.satellite_name );
+      "%s/%s.cfg", rc_data.glrpt_cfgs, rc_data.satellite_name );
 
   /* Open glrptrc file */
   if( !found_cfg || !Open_File(&glrptrc, rc_fpath, "r") )
@@ -507,10 +507,6 @@ Find_Config_Files( gpointer data )
   GtkWidget *sat_menu;
 
 
-  /* Setup directory path to glrpt's working directory */
-  snprintf( rc_data.glrpt_dir,
-      sizeof(rc_data.glrpt_dir), "%s/glrpt", getenv("HOME") );
-
   /* Build "Select Satellite" Menu item */
   if( !popup_menu )
     popup_menu = create_popup_menu( &popup_menu_builder );
@@ -519,7 +515,7 @@ Find_Config_Files( gpointer data )
   /* Look for files with a .cfg extention */
   errno = 0;
   found_cfg = 0;
-  num_files = scandir( rc_data.glrpt_dir, &file_list, NULL, alphasort );
+  num_files = scandir( rc_data.glrpt_cfgs, &file_list, NULL, alphasort );
   for( idx = 0; idx < num_files; idx++ )
   {
     /* Look for files with a ".cfg" extention */

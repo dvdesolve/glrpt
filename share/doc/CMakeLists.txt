@@ -14,6 +14,5 @@
 
 # install
 install(FILES glrpt.1.gz DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
-install(FILES glrpt.html DESTINATION ${CMAKE_INSTALL_DOCDIR})
 install(FILES rectify-calcs.txt DESTINATION ${CMAKE_INSTALL_DOCDIR})
 install(FILES rectify-geometry.png DESTINATION ${CMAKE_INSTALL_DOCDIR})

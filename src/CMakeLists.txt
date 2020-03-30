@@ -39,16 +39,16 @@ pkg_check_modules(SOAPYSDR REQUIRED SoapySDR)
 # sources
 set(glrpt_SOURCES
     common/shared.c
-    Glrpt/main.c
-    Glrpt/callbacks.c
-    Glrpt/clahe.c
-    Glrpt/callback_func.c
-    Glrpt/display.c
-    Glrpt/image.c
-    Glrpt/interface.c
-    Glrpt/jpeg.c
-    Glrpt/rc_config.c
-    Glrpt/utils.c
+    glrpt/main.c
+    glrpt/callbacks.c
+    glrpt/clahe.c
+    glrpt/callback_func.c
+    glrpt/display.c
+    glrpt/image.c
+    glrpt/interface.c
+    glrpt/jpeg.c
+    glrpt/rc_config.c
+    glrpt/utils.c
     sdr/filters.c
     sdr/ifft.c
     sdr/SoapySDR.c
@@ -72,16 +72,16 @@ set(glrpt_SOURCES
 set(glrpt_HEADERS
     common/common.h
     common/shared.h
-    Glrpt/main.h
-    Glrpt/callbacks.h
-    Glrpt/clahe.h
-    Glrpt/callback_func.h
-    Glrpt/display.h
-    Glrpt/image.h
-    Glrpt/interface.h
-    Glrpt/jpeg.h
-    Glrpt/rc_config.h
-    Glrpt/utils.h
+    glrpt/main.h
+    glrpt/callbacks.h
+    glrpt/clahe.h
+    glrpt/callback_func.h
+    glrpt/display.h
+    glrpt/image.h
+    glrpt/interface.h
+    glrpt/jpeg.h
+    glrpt/rc_config.h
+    glrpt/utils.h
     sdr/filters.h
     sdr/ifft.h
     sdr/SoapySDR.h
@@ -108,7 +108,8 @@ add_executable(glrpt ${glrpt_SOURCES} ${glrpt_HEADERS})
 
 
 # some preprocessor definitions
-target_compile_definitions(glrpt PRIVATE PACKAGE_STRING="glrpt ${PROJECT_VERSION}")
+target_compile_definitions(glrpt PRIVATE PACKAGE_NAME="${PROJECT_NAME}")
+target_compile_definitions(glrpt PRIVATE PACKAGE_STRING="${PROJECT_NAME} ${PROJECT_VERSION}")
 target_compile_definitions(glrpt PRIVATE PACKAGE_DATADIR="${CMAKE_INSTALL_FULL_DATAROOTDIR}/${PROJECT_NAME}")
 
 target_compile_definitions(glrpt PRIVATE _FORTIFY_SOURCE=2)

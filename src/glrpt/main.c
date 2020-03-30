@@ -13,17 +13,68 @@
  */
 
 #include "main.h"
+#include "utils.h"
 #include "../common/shared.h"
 #include "../lrpt_decode/rectify_meteor.h"
+#include <string.h>
 
 /* Signal handler */
 static void sig_handler( int signal );
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  int
-main( int argc, char *argv[] )
-{
+/* PrepareDirectories
+ *
+ * Find and create (if necessary) dirs with configs and final pictures.
+ * XDG specs are supported:
+ * https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+ */
+
+gboolean PrepareDirectories(void) {
+    char *var_ptr;
+
+    /* system-wide configs are mandatory */
+    snprintf(rc_data.glrpt_cfgs, sizeof(rc_data.glrpt_cfgs),
+            "%s/config", PACKAGE_DATADIR);
+
+    /* user-specific configs are optional */
+    /*
+    if ((var_ptr = getenv("XDG_CONFIG_HOME")))
+        snprintf(rc_data.glrpt_ucfgs, sizeof(rc_data.glrpt_ucfgs),
+                "%s/%s", var_ptr, PACKAGE_NAME);
+    else
+        snprintf(rc_data.glrpt_ucfgs,sizeof(rc_data.glrpt_ucfgs),
+                "%s/.config/%s", getenv("HOME"), PACKAGE_NAME);
+
+    if (!MkdirRecurse(rc_data.glrpt_ucfgs)) {
+        fprintf(stderr, "glrpt: %s\n",
+                "can't access/create user config directory");
+
+        rc_data.glrpt_ucfgs[0] = '\0';
+    }*/
+
+    /* cache for image storage is mandatory */
+    /* TODO allow user to select his own directory */
+    if ((var_ptr = getenv("XDG_CACHE_HOME")))
+        snprintf(rc_data.glrpt_pics, sizeof(rc_data.glrpt_pics),
+                "%s/%s", var_ptr, PACKAGE_NAME);
+    else
+        snprintf(rc_data.glrpt_pics, sizeof(rc_data.glrpt_pics),
+                "%s/.cache/%s", getenv("HOME"), PACKAGE_NAME);
+
+    if (!MkdirRecurse(rc_data.glrpt_pics)) {
+        fprintf(stderr, "glrpt: %s\n",
+                "can't access/create images cache directory");
+
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+/*****************************************************************************/
+
+int main(int argc, char *argv[]) {
   /* Command line option returned by getopt() */
   int option;
 
@@ -61,6 +112,16 @@ main( int argc, char *argv[] )
         exit(-1);
     } /* End of switch( option ) */
 
+  /* find and prepare program directories */
+  if (!PrepareDirectories()) {
+      fprintf(stderr, "glrpt: %s\n", "error during preparing directories");
+      exit(-1);
+  }
+
+  /* locate UI file */
+  snprintf(rc_data.glrpt_glade, sizeof(rc_data.glrpt_glade),
+          "%s/glrpt.glade", PACKAGE_DATADIR);
+
   /* Start GTK+ */
   gtk_init( &argc, &argv );
 
@@ -70,9 +131,6 @@ main( int argc, char *argv[] )
   rc_data.satellite_name[0] = '\0';
 
   /* Create glrpt window */
-  snprintf( rc_data.glrpt_glade,
-      sizeof(rc_data.glrpt_glade), "%s/glrpt.glade", PACKAGE_DATADIR );
-
   main_window = create_main_window( &main_window_builder );
   gtk_window_set_title( GTK_WINDOW(main_window), PACKAGE_STRING );
   gtk_widget_show( main_window );

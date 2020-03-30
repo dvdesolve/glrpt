@@ -14,8 +14,58 @@
 
 #include "utils.h"
 #include "../common/shared.h"
+#include <errno.h>
+#include <limits.h>
+#include <string.h>
+#include <sys/stat.h>
 
-/*------------------------------------------------------------------*/
+/*****************************************************************************/
+
+/* MkdirRecurse
+ *
+ * Create directory and all ancestors.
+ * Adapted from:
+ * https://gist.github.com/JonathonReinhart/8c0d90191c38af2dcadb102c4e202950
+ */
+
+gboolean MkdirRecurse(const char *path) {
+    const size_t len = strlen(path);
+    char _path[PATH_MAX];
+    char *p;
+
+    /* save directory path in a mutable var */
+    if (len > sizeof(_path) - 1) {
+        errno = ENAMETOOLONG;
+        return FALSE;
+    }
+
+    strcpy(_path, path);
+
+    /* walk through the path string */
+    for (p = _path + 1; *p; p++) {
+        if (*p == '/') {
+            /* temporarily truncate path */
+            *p = '\0';
+
+            if (mkdir(_path, S_IRWXU) != 0) {
+                if (errno != EEXIST)
+                    return FALSE;
+            }
+
+            /* restore path */
+            *p = '/';
+        }
+    }
+
+    if (mkdir(_path, S_IRWXU) != 0) {
+        if (errno != EEXIST)
+            return FALSE;
+    }
+
+    return TRUE;
+}
+
+/*****************************************************************************/
 
 /*  File_Name()
  *
@@ -42,10 +92,10 @@ File_Name( char *file_name, uint32_t chn, const char *ext )
     /* Combination pseudo-color image */
     if( chn == 3 )
       snprintf( file_name, MAX_FILE_NAME-1,
-          "%s/images/%s-Combo%s", rc_data.glrpt_dir, tim, ext );
+          "%s/%s-Combo%s", rc_data.glrpt_pics, tim, ext );
     else /* Channel image */
       snprintf( file_name, MAX_FILE_NAME-1,
-          "%s/images/%s-Ch%u%s", rc_data.glrpt_dir, tim, chn, ext );
+          "%s/%s-Ch%u%s", rc_data.glrpt_pics, tim, chn, ext );
   }
   else /* Remove leading spaces from file_name */
   {

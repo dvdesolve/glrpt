@@ -171,7 +171,7 @@ Mj_Dump_Image( void )
           Normalize_Image( channel_image[idx],
               (uint32_t)channel_image_size, NORM_BLACK, MAX_WHITE );
 
-          /* C.L.A.H.E. Normalization, see ../Glrpt/clahe.c */
+          /* C.L.A.H.E. Normalization, see ../glrpt/clahe.c */
           if( isFlagSet(IMAGE_CLAHE) )
           {
             if( !CLAHE( channel_image[idx],
