@@ -13,11 +13,12 @@
  */
 
 #ifndef MET_PACKET_H
-#define MET_PACKET_H    1
+#define MET_PACKET_H
 
-#include "../common/common.h"
+#include <stdint.h>
 
 #define PACKET_FULL_MARK    2047
 
-#endif
+void Parse_Cvcdu(uint8_t *p, int len);
 
+#endif

@@ -13,12 +13,9 @@
  */
 
 #ifndef MET_JPG_H
-#define MET_JPG_H   1
+#define MET_JPG_H
 
-#include "../common/common.h"
-#include "../glrpt/image.h"
-#include "../glrpt/clahe.h"
-#include "huffman.h"
+#include <stdint.h>
 
 #define MCU_PER_PACKET  14
 #define MCU_PER_LINE    196
@@ -49,11 +46,13 @@ static const uint8_t zigzag[64] =
 
 static const int dc_cat_off[12] = { 2, 3, 3, 3, 3, 3, 4, 5, 6, 7, 8, 9 };
 
-enum
-{
+enum {
   GREYSCALE_CHAN = 1,
   COLORIZED_CHAN = 3
 };
 
-#endif
+void Mj_Dump_Image(void);
+void Mj_Dec_Mcus(uint8_t *p, uint32_t apid, int pck_cnt, int mcu_id, uint8_t q);
+void Mj_Init(void);
 
+#endif

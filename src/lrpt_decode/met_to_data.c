@@ -13,7 +13,17 @@
  */
 
 #include "met_to_data.h"
-#include "../common/shared.h"
+
+#include "alib.h"
+#include "correlator.h"
+#include "viterbi27.h"
+#include "../glrpt/utils.h"
+
+#include <glib.h>
+
+#include <math.h>
+#include <stdint.h>
+#include <string.h>
 
 /*------------------------------------------------------------------------*/
 
@@ -162,6 +172,3 @@ Mtd_One_Frame( mtd_rec_t *mtd, uint8_t *raw )
 
   return( result );
 }
-
-/*------------------------------------------------------------------------*/
-

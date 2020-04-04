@@ -13,7 +13,20 @@
  */
 
 #include "medet.h"
+
+#include "../common/common.h"
 #include "../common/shared.h"
+#include "correlator.h"
+#include "../glrpt/display.h"
+#include "../glrpt/utils.h"
+#include "met_jpg.h"
+#include "met_packet.h"
+#include "met_to_data.h"
+
+#include <glib.h>
+
+#include <stdint.h>
+#include <stdio.h>
 
 static int ok_cnt, total_cnt;
 
@@ -115,6 +128,3 @@ Sig_Quality( void )
   ret = dClamp( ret, 0.0, 1.0 );
   return( ret );
 }
-
-/*------------------------------------------------------------------------*/
-

@@ -13,22 +13,53 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef JPEG_ENCODER_H
-#define JPEG_ENCODER_H  1
+#ifndef JPEG_H
+#define JPEG_H
 
-#include "../common/common.h"
+#include <glib.h>
 
+#include <stdint.h>
+#include <stdio.h>
 
-#define JPGE_MAX(a,b) (((a)>(b))?(a):(b))
-#define JPGE_MIN(a,b) (((a)<(b))?(a):(b))
+/* TODO review, may be inlines are more appropriate */
+#define JPEG_MAX(a,b) (((a)>(b))?(a):(b))
+#define JPEG_MIN(a,b) (((a)<(b))?(a):(b))
 
-//typedef uint uint32_t;
+/* JPEG chroma subsampling factors. Y_ONLY (grayscale images)
+ * and H2V2 (color images) are the most common
+ */
+enum subsampling_t {
+  Y_ONLY = 0,
+  H1V1   = 1,
+  H2V1   = 2,
+  H2V2   = 3
+};
+
+/* JPEG compression parameters structure */
+typedef struct compression_params_t {
+    /* Quality: 1-100, higher is better. Typical values are around 50-95 */
+    float m_quality;
+
+    /* m_subsampling:
+     * 0 = Y (grayscale) only
+     * 1 = YCbCr, no subsampling (H1V1, YCbCr 1x1x1, 3 blocks per MCU)
+     * 2 = YCbCr, H2V1 subsampling (YCbCr 2x1x1, 4 blocks per MCU)
+     * 3 = YCbCr, H2V2 subsampling (YCbCr 4x1x1, 6 blocks per MCU - most common)
+     */
+    enum subsampling_t m_subsampling;
+
+    /* Disables CbCr discrimination - only intended for testing.
+     * If true, the Y quantization table is also used for the CbCr channels
+     */
+    gboolean m_no_chroma_discrim_flag;
+} compression_params_t;
+
+/* TODO review (may be move inside) */
 typedef double dct_t;
-typedef int16_t dctq_t; // quantized
+typedef int16_t dctq_t; /* quantized */
 
-// Various JPEG enums and tables.
-enum
-{
+/* Helper JPEG enums and tables */
+enum {
   M_SOF0 = 0xC0,
   M_DHT  = 0xC4,
   M_SOI  = 0xD8,
@@ -38,8 +69,7 @@ enum
   M_APP0 = 0xE0
 };
 
-enum
-{
+enum {
   DC_LUM_CODES = 12,
   AC_LUM_CODES = 256,
   DC_CHROMA_CODES = 12,
@@ -48,66 +78,41 @@ enum
   MAX_HUFF_CODESIZE = 32
 };
 
-static uint8_t s_zag[64] =
-{
-  0,1,8,16,9,2,3,10,17,24,32,25,18,11,4,5,12,19,26,33,40,48,
-  41,34,27,20,13,6,7,14,21,28,35,42,49,56,57,50,43,36,29,22,15,
-  23,30,37,44,51,58,59,52,45,38,31,39,46,53,60,61,54,47,55,62,63
-};
+#define RGBA    TRUE  /* Signal image source to be rgba type */
+#define RGB     FALSE /* Signal image source to be rgb type */
 
-static int16_t s_std_lum_quant[64] =
-{
-  16,11,12,14,12,10,16,14,13,14,18,17,16,19,24,40,26,24,22,22,24,49,35,
-  37,29,40,58,51,61,60,57,51,56,55,64,72,92,78,64,68,87,69,55,56,80,
-  109,81,87,95,98,103,104,103,62,77,113,121,112,100,120,92,101,103,99
-};
-
-static int16_t s_std_croma_quant[64] =
-{
-  17,18,18,24,21,24,47,26,26,47,99,66,56,66,99,99,99,99,99,99,99,
-  99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,
-  99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99
-};
-
-#define RGBA    TRUE  // Signal image source to be rgba type
-#define RGB     FALSE // Signal image source to be rgb type
-
-struct component
-{
+struct component {
   uint8_t m_h_samp, m_v_samp;
   int m_last_dc_val;
 };
 
-struct huffman_table
-{
-  uint32_t   m_codes[256];
+struct huffman_table {
+  uint32_t m_codes[256];
   uint8_t  m_code_sizes[256];
   uint8_t  m_bits[17];
   uint8_t  m_val[256];
   uint32_t m_count[256];
 };
 
-struct huffman_dcac
-{
+struct huffman_dcac {
   int32_t m_quantization_table[64];
   struct huffman_table dc, ac;
 };
 
-struct image
-{
+struct image {
   int m_x, m_y;
 
   float *m_pixels;
-  dctq_t *m_dctqs; // quantized dcts
+  dctq_t *m_dctqs; /* quantized dcts */
 };
 
-struct sym_freq
-{
+struct sym_freq {
   uint32_t m_key;
   uint32_t m_sym_index;
 };
 
 /* JPEG encoder data structure */
+/* TODO may be typedef */
 struct jpeg_encoder
 {
   FILE *m_pStream;
@@ -115,8 +120,8 @@ struct jpeg_encoder
   uint8_t m_num_components;
   struct component m_comp[3];
   struct huffman_dcac m_huff[2];
-  enum { JPGE_OUT_BUF_SIZE = 2048 } buff;
-  uint8_t m_out_buf[JPGE_OUT_BUF_SIZE];
+  enum { JPEG_OUT_BUF_SIZE = 2048 } buff;
+  uint8_t m_out_buf[JPEG_OUT_BUF_SIZE];
   uint8_t *m_pOut_buf;
   uint32_t m_out_buf_left;
   uint32_t m_bit_buffer;
@@ -127,5 +132,7 @@ struct jpeg_encoder
   struct image m_image[3];
 };
 
-#endif // JPEG_ENCODER
+gboolean jpeg_encoder_compress_image_to_file(char *file_name, int width, int height, int num_channels, const uint8_t *pImage_data, compression_params_t *comp_params);
+gboolean jpeg_encoder_compression_parameters(compression_params_t *comp_params, float m_quality, enum subsampling_t m_subsampling, gboolean m_no_chroma_discrim_flag);
 
+#endif

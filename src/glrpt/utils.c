@@ -13,11 +13,77 @@
  */
 
 #include "utils.h"
+
+#include "../common/common.h"
 #include "../common/shared.h"
+#include "callback_func.h"
+#include "jpeg.h"
+#include "../lrpt_demod/demod.h"
+#include "../sdr/filters.h"
+#include "../sdr/ifft.h"
+
+#include <glib.h>
+#include <gtk/gtk.h>
+
 #include <errno.h>
 #include <limits.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <time.h>
+
+/*****************************************************************************/
+
+/* PrepareDirectories
+ *
+ * Find and create (if necessary) dirs with configs and final pictures.
+ * XDG specs are supported:
+ * https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+ */
+gboolean PrepareDirectories(void) {
+    char *var_ptr;
+
+    /* system-wide configs are mandatory */
+    snprintf(rc_data.glrpt_cfgs, sizeof(rc_data.glrpt_cfgs),
+            "%s/config", PACKAGE_DATADIR);
+
+    /* user-specific configs are optional */
+    /*
+    if ((var_ptr = getenv("XDG_CONFIG_HOME")))
+        snprintf(rc_data.glrpt_ucfgs, sizeof(rc_data.glrpt_ucfgs),
+                "%s/%s", var_ptr, PACKAGE_NAME);
+    else
+        snprintf(rc_data.glrpt_ucfgs,sizeof(rc_data.glrpt_ucfgs),
+                "%s/.config/%s", getenv("HOME"), PACKAGE_NAME);
+
+    if (!MkdirRecurse(rc_data.glrpt_ucfgs)) {
+        fprintf(stderr, "glrpt: %s\n",
+                "can't access/create user config directory");
+
+        rc_data.glrpt_ucfgs[0] = '\0';
+    }*/
+
+    /* cache for image storage is mandatory */
+    /* TODO allow user to select his own directory */
+    if ((var_ptr = getenv("XDG_CACHE_HOME")))
+        snprintf(rc_data.glrpt_pics, sizeof(rc_data.glrpt_pics),
+                "%s/%s", var_ptr, PACKAGE_NAME);
+    else
+        snprintf(rc_data.glrpt_pics, sizeof(rc_data.glrpt_pics),
+                "%s/.cache/%s", getenv("HOME"), PACKAGE_NAME);
+
+    if (!MkdirRecurse(rc_data.glrpt_pics)) {
+        fprintf(stderr, "glrpt: %s\n",
+                "can't access/create images cache directory");
+
+        return FALSE;
+    }
+
+    return TRUE;
+}
 
 /*****************************************************************************/
 
@@ -115,6 +181,7 @@ File_Name( char *file_name, uint32_t chn, const char *ext )
 /* Filename()
  *
  * Finds file name in a file path
+ * TODO may be it worth to use standard library routine
  */
 
   static char *
@@ -276,7 +343,7 @@ Save_Image_JPEG(
   Show_Message( mesg, "black" );
 
   /* Compress image data to jpeg file, report failure */
-  ret = jepg_encoder_compress_image_to_file(
+  ret = jpeg_encoder_compress_image_to_file(
       file_name, width, height, num_channels, pImage_data, comp_params );
   if( !ret )
   {
@@ -377,9 +444,11 @@ Cleanup( void )
 
 /*------------------------------------------------------------------------*/
 
+/* TODO may be it worth to make them inline and combine with another utils */
 /* Functions for testing and setting/clearing flags */
 
 /* An int variable holding the single-bit flags */
+/* TODO bad use of global */
 static int Flags = 0;
 
   int
@@ -511,6 +580,3 @@ iClamp( int i, int min, int max )
   else if( i > max ) ret = max;
   return( ret );
 }
-
-/*------------------------------------------------------------------*/
-

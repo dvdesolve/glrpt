@@ -13,7 +13,17 @@
  */
 
 #include "display.h"
+
 #include "../common/shared.h"
+#include "../lrpt_demod/demod.h"
+#include "../sdr/ifft.h"
+#include "utils.h"
+
+#include <cairo/cairo.h>
+#include <glib.h>
+#include <gtk/gtk.h>
+
+#include <stdint.h>
 
 /*------------------------------------------------------------------------*/
 
@@ -344,6 +354,3 @@ Draw_Level_Gauge( GtkWidget *widget, cairo_t *cr, double level )
   }
 
 } /* Draw_Level_Gauge() */
-
-/*------------------------------------------------------------------------*/
-

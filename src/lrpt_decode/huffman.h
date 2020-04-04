@@ -13,8 +13,19 @@
  */
 
 #ifndef HUFFMAN_H
-#define HUFFMAN_H   1
+#define HUFFMAN_H
 
-#include "../common/common.h"
+#include <stdint.h>
+
+/* Decoder AC table data */
+typedef struct ac_table_rec_t {
+  int run, size, len;
+  uint32_t mask, code;
+} ac_table_rec_t;
+
+int Get_AC(const uint16_t w);
+int Get_DC(const uint16_t w);
+int Map_Range(const int cat, const int vl);
+void Default_Huffman_Table(void);
 
 #endif

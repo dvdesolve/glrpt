@@ -12,8 +12,24 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+#include "callback_func.h"
 #include "callbacks.h"
 #include "../common/shared.h"
+#include "display.h"
+#include "interface.h"
+#include "../lrpt_decode/medet.h"
+#include "../lrpt_decode/met_jpg.h"
+#include "../lrpt_demod/demod.h"
+#include "../sdr/SoapySDR.h"
+#include "utils.h"
+
+#include <cairo/cairo.h>
+#include <gdk/gdk.h>
+#include <glib.h>
+#include <glib-object.h>
+#include <gtk/gtk.h>
+
+#include <stddef.h>
 
   void
 on_main_window_destroy(
@@ -518,4 +534,3 @@ on_auto_agc_radiobutton_toggled(
       SoapySDR_Set_Tuner_Gain_Mode();
   }
 }
-

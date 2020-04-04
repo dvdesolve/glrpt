@@ -13,9 +13,20 @@
  */
 
 #include "interface.h"
-#include "../common/shared.h"
 
-/*------------------------------------------------------------------*/
+#include "callback_func.h"
+#include "../common/common.h"
+#include "../common/shared.h"
+#include "../sdr/filters.h"
+#include "utils.h"
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
+#include <glib.h>
+#include <gtk/gtk.h>
+
+#include <stddef.h>
+#include <stdio.h>
 
 /* Gtk_Builder()
  *
@@ -147,3 +158,67 @@ create_quit_dialog( GtkBuilder **builder )
 
 /*------------------------------------------------------------------*/
 
+/*  Initialize_Top_Window()
+ *
+ *  Initializes glrpt's top window
+ */
+
+void Initialize_Top_Window(void) {
+  /* The scrolled window image container */
+  gchar text[48];
+
+  /* Show current satellite */
+  GtkLabel *label = GTK_LABEL(
+      Builder_Get_Object(main_window_builder, "satellite_label") );
+  snprintf( text, sizeof(text), "%s LRPT", rc_data.satellite_name );
+  gtk_label_set_text( label, text );
+
+  /* Show Center_Freq to frequency entry */
+  Enter_Center_Freq( rc_data.sdr_center_freq );
+
+  /* Show Bandwidth to B/W entry */
+  Enter_Filter_BW();
+
+  /* Kill existing pixbuf */
+  if( scaled_image_pixbuf != NULL )
+  {
+    g_object_unref( scaled_image_pixbuf );
+    scaled_image_pixbuf = NULL;
+  }
+
+  /* Create new pixbuff for scaled images (+3 for white separator lines) */
+  scaled_image_width   = (3 * METEOR_IMAGE_WIDTH) / (int)rc_data.image_scale + 3;
+  scaled_image_height  = (int)rc_data.decode_timer * IMAGE_LINES_PERSEC;
+  scaled_image_height /= (int)rc_data.image_scale;
+
+  /* Create a pixbuf for the LRPT image display */
+  scaled_image_pixbuf = gdk_pixbuf_new(
+      GDK_COLORSPACE_RGB, FALSE, 8, scaled_image_width, scaled_image_height );
+
+  /* Error, not enough memory */
+  if( scaled_image_pixbuf == NULL)
+  {
+    Show_Message( "Memory allocation for pixbuf failed - Quit", "red" );
+    Error_Dialog();
+    return;
+  }
+
+  /* Get details of pixbuf */
+  scaled_image_pixel_buf  = gdk_pixbuf_get_pixels(     scaled_image_pixbuf );
+  scaled_image_rowstride  = gdk_pixbuf_get_rowstride(  scaled_image_pixbuf );
+  scaled_image_n_channels = gdk_pixbuf_get_n_channels( scaled_image_pixbuf );
+
+  /* Fill pixbuf with background color */
+  gdk_pixbuf_fill( scaled_image_pixbuf, 0xaaaaaaff );
+
+  /* Globalize image to be displayed */
+  lrpt_image = Builder_Get_Object( main_window_builder, "lrpt_image" );
+
+  /* Set lrpt image from pixbuff */
+  gtk_image_set_from_pixbuf( GTK_IMAGE(lrpt_image), scaled_image_pixbuf );
+  gtk_widget_show( lrpt_image );
+
+  /* Set window size as required (minimal) */
+  gtk_window_resize( GTK_WINDOW(main_window), 10, 10 );
+
+}

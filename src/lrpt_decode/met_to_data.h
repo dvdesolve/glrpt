@@ -13,9 +13,20 @@
  */
 
 #ifndef MET_TO_DATA_H
-#define MET_TO_DATA_H   1
+#define MET_TO_DATA_H
 
-#include "../common/common.h"
+#include "viterbi27.h"
+
+#include <glib.h>
+
+#include <stdint.h>
+
+/* LRPT Decoder data */
+#define PATTERN_SIZE        64
+#define PATTERN_CNT         8
+#define MIN_CORRELATION     45
+#define SOFT_FRAME_LEN      16384
+#define HARD_FRAME_LEN      1024
 
 static const uint8_t prand[255] =
 {
@@ -53,5 +64,30 @@ static const uint8_t prand[255] =
   0x08, 0x78, 0xc4, 0x4a, 0x66, 0xf5, 0x58
 };
 
-#endif
+/* Decoder correlator data */
+typedef struct corr_rec_t {
+  uint8_t patts[PATTERN_SIZE][PATTERN_SIZE];
 
+  int
+    correlation[PATTERN_CNT],
+    tmp_corr[PATTERN_CNT],
+    position[PATTERN_CNT];
+} corr_rec_t;
+
+/* Decoder MTD data */
+typedef struct mtd_rec_t {
+  corr_rec_t c;
+  viterbi27_rec_t v;
+
+  int pos, prev_pos;
+  uint8_t ecced_data[HARD_FRAME_LEN];
+
+  uint32_t word, cpos, corr, last_sync;
+  int r[4], sig_q;
+} mtd_rec_t;
+
+void Mtd_Init(mtd_rec_t *mtd);
+uint8_t **ret_decoded(void);
+gboolean Mtd_One_Frame(mtd_rec_t *mtd, uint8_t *raw);
+
+#endif

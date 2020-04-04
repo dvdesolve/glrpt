@@ -12,10 +12,12 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef UTILS_H
-#define UTILS_H   1
+#ifndef DEMOD_UTILS_H
+#define DEMOD_UTILS_H
 
-#include "../common/common.h"
+#include <stdint.h>
+
+int8_t Clamp_Int8(double x);
+double Clamp_Double(double x, double max_abs);
 
 #endif
-

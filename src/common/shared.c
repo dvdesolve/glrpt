@@ -14,6 +14,22 @@
 
 #include "shared.h"
 
+#include "common.h"
+#include "../glrpt/rc_config.h"
+#include "../lrpt_decode/huffman.h"
+#include "../lrpt_decode/met_to_data.h"
+#include "../sdr/filters.h"
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib.h>
+#include <gtk/gtk.h>
+
+#include <semaphore.h>
+#include <stddef.h>
+#include <stdint.h>
+
+/*****************************************************************************/
+
 /* Runtime config data */
 rc_data_t rc_data;
 
@@ -113,6 +129,3 @@ mtd_rec_t mtd_record;
 uint8_t *channel_image[CHANNEL_IMAGE_NUM];
 size_t   channel_image_size;
 uint32_t channel_image_width, channel_image_height;
-
-/*------------------------------------------------------------------------*/
-

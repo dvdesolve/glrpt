@@ -13,7 +13,8 @@
  */
 
 #include "utils.h"
-#include "../common/shared.h"
+
+#include <stdint.h>
 
 /*------------------------------------------------------------------------*/
 
@@ -44,6 +45,3 @@ Clamp_Double( double x, double max_abs )
   if( x < -max_abs ) return( -max_abs );
   return( x );
 } /* Clamp_Double() */
-
-/*------------------------------------------------------------------------*/
-

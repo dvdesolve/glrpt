@@ -13,7 +13,27 @@
  */
 
 #include "callback_func.h"
+
+#include "../common/common.h"
 #include "../common/shared.h"
+#include "display.h"
+#include "image.h"
+#include "interface.h"
+#include "../lrpt_decode/medet.h"
+#include "../lrpt_demod/demod.h"
+#include "../sdr/ifft.h"
+#include "../sdr/SoapySDR.h"
+#include "utils.h"
+
+#include <cairo/cairo.h>
+#include <glib-object.h>
+#include <glib.h>
+#include <gtk/gtk.h>
+
+#include <stddef.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
 
 /*------------------------------------------------------------------------*/
 
@@ -803,6 +823,3 @@ BW_Entry_Activate( GtkEntry *entry )
   Show_Message( text, "black" );
 
 } /* BW_Entry_Activate() */
-
-/*------------------------------------------------------------------------*/
-

@@ -13,7 +13,23 @@
  */
 
 #include "SoapySDR.h"
+
+#include "../common/common.h"
 #include "../common/shared.h"
+#include "../glrpt/callback_func.h"
+#include "../glrpt/display.h"
+#include "../glrpt/interface.h"
+#include "../glrpt/utils.h"
+#include "ifft.h"
+
+#include <glib.h>
+#include <SoapySDR/Device.h>
+#include <SoapySDR/Formats.h>
+
+#include <complex.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
 
 static SoapySDRDevice *sdr = NULL;
 static SoapySDRStream *rxStream    = NULL;
@@ -23,6 +39,69 @@ static double  *data_buf_q[2] = { NULL, NULL };
 static size_t   stream_mtu;
 static uint32_t sdr_decimate;
 static double   data_scale;
+
+/*----------------------------------------------------------------------*/
+
+/* SoapySDR_Close_Device()
+ *
+ * Closes thr RTL-SDR device, if open
+ */
+  void
+SoapySDR_Close_Device( void )
+{
+  int ret;
+
+  /* Deactivate and close the stream */
+  ClearFlag( STATUS_SOAPYSDR_INIT );
+  if( (rxStream != NULL) && (sdr != NULL) )
+  {
+    ret = SoapySDRDevice_deactivateStream( sdr, rxStream, 0, 0 );
+    if( ret != SUCCESS )
+    {
+      Show_Message( "Failed to Deactivate Stream", "red" );
+      Show_Message( SoapySDRDevice_lastError(), "red" );
+      Error_Dialog();
+    }
+
+    ret = SoapySDRDevice_closeStream( sdr, rxStream );
+    if( ret != SUCCESS )
+    {
+      Show_Message( "Failed to Close Stream", "red" );
+      Show_Message( SoapySDRDevice_lastError(), "red" );
+      Error_Dialog();
+    }
+
+    rxStream = NULL;
+  } /* if( rxStream != NULL ) */
+
+  /* Close the SDR device */
+  if( sdr != NULL )
+  {
+    ret = SoapySDRDevice_unmake( sdr );
+    if( ret != SUCCESS )
+    {
+      Show_Message( "Failed to Close SDR device", "red" );
+      Show_Message( SoapySDRDevice_lastError(), "red" );
+      Error_Dialog();
+    }
+    sdr = NULL;
+  }
+
+  /* Free the samples buffer */
+  free_ptr( (void **)&stream_buff );
+  free_ptr( (void **)&data_buf_i[0] );
+  free_ptr( (void **)&data_buf_q[0] );
+  free_ptr( (void **)&data_buf_i[1] );
+  free_ptr( (void **)&data_buf_q[1] );
+
+  /* De-initialize Low Pass filter */
+  Deinit_Chebyshev_Filter( &filter_data_i );
+  Deinit_Chebyshev_Filter( &filter_data_q );
+
+  ClearFlag( STATUS_STREAMING );
+  Display_Icon( status_icon, "gtk-no" );
+
+} /* SoapySDR_Close_Device() */
 
 /*----------------------------------------------------------------------*/
 
@@ -609,69 +688,3 @@ SoapySDR_Activate_Stream( void )
 
   return( TRUE );
 } /* SoapySDR_Activate_Stream() */
-
-/*----------------------------------------------------------------------*/
-
-/* SoapySDR_Close_Device()
- *
- * Closes thr RTL-SDR device, if open
- */
-  void
-SoapySDR_Close_Device( void )
-{
-  int ret;
-
-  /* Deactivate and close the stream */
-  ClearFlag( STATUS_SOAPYSDR_INIT );
-  if( (rxStream != NULL) && (sdr != NULL) )
-  {
-    ret = SoapySDRDevice_deactivateStream( sdr, rxStream, 0, 0 );
-    if( ret != SUCCESS )
-    {
-      Show_Message( "Failed to Deactivate Stream", "red" );
-      Show_Message( SoapySDRDevice_lastError(), "red" );
-      Error_Dialog();
-    }
-
-    ret = SoapySDRDevice_closeStream( sdr, rxStream );
-    if( ret != SUCCESS )
-    {
-      Show_Message( "Failed to Close Stream", "red" );
-      Show_Message( SoapySDRDevice_lastError(), "red" );
-      Error_Dialog();
-    }
-
-    rxStream = NULL;
-  } /* if( rxStream != NULL ) */
-
-  /* Close the SDR device */
-  if( sdr != NULL )
-  {
-    ret = SoapySDRDevice_unmake( sdr );
-    if( ret != SUCCESS )
-    {
-      Show_Message( "Failed to Close SDR device", "red" );
-      Show_Message( SoapySDRDevice_lastError(), "red" );
-      Error_Dialog();
-    }
-    sdr = NULL;
-  }
-
-  /* Free the samples buffer */
-  free_ptr( (void **)&stream_buff );
-  free_ptr( (void **)&data_buf_i[0] );
-  free_ptr( (void **)&data_buf_q[0] );
-  free_ptr( (void **)&data_buf_i[1] );
-  free_ptr( (void **)&data_buf_q[1] );
-
-  /* De-initialize Low Pass filter */
-  Deinit_Chebyshev_Filter( &filter_data_i );
-  Deinit_Chebyshev_Filter( &filter_data_q );
-
-  ClearFlag( STATUS_STREAMING );
-  Display_Icon( status_icon, "gtk-no" );
-
-} /* SoapySDR_Close_Device() */
-
-/*-----------------------------------------------------------------------*/
-

@@ -13,11 +13,11 @@
  */
 
 #ifndef CALLBACKS_H
-#define CALLBACKS_H     1
+#define CALLBACKS_H
 
-#include "../common/common.h"
-#include "interface.h"
-#include "../sdr/ifft.h"
+#include <glib.h>
+#include <gtk/gtk.h>
+
+void on_satellite_menuitem_activate(GtkMenuItem *menuitem, gpointer user_data);
 
 #endif
-

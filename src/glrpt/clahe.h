@@ -13,9 +13,21 @@
  */
 
 #ifndef CLAHE_H
-#define CLAHE_H     1
+#define CLAHE_H
 
-#include "../common/common.h"
+#include <glib.h>
+
+#include <stdint.h>
+
+#define BYTE_IMAGE  1
+
+#ifdef BYTE_IMAGE /* for 8 bit-per-pixel images */
+  typedef unsigned char kz_pixel_t;
+  #define uiNR_OF_GREY ( 256 )
+#else /* for 12 bit-per-pixel images (default) */
+  typedef unsigned short kz_pixel_t;
+  #define uiNR_OF_GREY ( 4096 )
+#endif
 
 /* max. # contextual regions in x-direction */
 #define MAX_REG_X   16
@@ -33,5 +45,6 @@
 /* Normalized cliplimit (higher values give more contrast) */
 #define CLIP_LIMIT   3.0
 
-#endif
+gboolean CLAHE(kz_pixel_t *pImage, uint32_t uiXRes, uint32_t uiYRes, kz_pixel_t Min, kz_pixel_t Max, uint32_t uiNrX, uint32_t uiNrY, uint32_t uiNrBins, double fCliplimit);
 
+#endif

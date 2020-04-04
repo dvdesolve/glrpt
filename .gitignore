@@ -1,0 +1,8 @@
+# build root
+build/
+
+# compilation database
+src/compile_commands.json
+
+# YCM internals
+src/.clangd/

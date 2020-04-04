@@ -13,12 +13,38 @@
  */
 
 #include "pll.h"
-#include "../common/shared.h"
 
-/*------------------------------------------------------------------------*/
+#include "../common/common.h"
+#include "../common/shared.h"
+#include "demod.h"
+#include "../glrpt/display.h"
+#include "../glrpt/utils.h"
+#include "utils.h"
+
+#include <complex.h>
+#include <math.h>
+#include <stddef.h>
 
 static double *lut_tanh = NULL;
 static double costas_err_scale;
+
+/*------------------------------------------------------------------------*/
+
+/* Costas_Recompute_Coeffs()
+ *
+ * Compute the alpha and beta coefficients of the Costas loop from
+ * damping and bandwidth, and update them in the Costas object
+ */
+  void
+Costas_Recompute_Coeffs( Costas_t *self, double damping, double bw )
+{
+  double denom, bw2;
+
+  bw2 = bw * bw;
+  denom = ( 1.0 + 2.0 * damping * bw + bw2 );
+  self->alpha = ( 4.0 * damping * bw ) / denom;
+  self->beta  = ( 4.0 * bw2 ) / denom;
+} /* Costas_Recompute_Coeffs() */
 
 /* Lut_Tanh()
  *
@@ -166,23 +192,6 @@ Costas_Correct_Phase( Costas_t *self, double error )
 
 } /* Costas_Correct_Phase() */
 
-/*------------------------------------------------------------------------*/
-
-/* Costas_Recompute_Coeffs()
- *
- * Compute the alpha and beta coefficients of the Costas loop from
- * damping and bandwidth, and update them in the Costas object
- */
-  void
-Costas_Recompute_Coeffs( Costas_t *self, double damping, double bw )
-{
-  double denom, bw2;
-
-  bw2 = bw * bw;
-  denom = ( 1.0 + 2.0 * damping * bw + bw2 );
-  self->alpha = ( 4.0 * damping * bw ) / denom;
-  self->beta  = ( 4.0 * bw2 ) / denom;
-} /* Costas_Recompute_Coeffs() */
 
 /*------------------------------------------------------------------------*/
 
@@ -215,6 +224,3 @@ Costas_Delta( complex double sample, complex double cosample )
 
   return( error );
 } /* Costas_Delta() */
-
-/*------------------------------------------------------------------------*/
-

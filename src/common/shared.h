@@ -13,9 +13,21 @@
  */
 
 #ifndef SHARED_H
-#define SHARED_H    1
+#define SHARED_H
 
-#include "common.h"
+#include "../glrpt/rc_config.h"
+#include "../lrpt_decode/met_to_data.h"
+#include "../sdr/filters.h"
+
+#include "../lrpt_decode/huffman.h"
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib.h>
+#include <gtk/gtk.h>
+
+#include <semaphore.h>
+#include <stddef.h>
+#include <stdint.h>
 
 /* Runtime config data */
 extern rc_data_t rc_data;
@@ -41,6 +53,7 @@ extern gint
   wfall_height;
 
 /* Global widgets */
+/* TODO check if these objects should be local; order of enumeration */
 extern GtkWidget
   *qpsk_drawingarea,    /* QPSK Constellation drawingarea */
   *ifft_drawingarea,    /* IFFT Spectrum drawingarea */
@@ -51,7 +64,7 @@ extern GtkWidget
   *pll_lock_icon,       /* PLL Lock indicator icon */
   *pll_ave_entry,       /* PLL lock detect level */
   *pll_freq_entry,      /* PLL frequency indicator */
-  *pll_bw_entry,        /* PLL bandwidth indicator */
+//  *pll_bw_entry,        /* PLL bandwidth indicator */ /* TODO */
   *sig_level_entry,     /* Average Signal level in AGC */
   *agc_gain_entry,      /* AGC gain level */
   *frame_icon,          /* Frame Status indicator icon */
@@ -70,6 +83,7 @@ extern GtkBuilder
   *main_window_builder,
   *popup_menu_builder;
 
+/* TODO check for locality */
 /* Text buffer for text view */
 extern GtkTextBuffer *text_buffer;
 
@@ -95,7 +109,7 @@ extern GtkWidget
   *auto_timer_dialog;
 
 /* Tag to wake-up timeout function */
-extern guint cancel_timer_tag;
+//extern guint cancel_timer_tag; /* TODO */
 
 /* IFFT data buffer*/
 extern int16_t *ifft_data;
@@ -117,8 +131,7 @@ extern size_t   channel_image_size;
 extern uint32_t channel_image_width, channel_image_height;
 
 extern mtd_rec_t mtd_record;
-extern int corr_tab[256][256];
-extern int ac_lookup[65536], dc_lookup[65536];
+//extern int corr_tab[256][256]; /* TODO */
+//extern int ac_lookup[65536], dc_lookup[65536]; /* TODO */
 
 #endif
-

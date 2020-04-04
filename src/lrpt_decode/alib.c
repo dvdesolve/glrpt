@@ -13,8 +13,14 @@
  */
 
 #include "alib.h"
-#include "../common/shared.h"
 
+#include "viterbi27.h"
+
+#include <glib.h>
+
+#include <stdint.h>
+#include <string.h>
+#include <strings.h>
 /*------------------------------------------------------------------------*/
 
   int
@@ -346,6 +352,3 @@ Ecc_Interleave( uint8_t *data, uint8_t *output, int pos, int n )
   for( i = 0; i < 255; i++ )
     output[ i * n + pos] = data[i];
 }
-
-/*------------------------------------------------------------------------*/
-

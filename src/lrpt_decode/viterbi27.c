@@ -13,7 +13,15 @@
  */
 
 #include "viterbi27.h"
-#include "../common/shared.h"
+
+#include "alib.h"
+#include "correlator.h"
+#include "../glrpt/utils.h"
+
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <strings.h>
 
 /*------------------------------------------------------------------------*/
 
@@ -536,6 +544,3 @@ Mk_Viterbi27( viterbi27_rec_t *v )
 
   Pair_Lookup_Create( v );
 }
-
-/*------------------------------------------------------------------------*/
-

@@ -13,7 +13,17 @@
  */
 
 #include "met_packet.h"
+
 #include "../common/shared.h"
+#include "met_jpg.h"
+
+#include <glib.h>
+#include <gtk/gtk.h>
+
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 
 static gboolean partial_packet = FALSE;
 static int last_frame = 0;
@@ -170,6 +180,3 @@ Parse_Cvcdu( uint8_t *p, int len )
     }
   }
 }
-
-/*------------------------------------------------------------------------*/
-

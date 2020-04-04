@@ -13,7 +13,14 @@
  */
 
 #include "huffman.h"
+
 #include "../common/shared.h"
+#include "../glrpt/utils.h"
+
+#include <glib.h>
+
+#include <stddef.h>
+#include <stdint.h>
 
 int ac_lookup[65536], dc_lookup[65536];
 
@@ -188,6 +195,3 @@ Default_Huffman_Table( void )
   for( i = 0; i <= 65535; i++ )
     dc_lookup[i] = Get_DC_Real((uint16_t)i);
 }
-
-/*------------------------------------------------------------------------*/
-

@@ -13,7 +13,19 @@
  */
 
 #include "filters.h"
+
+#include "../common/common.h"
 #include "../common/shared.h"
+#include "../glrpt/interface.h"
+#include "../glrpt/utils.h"
+
+#include <glib.h>
+#include <gtk/gtk.h>
+
+#include <math.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
 
 /*-----------------------------------------------------------------------*/
 
@@ -276,6 +288,3 @@ Deinit_Chebyshev_Filter( filter_data_t *data )
   free_ptr( (void **)&(data->x) );
   free_ptr( (void **)&(data->y) );
 } /* Deinit_Chebyshev_Filter() */
-
-/*-----------------------------------------------------------------------*/
-

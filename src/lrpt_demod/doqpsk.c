@@ -13,7 +13,15 @@
  */
 
 #include "doqpsk.h"
-#include "../common/shared.h"
+
+#include "../glrpt/utils.h"
+
+#include <glib.h>
+
+#include <math.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
 
 /*------------------------------------------------------------------------*/
 
@@ -280,6 +288,3 @@ Free_Isqrt_Table( void )
 {
   free_ptr( (void **)&isqrt_table );
 }
-
-/*------------------------------------------------------------------------*/
-

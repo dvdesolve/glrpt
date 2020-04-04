@@ -13,9 +13,29 @@
  */
 
 #ifndef CALLBACK_FUNC_H
-#define CALLBACK_FUNC_H     1
+#define CALLBACK_FUNC_H
 
-#include "../common/common.h"
+#include <glib.h>
+#include <gtk/gtk.h>
+
+#include <stdint.h>
+
+void Error_Dialog(void);
+gboolean Cancel_Timer(gpointer data);
+void Popup_Menu(void);
+void Start_Togglebutton_Toggled(GtkToggleButton *togglebutton);
+void Start_Receiver_Menuitem_Toggled(GtkCheckMenuItem *menuitem);
+void Decode_Images_Menuitem_Toggled(GtkCheckMenuItem *menuitem);
+void Alarm_Action(void);
+void Decode_Timer_Setup(void);
+void Auto_Timer_OK_Clicked(void);
+void Hours_Entry(GtkEditable *editable);
+void Minutes_Entry(GtkEditable *editable);
+void Enter_Center_Freq(uint32_t freq);
+void Fft_Drawingarea_Size_Alloc(GtkAllocation *allocation);
+void Qpsk_Drawingarea_Size_Alloc(GtkAllocation *allocation);
+void Qpsk_Drawingarea_Draw(cairo_t *cr);
+void BW_Entry_Activate(GtkEntry *entry);
+void Set_Check_Menu_Item(gchar *item_name, gboolean flag);
 
 #endif
-

@@ -12,8 +12,16 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+#include "filters.h"
+
 #include "demod.h"
-#include "../common/shared.h"
+#include "../glrpt/utils.h"
+
+#include <complex.h>
+#include <math.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 /*------------------------------------------------------------------------*/
 
@@ -172,6 +180,3 @@ Filter_Free( Filter_t *self )
 
   free_ptr( (void **)&self );
 } /* Filter_Free() */
-
-/*------------------------------------------------------------------------*/
-

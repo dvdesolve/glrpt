@@ -13,7 +13,10 @@
  */
 
 #include "correlator.h"
-#include "../common/shared.h"
+
+#include "met_to_data.h"
+
+#include <stdint.h>
 
 /*------------------------------------------------------------------------*/
 
@@ -245,6 +248,3 @@ Corr_Correlate( corr_rec_t *c, uint8_t *data, uint32_t len )
 
   return( result );
 }
-
-/*------------------------------------------------------------------------*/
-

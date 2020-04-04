@@ -13,7 +13,12 @@
  */
 
 #include "agc.h"
-#include "../common/shared.h"
+
+#include "demod.h"
+#include "../glrpt/utils.h"
+
+#include <complex.h>
+#include <math.h>
 
 /*------------------------------------------------------------------------*/
 
@@ -80,6 +85,3 @@ Agc_Free( Agc_t *self )
 {
   free_ptr( (void **)&self );
 } /* Agc_Free() */
-
-/*------------------------------------------------------------------------*/
-

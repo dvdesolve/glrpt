@@ -36,7 +36,14 @@
  */
 
 #include "rectify_meteor.h"
+
 #include "../common/shared.h"
+#include "../glrpt/utils.h"
+
+#include <math.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
 
 /*-----------------------------------------------------------------------*/
 
@@ -573,6 +580,3 @@ Rectify_Images( void )
   SetFlag( IMAGES_RECTIFIED );
   free_ptr( (void **) &temp_image );
 } /* Rectify_Images() */
-
-/*-----------------------------------------------------------------------*/
-

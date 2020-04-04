@@ -13,7 +13,17 @@
  */
 
 #include "image.h"
+
+#include "callback_func.h"
+#include "../common/common.h"
 #include "../common/shared.h"
+#include "utils.h"
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib.h>
+
+#include <stddef.h>
+#include <stdint.h>
 
 /*------------------------------------------------------------------------*/
 
@@ -375,6 +385,3 @@ Create_Combo_Image( uint8_t *combo_image )
     }
 
 } /* Create_Combo_Image() */
-
-/*------------------------------------------------------------------------*/
-

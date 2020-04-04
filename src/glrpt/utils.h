@@ -12,14 +12,35 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef UTILS_H
-#define UTILS_H     1
+#ifndef GLRPT_UTILS_H
+#define GLRPT_UTILS_H
 
-#include "../common/common.h"
+#include "jpeg.h"
 
-/*****************************************************************************/
+#include <glib.h>
 
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+
+gboolean PrepareDirectories(void);
 gboolean MkdirRecurse(const char *path);
+void Usage(void);
+void Show_Message(const char *mesg, const char *attr);
+void File_Name(char *file_name, uint32_t chn, const char *ext);
+void Save_Image_Raw(char *fname, const char *type, uint32_t width, uint32_t height, uint32_t max_val, uint8_t *buffer);
+void Save_Image_JPEG(char *file_name, int width, int height, int num_channels, const uint8_t *pImage_data, compression_params_t *comp_params);
+void mem_alloc(void **ptr, size_t req);
+void mem_realloc(void **ptr, size_t req);
+void free_ptr(void **ptr);
+gboolean Open_File(FILE **fp, char *fname, const char *mode);
+int isFlagSet(int flag);
+int isFlagClear(int flag);
+void SetFlag(int flag);
+void ClearFlag(int flag);
+void Strlcpy(char *dest, const char *src, size_t n);
+double dClamp(double x, double min, double max);
+int iClamp(int i, int min, int max);
+void Cleanup(void);
 
 #endif
-

@@ -13,10 +13,18 @@
  */
 
 #ifndef CORRELATOR_H
-#define CORRELATOR_H    1
+#define CORRELATOR_H
 
-#include "../common/common.h"
-#include "viterbi27.h"
+#include "met_to_data.h"
+
+#include <stdint.h>
+
+#define CORR_LIMIT          55
+
+void Init_Correlator_Tables(void);
+void Fix_Packet(void *data, int len, int shift);
+void Correlator_Init(corr_rec_t *c, uint64_t q);
+int Corr_Correlate(corr_rec_t *c, uint8_t *data, uint32_t len);
+int Hard_Correlate(const uint8_t d, const uint8_t w);
 
 #endif
-

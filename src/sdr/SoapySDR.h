@@ -13,13 +13,11 @@
  */
 
 #ifndef SOAPYSDR_H
-#define SOAPYSDR_H      1
+#define SOAPYSDR_H
 
-#include <SoapySDR/Device.h>
-#include <SoapySDR/Formats.h>
-#include "../common/common.h"
-#include "../glrpt/display.h"
-#include "ifft.h"
+#include <glib.h>
+
+#include <stdint.h>
 
 /* Range of Gain slider */
 #define GAIN_SCALE  100.0
@@ -27,9 +25,19 @@
 /* Range factors for level gauges */
 #define AGC_GAIN_RANGE1   1.0
 #define AGC_GAIN_RANGE2   0.01
-#define AGC_AVE_RANGE     5000.0
+/* TODO was duplicated - need review */
+//#define AGC_AVE_RANGE     5000.0
 
 #define DATA_SCALE  10.0
 
-#endif
+/* DSP Filter Parameters */
+#define FILTER_RIPPLE   5.0
+#define FILTER_POLES    6
 
+gboolean SoapySDR_Init(void);
+gboolean SoapySDR_Activate_Stream(void);
+gboolean SoapySDR_Set_Center_Freq(uint32_t center_freq);
+void SoapySDR_Set_Tuner_Gain_Mode(void);
+void SoapySDR_Set_Tuner_Gain(double gain);
+
+#endif

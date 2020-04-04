@@ -13,7 +13,24 @@
  */
 
 #include "met_jpg.h"
+
+#include "alib.h"
+#include "../common/common.h"
 #include "../common/shared.h"
+#include "dct.h"
+#include "../glrpt/clahe.h"
+#include "../glrpt/image.h"
+#include "../glrpt/jpeg.h"
+#include "../glrpt/utils.h"
+#include "huffman.h"
+#include "rectify_meteor.h"
+#include "viterbi27.h"
+
+#include <glib.h>
+
+#include <math.h>
+#include <stddef.h>
+#include <stdint.h>
 
 /*------------------------------------------------------------------------*/
 
@@ -60,7 +77,7 @@ Save_Images( int type )
       {
         /* Set compression parameters */
         compression_params_t comp_params;
-        gboolean ret = jepg_encoder_compression_parameters(
+        gboolean ret = jpeg_encoder_compression_parameters(
             &comp_params, rc_data.jpeg_quality, Y_ONLY, TRUE );
         if( !ret )
           Show_Message( "Bad compression parameters", "red" );
@@ -109,7 +126,7 @@ Save_Images( int type )
     {
       /* Set compression parameters */
       compression_params_t comp_params;
-      gboolean ret = jepg_encoder_compression_parameters(
+      gboolean ret = jpeg_encoder_compression_parameters(
           &comp_params, rc_data.jpeg_quality, H2V2, FALSE );
       if( !ret ) Show_Message( "Bad compression parameters", "red" );
 
@@ -431,6 +448,3 @@ Mj_Init( void )
   first_pck = 0;
   prev_pck  = 0;
 }
-
-/*------------------------------------------------------------------------*/
-

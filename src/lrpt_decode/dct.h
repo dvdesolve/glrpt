@@ -13,9 +13,8 @@
  */
 
 #ifndef DCT_H
-#define DCT_H   1
+#define DCT_H
 
-#include "../common/common.h"
+void Flt_Idct_8x8(double *res, const double *inpt);
 
 #endif
-

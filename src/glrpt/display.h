@@ -13,9 +13,15 @@
  */
 
 #ifndef DISPLAY_H
-#define DISPLAY_H       1
+#define DISPLAY_H
 
-#include "../common/common.h"
+#include "../lrpt_demod/demod.h"
+
+#include <cairo/cairo.h>
+#include <glib.h>
+#include <gtk/gtk.h>
+
+#include <stdint.h>
 
 /* IFFT Signal Amplitude averaging window */
 #define AMPL_AVE_WIN   4
@@ -26,5 +32,10 @@
 #define RED_THRESHOLD     4.0
 #define GREEN_THRESHOLD   1.5
 
-#endif
+void Draw_Level_Gauge(GtkWidget *widget, cairo_t *cr, double level);
+void Display_Icon(GtkWidget *img, const gchar *name);
+void Display_Demod_Params(Demod_t *demod);
+void Display_QPSK_Const(int8_t *buffer);
+void Display_Waterfall(void);
 
+#endif

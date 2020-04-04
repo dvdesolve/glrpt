@@ -13,7 +13,19 @@
  */
 
 #include "rc_config.h"
+
+#include "callback_func.h"
+#include "callbacks.h"
+#include "../common/common.h"
 #include "../common/shared.h"
+#include "interface.h"
+#include "utils.h"
+
+#include <glib-object.h>
+#include <gobject/gvaluecollector.h>
+
+#include <errno.h>
+#include <stdio.h>
 
 /*------------------------------------------------------------------------*/
 
@@ -551,6 +563,3 @@ Find_Config_Files( gpointer data )
 
   return( FALSE );
 } /* Find_Config_Files() */
-
-/*------------------------------------------------------------------*/
-

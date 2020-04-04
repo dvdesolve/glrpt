@@ -15,7 +15,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 
-project(glrpt VERSION 2.5.0)
+project(glrpt VERSION 2.5.0 LANGUAGES C)
 
 
 include(GNUInstallDirs)

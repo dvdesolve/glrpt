@@ -12,10 +12,16 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef FILTERS_H
-#define FILTERS_H    1
+#ifndef DEMOD_FILTERS_H
+#define DEMOD_FILTERS_H
 
-#include "../common/common.h"
+#include "demod.h"
+
+#include <stdint.h>
+
+/* TODO why not to use complex? */
+void Filter_Free(Filter_t *self);
+Filter_t *Filter_RRC(uint32_t order, uint32_t factor, double osf, double alpha);
+_Complex double Filter_Fwd(Filter_t *const self, _Complex double in);
 
 #endif
-

@@ -47,7 +47,17 @@
  */
 
 #include "ifft.h"
+
 #include "../common/shared.h"
+#include "../glrpt/callback_func.h"
+#include "../glrpt/display.h"
+#include "../glrpt/utils.h"
+
+#include <glib.h>
+
+#include <math.h>
+#include <stddef.h>
+#include <stdint.h>
 
 static int16_t
   ifft_order = 0,
@@ -384,6 +394,3 @@ IFFT_Data( short sample )
   } /* if( ++cnt >= rc_data.ifft_stride ) */
 
 } /* IFFT_Data() */
-
-/*------------------------------------------------------------------------*/
-

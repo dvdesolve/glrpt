@@ -12,9 +12,13 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#include "../common/common.h"
+#ifndef RECTIFY_METEOR_H
+#define RECTIFY_METEOR_H
 
 #define	PHI_MAX   	  0.9425  // Half the max scan angle, in radians
 #define	SAT_ALTITUDE  830.0   // Satellite's average altitude in km
 #define EARTH_RADIUS  6370.0  // Earth's average radius in km
 
+void Rectify_Images(void);
+
+#endif

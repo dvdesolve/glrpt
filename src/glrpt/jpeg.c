@@ -13,7 +13,34 @@
  */
 
 #include "jpeg.h"
-#include "../common/shared.h"
+
+#include "utils.h"
+
+#include <glib.h>
+
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+static int16_t s_std_croma_quant[64] = {
+  17,18,18,24,21,24,47,26,26,47,99,66,56,66,99,99,99,99,99,99,99,
+  99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,
+  99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99
+};
+
+static int16_t s_std_lum_quant[64] = {
+  16,11,12,14,12,10,16,14,13,14,18,17,16,19,24,40,26,24,22,22,24,49,35,
+  37,29,40,58,51,61,60,57,51,56,55,64,72,92,78,64,68,87,69,55,56,80,
+  109,81,87,95,98,103,104,103,62,77,113,121,112,100,120,92,101,103,99
+};
+
+static uint8_t s_zag[64] = {
+  0,1,8,16,9,2,3,10,17,24,32,25,18,11,4,5,12,19,26,33,40,48,
+  41,34,27,20,13,6,7,14,21,28,35,42,49,56,57,50,43,36,29,22,15,
+  23,30,37,44,51,58,59,52,45,38,31,39,46,53,60,61,54,47,55,62,63
+};
 
 /*------------------------------------------------------------------------*/
 
@@ -556,19 +583,19 @@ huffman_table_optimize(
 
     // the maximum possible size of a JPEG Huffman code
     // (valid range is [9,16] - 9 vs. 8 because of the dummy symbol)
-    const uint32_t JPGE_CODE_SIZE_LIMIT = 16;
+    const uint32_t JPEG_CODE_SIZE_LIMIT = 16;
     huffman_enforce_max_code_size(
-        num_codes, num_used_syms, JPGE_CODE_SIZE_LIMIT );
+        num_codes, num_used_syms, JPEG_CODE_SIZE_LIMIT );
 
     // Compute m_huff_bits array, which contains the # of symbols per code size.
     memset( (void *)(table->m_bits), 0, sizeof(table->m_bits) );
-    for( int i = 1; i <= (int)JPGE_CODE_SIZE_LIMIT; i++ )
+    for( int i = 1; i <= (int)JPEG_CODE_SIZE_LIMIT; i++ )
     {
       table->m_bits[i] = (uint8_t)( num_codes[i] );
     }
 
     // Remove the dummy symbol added above, which must be in largest bucket.
-    for( int i = JPGE_CODE_SIZE_LIMIT; i >= 1; i-- )
+    for( int i = JPEG_CODE_SIZE_LIMIT; i >= 1; i-- )
     {
       if( table->m_bits[i] )
       {
@@ -856,7 +883,7 @@ jpeg_encoder_compute_quant_table(
   {
     int32_t j = pSrc[i];
     j = ( j * (int32_t)q + 50L ) / 100L;
-    pDst[i] = JPGE_MIN( JPGE_MAX(j, 1), 1024 / 3 );
+    pDst[i] = JPEG_MIN( JPEG_MAX(j, 1), 1024 / 3 );
   }
 
   // DC quantized worse than 8 makes overall quality fall off the cliff
@@ -974,7 +1001,7 @@ jpeg_encoder_jpg_open(
       enc->m_params.m_no_chroma_discrim_flag ?
       s_std_lum_quant : s_std_croma_quant );
 
-  enc->m_out_buf_left = JPGE_OUT_BUF_SIZE;
+  enc->m_out_buf_left = JPEG_OUT_BUF_SIZE;
   enc->m_pOut_buf = enc->m_out_buf;
 
   jpeg_encoder_reset_last_dc( enc );
@@ -1020,9 +1047,9 @@ jpeg_encoder_quantize_pixels(
   static void
 jpeg_encoder_flush_output_buffer( struct jpeg_encoder *enc )
 {
-  if( enc->m_out_buf_left != JPGE_OUT_BUF_SIZE )
+  if( enc->m_out_buf_left != JPEG_OUT_BUF_SIZE )
   {
-    int len = JPGE_OUT_BUF_SIZE - (int)enc->m_out_buf_left;
+    int len = JPEG_OUT_BUF_SIZE - (int)enc->m_out_buf_left;
     gboolean status =
       jpeg_encoder_put_buf( enc->m_out_buf, len, enc->m_pStream );
     enc->m_all_stream_writes_succeeded =
@@ -1030,7 +1057,7 @@ jpeg_encoder_flush_output_buffer( struct jpeg_encoder *enc )
   }
 
   enc->m_pOut_buf = enc->m_out_buf;
-  enc->m_out_buf_left = JPGE_OUT_BUF_SIZE;
+  enc->m_out_buf_left = JPEG_OUT_BUF_SIZE;
 }
 
 /*------------------------------------------------------------------------*/
@@ -1055,7 +1082,8 @@ bit_count( int temp1 )
 
 /*------------------------------------------------------------------------*/
 
-#define JPGE_PUT_BYTE(c) \
+/* TODO may be optimized */
+#define JPEG_PUT_BYTE(c) \
 { \
   *(enc->m_pOut_buf)++ = (c); \
   if( --(enc->m_out_buf_left) == 0 ) \
@@ -1074,10 +1102,10 @@ jpeg_encoder_put_bits(
   while( enc->m_bits_in >= 8 )
   {
     c = (uint8_t)( (enc->m_bit_buffer >> 16) & 0xFF );
-    JPGE_PUT_BYTE( c )
+    JPEG_PUT_BYTE( c )
       if( c == 0xFF )
       {
-        JPGE_PUT_BYTE( 0 )
+        JPEG_PUT_BYTE( 0 )
       }
 
     enc->m_bit_buffer <<= 8;
@@ -1527,13 +1555,13 @@ jpeg_encoder_read_image(
 
 /******* My own higher-level helper/wrapper functions *******/
 
-/* jepg_encoder_compression_parameters()
+/* jpeg_encoder_compression_parameters()
  *
  * Sets the JPEG compression parameters
  * to a compression_params_t struct
  */
   gboolean
-jepg_encoder_compression_parameters(
+jpeg_encoder_compression_parameters(
     compression_params_t *comp_params,
     float m_quality,
     enum subsampling_t m_subsampling,
@@ -1547,12 +1575,12 @@ jepg_encoder_compression_parameters(
 
 /*------------------------------------------------------------------------*/
 
-/* jepg_encoder_compress_image_to_file()
+/* jpeg_encoder_compress_image_to_file()
  *
  * Saves an image buffer to a JPEG-compressed file
  */
   gboolean
-jepg_encoder_compress_image_to_file(
+jpeg_encoder_compress_image_to_file(
     char *file_name,
     int width, int height,
     int num_channels,
@@ -1597,7 +1625,4 @@ jepg_encoder_compress_image_to_file(
 
   return( TRUE );
 
-}/* jepg_encoder_compress_image_to_file */
-
-/*------------------------------------------------------------------------*/
-
+}/* jpeg_encoder_compress_image_to_file */

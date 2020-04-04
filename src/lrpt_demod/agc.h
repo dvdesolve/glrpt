@@ -13,9 +13,9 @@
  */
 
 #ifndef AGC_H
-#define AGC_H    1
+#define AGC_H
 
-#include "../common/common.h"
+#include "demod.h"
 
 /* AGC default parameters */
 #define AGC_WINSIZE         65536.0  // 1024*64
@@ -25,5 +25,9 @@
 #define AGC_BIAS_WINSIZE    262144.0 // 256*1024
 #define AGC_BIAS_WINSIZE_1  262143.0 // 256*1024 - 1
 
-#endif
+/* TODO why not to use complex? */
+_Complex double Agc_Apply(Agc_t *self, _Complex double sample);
+Agc_t *Agc_Init(void);
+void Agc_Free(Agc_t *self);
 
+#endif

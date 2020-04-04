@@ -13,11 +13,16 @@
  */
 
 #ifndef IFFT_H
-#define IFFT_H  1
+#define IFFT_H
 
-#include "../common/common.h"
+#include <glib.h>
+
+#include <stdint.h>
 
 #define IFFT_DECIMATE  2
 
-#endif
+void Deinit_Ifft(void);
+void IFFT(int16_t *data);
+gboolean Initialize_IFFT(int16_t width);
 
+#endif
