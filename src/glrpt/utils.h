@@ -30,6 +30,7 @@ void Show_Message(const char *mesg, const char *attr);
 void File_Name(char *file_name, uint32_t chn, const char *ext);
 void Save_Image_Raw(char *fname, const char *type, uint32_t width, uint32_t height, uint32_t max_val, uint8_t *buffer);
 void Save_Image_JPEG(char *file_name, int width, int height, int num_channels, const uint8_t *pImage_data, compression_params_t *comp_params);
+/* TODO may be re-vise all functions below */
 void mem_alloc(void **ptr, size_t req);
 void mem_realloc(void **ptr, size_t req);
 void free_ptr(void **ptr);

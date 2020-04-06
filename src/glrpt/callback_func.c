@@ -16,23 +16,28 @@
 
 #include "../common/common.h"
 #include "../common/shared.h"
-#include "display.h"
-#include "image.h"
-#include "interface.h"
 #include "../lrpt_decode/medet.h"
 #include "../lrpt_demod/demod.h"
 #include "../sdr/ifft.h"
 #include "../sdr/SoapySDR.h"
+#include "display.h"
+#include "image.h"
+#include "interface.h"
 #include "utils.h"
 
 #include <cairo/cairo.h>
-#include <glib-object.h>
+#include <gdk/gdk.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib.h>
+#include <glib-object.h>
 #include <gtk/gtk.h>
 
+#include <semaphore.h>
 #include <stddef.h>
-#include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 /*------------------------------------------------------------------------*/

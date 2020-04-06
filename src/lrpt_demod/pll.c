@@ -16,9 +16,9 @@
 
 #include "../common/common.h"
 #include "../common/shared.h"
-#include "demod.h"
 #include "../glrpt/display.h"
 #include "../glrpt/utils.h"
+#include "demod.h"
 #include "utils.h"
 
 #include <complex.h>

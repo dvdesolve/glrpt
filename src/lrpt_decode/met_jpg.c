@@ -14,14 +14,14 @@
 
 #include "met_jpg.h"
 
-#include "alib.h"
 #include "../common/common.h"
 #include "../common/shared.h"
-#include "dct.h"
 #include "../glrpt/clahe.h"
 #include "../glrpt/image.h"
 #include "../glrpt/jpeg.h"
 #include "../glrpt/utils.h"
+#include "alib.h"
+#include "dct.h"
 #include "huffman.h"
 #include "rectify_meteor.h"
 #include "viterbi27.h"

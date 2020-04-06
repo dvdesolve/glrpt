@@ -123,10 +123,9 @@ enum
 /* General definitions for image processing */
 #define MAX_FILE_NAME   128 /* Max length for filenames */
 
-/* TODO recheck */
-/* Should have been in math.h */
+/* Safe fallback */
 #ifndef M_2PI
-  #define M_2PI     6.28318530717958647692
+#define M_2PI 6.28318530717958647692
 #endif
 
 #endif

@@ -15,6 +15,7 @@
 #ifndef GLRPT_INTERFACE_H
 #define GLRPT_INTERFACE_H
 
+#include <glib.h>
 #include <gtk/gtk.h>
 
 #include <stddef.h>

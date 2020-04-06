@@ -12,14 +12,13 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#include "callback_func.h"
 #include "../common/shared.h"
-#include "interface.h"
-#include "../sdr/ifft.h"
 #include "../sdr/filters.h"
+#include "../sdr/ifft.h"
+#include "callback_func.h"
+#include "interface.h"
 #include "utils.h"
 
-#include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib.h>
 #include <gtk/gtk.h>
 

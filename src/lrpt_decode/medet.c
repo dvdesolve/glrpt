@@ -16,14 +16,15 @@
 
 #include "../common/common.h"
 #include "../common/shared.h"
-#include "correlator.h"
 #include "../glrpt/display.h"
 #include "../glrpt/utils.h"
+#include "correlator.h"
 #include "met_jpg.h"
 #include "met_packet.h"
 #include "met_to_data.h"
 
 #include <glib.h>
+#include <gtk/gtk.h>
 
 #include <stdint.h>
 #include <stdio.h>

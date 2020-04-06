@@ -14,8 +14,8 @@
 
 #include "filters.h"
 
-#include "demod.h"
 #include "../glrpt/utils.h"
+#include "demod.h"
 
 #include <complex.h>
 #include <math.h>

@@ -12,15 +12,16 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#include "callback_func.h"
 #include "callbacks.h"
+
 #include "../common/shared.h"
-#include "display.h"
-#include "interface.h"
 #include "../lrpt_decode/medet.h"
 #include "../lrpt_decode/met_jpg.h"
 #include "../lrpt_demod/demod.h"
 #include "../sdr/SoapySDR.h"
+#include "callback_func.h"
+#include "display.h"
+#include "interface.h"
 #include "utils.h"
 
 #include <cairo/cairo.h>
@@ -30,6 +31,8 @@
 #include <gtk/gtk.h>
 
 #include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
 
   void
 on_main_window_destroy(

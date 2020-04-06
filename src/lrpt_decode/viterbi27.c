@@ -14,9 +14,9 @@
 
 #include "viterbi27.h"
 
+#include "../glrpt/utils.h"
 #include "alib.h"
 #include "correlator.h"
-#include "../glrpt/utils.h"
 
 #include <stddef.h>
 #include <stdint.h>

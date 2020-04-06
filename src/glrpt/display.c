@@ -23,7 +23,9 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 /*------------------------------------------------------------------------*/
 

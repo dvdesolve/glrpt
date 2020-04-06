@@ -15,6 +15,7 @@
 #ifndef GLRPT_CALLBACK_FUNC_H
 #define GLRPT_CALLBACK_FUNC_H
 
+#include <cairo/cairo.h>
 #include <glib.h>
 #include <gtk/gtk.h>
 

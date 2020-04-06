@@ -23,13 +23,16 @@
 #include "ifft.h"
 
 #include <glib.h>
+#include <gtk/gtk.h>
 #include <SoapySDR/Device.h>
 #include <SoapySDR/Formats.h>
 
 #include <complex.h>
+#include <semaphore.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 static SoapySDRDevice *sdr = NULL;
 static SoapySDRStream *rxStream    = NULL;

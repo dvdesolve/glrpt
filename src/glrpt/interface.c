@@ -14,15 +14,16 @@
 
 #include "interface.h"
 
-#include "callback_func.h"
 #include "../common/common.h"
 #include "../common/shared.h"
 #include "../sdr/filters.h"
+#include "callback_func.h"
 #include "utils.h"
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
-#include <glib-object.h>
 #include <glib.h>
+#include <glib-object.h>
+#include <gmodule.h>
 #include <gtk/gtk.h>
 
 #include <stddef.h>

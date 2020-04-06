@@ -16,11 +16,11 @@
 
 #include "../common/common.h"
 #include "../common/shared.h"
-#include "callback_func.h"
-#include "jpeg.h"
 #include "../lrpt_demod/demod.h"
 #include "../sdr/filters.h"
 #include "../sdr/ifft.h"
+#include "callback_func.h"
+#include "jpeg.h"
 
 #include <glib.h>
 #include <gtk/gtk.h>

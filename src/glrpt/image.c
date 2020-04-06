@@ -14,12 +14,13 @@
 
 #include "image.h"
 
-#include "callback_func.h"
 #include "../common/common.h"
 #include "../common/shared.h"
+#include "callback_func.h"
 #include "utils.h"
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gtk/gtk.h>
 #include <glib.h>
 
 #include <stddef.h>

@@ -14,27 +14,29 @@
 
 #include "demod.h"
 
-#include "agc.h"
 #include "../common/common.h"
 #include "../common/shared.h"
-#include "doqpsk.h"
-#include "filters.h"
 #include "../glrpt/callback_func.h"
 #include "../glrpt/display.h"
 #include "../glrpt/utils.h"
 #include "../lrpt_decode/medet.h"
 #include "../lrpt_decode/met_jpg.h"
 #include "../lrpt_decode/met_to_data.h"
-#include "pll.h"
 #include "../sdr/filters.h"
+#include "agc.h"
+#include "doqpsk.h"
+#include "filters.h"
+#include "pll.h"
 #include "utils.h"
 
 #include <glib.h>
 
 #include <complex.h>
 #include <math.h>
+#include <semaphore.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 static Demod_t   *demodulator = NULL;
 static gboolean (*Demod_PSK)(complex double, int8_t *);

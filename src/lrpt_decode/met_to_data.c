@@ -14,14 +14,15 @@
 
 #include "met_to_data.h"
 
+#include "../glrpt/utils.h"
 #include "alib.h"
 #include "correlator.h"
 #include "viterbi27.h"
-#include "../glrpt/utils.h"
 
 #include <glib.h>
 
 #include <math.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <string.h>
 
