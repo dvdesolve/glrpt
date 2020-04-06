@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef INTERFACE_H
-#define INTERFACE_H
+#ifndef GLRPT_INTERFACE_H
+#define GLRPT_INTERFACE_H
 
 #include <gtk/gtk.h>
 

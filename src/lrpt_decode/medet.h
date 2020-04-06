@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef MEDET_H
-#define MEDET_H
+#ifndef LRPT_DECODE_MEDET_H
+#define LRPT_DECODE_MEDET_H
 
 #include <stdint.h>
 

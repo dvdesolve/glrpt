@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef MET_PACKET_H
-#define MET_PACKET_H
+#ifndef LRPT_DECODE_MET_PACKET_H
+#define LRPT_DECODE_MET_PACKET_H
 
 #include <stdint.h>
 

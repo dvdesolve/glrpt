@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef DOQPSK_H
-#define DOQPSK_H
+#ifndef LRPT_DEMOD_DOQPSK_H
+#define LRPT_DEMOD_DOQPSK_H
 
 #include <stdint.h>
 

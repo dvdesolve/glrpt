@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef MET_TO_DATA_H
-#define MET_TO_DATA_H
+#ifndef LRPT_DECODE_MET_TO_DATA_H
+#define LRPT_DECODE_MET_TO_DATA_H
 
 #include "viterbi27.h"
 

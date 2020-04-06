@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef VITERBI27_H
-#define VITERBI27_H
+#ifndef LRPT_DECODE_VITERBI27_H
+#define LRPT_DECODE_VITERBI27_H
 
 #include <stddef.h>
 #include <stdint.h>

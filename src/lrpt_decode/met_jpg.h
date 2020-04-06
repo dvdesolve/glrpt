@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef MET_JPG_H
-#define MET_JPG_H
+#ifndef LRPT_DECODE_MET_JPG_H
+#define LRPT_DECODE_MET_JPG_H
 
 #include <stdint.h>
 

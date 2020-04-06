@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef DEMOD_H
-#define DEMOD_H
+#ifndef LRPT_DEMOD_DEMOD_H
+#define LRPT_DEMOD_DEMOD_H
 
 #include "doqpsk.h"
 

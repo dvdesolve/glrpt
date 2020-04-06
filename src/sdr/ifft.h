@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef IFFT_H
-#define IFFT_H
+#ifndef SDR_IFFT_H
+#define SDR_IFFT_H
 
 #include <glib.h>
 

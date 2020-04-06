@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef CALLBACK_FUNC_H
-#define CALLBACK_FUNC_H
+#ifndef GLRPT_CALLBACK_FUNC_H
+#define GLRPT_CALLBACK_FUNC_H
 
 #include <glib.h>
 #include <gtk/gtk.h>

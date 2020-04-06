@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef RC_CONFIG_H
-#define RC_CONFIG_H
+#ifndef GLRPT_RC_CONFIG_H
+#define GLRPT_RC_CONFIG_H
 
 #include "../common/common.h"
 

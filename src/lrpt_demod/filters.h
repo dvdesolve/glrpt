@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef DEMOD_FILTERS_H
-#define DEMOD_FILTERS_H
+#ifndef LRPT_DEMOD_FILTERS_H
+#define LRPT_DEMOD_FILTERS_H
 
 #include "demod.h"
 

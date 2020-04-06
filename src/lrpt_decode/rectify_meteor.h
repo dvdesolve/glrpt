@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef RECTIFY_METEOR_H
-#define RECTIFY_METEOR_H
+#ifndef LRPT_DECODE_RECTIFY_METEOR_H
+#define LRPT_DECODE_RECTIFY_METEOR_H
 
 #define	PHI_MAX   	  0.9425  // Half the max scan angle, in radians
 #define	SAT_ALTITUDE  830.0   // Satellite's average altitude in km

@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef HUFFMAN_H
-#define HUFFMAN_H
+#ifndef LRPT_DECODE_HUFFMAN_H
+#define LRPT_DECODE_HUFFMAN_H
 
 #include <stdint.h>
 

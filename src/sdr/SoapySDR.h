@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef SOAPYSDR_H
-#define SOAPYSDR_H
+#ifndef SDR_SOAPYSDR_H
+#define SDR_SOAPYSDR_H
 
 #include <glib.h>
 

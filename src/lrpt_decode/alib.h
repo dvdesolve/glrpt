@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef ALIB_H
-#define ALIB_H
+#ifndef LRPT_DECODE_ALIB_H
+#define LRPT_DECODE_ALIB_H
 
 #include "viterbi27.h"
 

@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef DEMOD_UTILS_H
-#define DEMOD_UTILS_H
+#ifndef LRPT_DEMOD_UTILS_H
+#define LRPT_DEMOD_UTILS_H
 
 #include <stdint.h>
 

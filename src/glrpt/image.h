@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef IMAGE_H
-#define IMAGE_H
+#ifndef GLRPT_IMAGE_H
+#define GLRPT_IMAGE_H
 
 #include <stdint.h>
 

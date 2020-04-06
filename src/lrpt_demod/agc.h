@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef AGC_H
-#define AGC_H
+#ifndef LRPT_DEMOD_AGC_H
+#define LRPT_DEMOD_AGC_H
 
 #include "demod.h"
 

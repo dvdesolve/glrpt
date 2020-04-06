@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef PLL_H
-#define PLL_H
+#ifndef LRPT_DEMOD_PLL_H
+#define LRPT_DEMOD_PLL_H
 
 #include "demod.h"
 

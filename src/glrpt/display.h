@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef DISPLAY_H
-#define DISPLAY_H
+#ifndef GLRPT_DISPLAY_H
+#define GLRPT_DISPLAY_H
 
 #include "../lrpt_demod/demod.h"
 

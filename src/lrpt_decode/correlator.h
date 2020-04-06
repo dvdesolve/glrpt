@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef CORRELATOR_H
-#define CORRELATOR_H
+#ifndef LRPT_DECODE_CORRELATOR_H
+#define LRPT_DECODE_CORRELATOR_H
 
 #include "met_to_data.h"
 

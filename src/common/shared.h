@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef SHARED_H
-#define SHARED_H
+#ifndef COMMON_SHARED_H
+#define COMMON_SHARED_H
 
 #include "../glrpt/rc_config.h"
 #include "../lrpt_decode/met_to_data.h"

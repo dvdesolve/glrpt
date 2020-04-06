@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef COMMON_COMMON_H
+#define COMMON_COMMON_H
 
 /* Flow control flags */
 #define STATUS_RECEIVING        0x00000001 /* SDR Receiver Running or Not     */

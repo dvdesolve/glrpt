@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef CALLBACKS_H
-#define CALLBACKS_H
+#ifndef GLRPT_CALLBACKS_H
+#define GLRPT_CALLBACKS_H
 
 #include <glib.h>
 #include <gtk/gtk.h>

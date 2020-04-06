@@ -13,8 +13,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef JPEG_H
-#define JPEG_H
+#ifndef GLRPT_JPEG_H
+#define GLRPT_JPEG_H
 
 #include <glib.h>
 

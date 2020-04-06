@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef CLAHE_H
-#define CLAHE_H
+#ifndef GLRPT_CLAHE_H
+#define GLRPT_CLAHE_H
 
 #include <glib.h>
 

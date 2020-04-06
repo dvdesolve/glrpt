@@ -12,8 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
-#ifndef DCT_H
-#define DCT_H
+#ifndef LRPT_DECODE_DCT_H
+#define LRPT_DECODE_DCT_H
 
 void Flt_Idct_8x8(double *res, const double *inpt);
 
