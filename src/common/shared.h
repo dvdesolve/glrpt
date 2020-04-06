@@ -64,7 +64,6 @@ extern GtkWidget
   *pll_lock_icon,       /* PLL Lock indicator icon */
   *pll_ave_entry,       /* PLL lock detect level */
   *pll_freq_entry,      /* PLL frequency indicator */
-//  *pll_bw_entry,        /* PLL bandwidth indicator */ /* TODO */
   *sig_level_entry,     /* Average Signal level in AGC */
   *agc_gain_entry,      /* AGC gain level */
   *frame_icon,          /* Frame Status indicator icon */
@@ -108,9 +107,6 @@ extern GtkWidget
   *decode_timer_dialog,
   *auto_timer_dialog;
 
-/* Tag to wake-up timeout function */
-//extern guint cancel_timer_tag; /* TODO */
-
 /* IFFT data buffer*/
 extern int16_t *ifft_data;
 extern uint16_t ifft_data_length;
@@ -131,7 +127,5 @@ extern size_t   channel_image_size;
 extern uint32_t channel_image_width, channel_image_height;
 
 extern mtd_rec_t mtd_record;
-//extern int corr_tab[256][256]; /* TODO */
-//extern int ac_lookup[65536], dc_lookup[65536]; /* TODO */
 
 #endif

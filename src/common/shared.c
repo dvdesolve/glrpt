@@ -106,9 +106,6 @@ GtkWidget
   *decode_timer_dialog = NULL,
   *auto_timer_dialog   = NULL;
 
-/* Tag to wake-up timeout function */
-guint cancel_timer_tag;
-
 /* IFFT data buffer*/
 int16_t *ifft_data        = NULL;
 uint16_t ifft_data_length = 0;

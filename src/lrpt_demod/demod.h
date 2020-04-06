@@ -36,8 +36,8 @@
 
 /* TODO seems like mess-up; recheck and refer to SOFT_FRAME_LENGTH directly */
 #define DEMOD_BUF_SIZE      49152  // 3 * SOFT_FRAME_LEN
-#define DEMOD_BUF_MIDL      16384  // 2 * SOFT_FRAME_LEN
-#define DEMOD_BUF_LOWR      32768  // 1 * SOFT_FRAME_LEN
+#define DEMOD_BUF_MIDL      16384  // 1 * SOFT_FRAME_LEN
+#define DEMOD_BUF_LOWR      32768  // 2 * SOFT_FRAME_LEN
 #define RAW_BUF_REALLOC     INTLV_BASE_LEN
 
 /* LRPT Demodulator data */

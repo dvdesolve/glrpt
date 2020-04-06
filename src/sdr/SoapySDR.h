@@ -25,8 +25,6 @@
 /* Range factors for level gauges */
 #define AGC_GAIN_RANGE1   1.0
 #define AGC_GAIN_RANGE2   0.01
-/* TODO was duplicated - need review */
-//#define AGC_AVE_RANGE     5000.0
 
 #define DATA_SCALE  10.0
 
