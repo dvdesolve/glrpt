@@ -12,6 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "callback_func.h"
 
 #include "../common/common.h"
@@ -40,15 +42,18 @@
 #include <string.h>
 #include <time.h>
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
+
+static void Sensitize_Menu_Item(gchar *item_name, gboolean flag);
+static gboolean Init_Reception(void);
+
+/*****************************************************************************/
 
 /* Error_Dialog()
  *
  * Opens an error dialog box
  */
-  void
-Error_Dialog( void )
-{
+void Error_Dialog(void) {
   GtkBuilder *builder;
   if( !error_dialog )
   {
@@ -56,18 +61,15 @@ Error_Dialog( void )
     gtk_widget_show( error_dialog );
     g_object_unref( builder );
   }
+}
 
-} /* Error_Dialog() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Cancel_Timer()
  *
  * Handles cancellation of decoder timer
  */
-  gboolean
-Cancel_Timer( gpointer data )
-{
+gboolean Cancel_Timer(gpointer data) {
   alarm( 0 );
   Show_Message( "Cancelling Decode Timer", "orange" );
   ClearFlag( ENABLE_DECODE_TIMER );
@@ -82,47 +84,39 @@ Cancel_Timer( gpointer data )
   Initialize_Top_Window();
 
   return( FALSE );
-} /* Cancel_Timer() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Sensitize_Menu_Item()
  *
  * Handles dynamic sensitivity changes to pop-up menu items
  */
-  static void
-Sensitize_Menu_Item( gchar *item_name, gboolean flag )
-{
+static void Sensitize_Menu_Item(gchar *item_name, gboolean flag) {
   GtkWidget *menu_item;
   menu_item = Builder_Get_Object( popup_menu_builder, item_name );
   gtk_widget_set_sensitive( menu_item, flag );
+}
 
-} /* Sensitize_Menu_Item() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Set_Check_Menu_Item()
  *
  * Sets pop-up check menu items active/inactive
  */
-  void
-Set_Check_Menu_Item( gchar *item_name, gboolean flag )
-{
+void Set_Check_Menu_Item(gchar *item_name, gboolean flag) {
   GtkWidget *menu_item;
   menu_item = Builder_Get_Object( popup_menu_builder, item_name );
   gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(menu_item), flag );
+}
 
-} /* Set_Check_Menu_Item() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Popup_Menu()
  *
  * Opens pop-up menu
  */
-  void
-Popup_Menu( void )
-{
+void Popup_Menu(void) {
   if( isFlagSet(STATUS_PENDING) ) return;
 
   /* Initialize on first call */
@@ -213,18 +207,15 @@ Popup_Menu( void )
     Set_Check_Menu_Item( "pgm_menuitem", TRUE );
 
   gtk_menu_popup_at_pointer( GTK_MENU(popup_menu), NULL );
+}
 
-} /*  Popup_Menu() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Init_Reception()
  *
  * Initialize Reception of signal from Satellite
  */
-  static gboolean
-Init_Reception( void )
-{
+static gboolean Init_Reception(void) {
   /* Initialize semaphore */
   sem_init( &demod_semaphore, 0, 0 );
 
@@ -240,17 +231,15 @@ Init_Reception( void )
   Demod_Init();
 
   return( TRUE );
-} /* Init_Reception() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Start_Togglebutton_Toggled()
  *
  * Handles the on_start_togglebutton_toggled CB
  */
-  void
-Start_Togglebutton_Toggled( GtkToggleButton *togglebutton )
-{
+void Start_Togglebutton_Toggled(GtkToggleButton *togglebutton) {
   /* Start SDR Receeiver if not satrted already */
   if( gtk_toggle_button_get_active(togglebutton) &&
       isFlagClear(STATUS_RECEIVING) &&
@@ -264,18 +253,15 @@ Start_Togglebutton_Toggled( GtkToggleButton *togglebutton )
   {
     Set_Check_Menu_Item( "start_receiver_menuitem", FALSE );
   }
+}
 
-} /* Start_Togglebutton_Toggled() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Start_Receiver_Menuitem_Toggled()
  *
  * Handles the on_start_receiver_menuitem_toggled CB
  */
-  void
-Start_Receiver_Menuitem_Toggled( GtkCheckMenuItem *menuitem )
-{
+void Start_Receiver_Menuitem_Toggled(GtkCheckMenuItem *menuitem) {
   /* Start SDR Receeiver if not satrted already */
   if( gtk_check_menu_item_get_active(menuitem) &&
       isFlagClear(STATUS_RECEIVING) &&
@@ -320,18 +306,15 @@ Start_Receiver_Menuitem_Toggled( GtkCheckMenuItem *menuitem )
     else
       ClearFlag( STATUS_RECEIVING );
   }
+}
 
-} /* Start_Receiver_Menuitem_Toggled() */
+/*****************************************************************************/
 
-/*------------------------------------------------------------------------*/
-
-/* Decode_Images_Menuitem_Activate()
+/* Decode_Images_Menuitem_Toggled()
  *
  * Handles the on_decode_images_menuitem_toggled CB
  */
-  void
-Decode_Images_Menuitem_Toggled( GtkCheckMenuItem *menuitem )
-{
+void Decode_Images_Menuitem_Toggled(GtkCheckMenuItem *menuitem) {
   /* Start LRPT Image Decoder if not already started */
   if( gtk_check_menu_item_get_active(menuitem) &&
       isFlagClear(STATUS_DECODING) )
@@ -374,18 +357,15 @@ Decode_Images_Menuitem_Toggled( GtkCheckMenuItem *menuitem )
     Display_Icon( frame_icon, "gtk-no" );
     ClearFlag( FRAME_OK_ICON );
   } /* if( !gtk_check_menu_item_get_active(menuitem) && */
+}
 
-} /* Decode_Images_Menuitem_Toggled() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Alarm_Action()
  *
  * Handles the SIGALRM timer signal
  */
-  void
-Alarm_Action( void )
-{
+void Alarm_Action(void) {
   /* Start Receive/Decode Operation */
   if( isFlagSet(ALARM_ACTION_START) &&
       isFlagClear(STATUS_RECEIVING) )
@@ -453,18 +433,15 @@ Alarm_Action( void )
 
     return;
   }
+}
 
-} /* Alarm_Action() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Decode_Timer_Setup()
  *
  * Handles on_timeout_okbutton_clicked CB
  */
-  void
-Decode_Timer_Setup( void )
-{
+void Decode_Timer_Setup(void) {
   GtkWidget *spinbutton;
   char mesg[MESG_SIZE];
 
@@ -489,19 +466,16 @@ Decode_Timer_Setup( void )
   gtk_widget_destroy( decode_timer_dialog );
   Initialize_Top_Window();
   SetFlag( ENABLE_DECODE_TIMER );
+}
 
-} /* Decode_Timer_Setup() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Auto_Timer_OK_Clicked()
  *
  * Handles the on_start_stop_ok_clicked CB
  *
  */
-  void
-Auto_Timer_OK_Clicked( void )
-{
+void Auto_Timer_OK_Clicked(void) {
   uint
     start_hrs,  /* Start time hours   */
     start_min,  /* Start time minutes */
@@ -583,18 +557,15 @@ Auto_Timer_OK_Clicked( void )
 
   Initialize_Top_Window();
   gtk_widget_destroy( auto_timer_dialog );
+}
 
-} /* Auto_Timer_OK_Clicked() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Hours_Entry()
  *
  * Handles on_hrs_entry_changed CB
  */
-  void
-Hours_Entry( GtkEditable *editable )
-{
+void Hours_Entry(GtkEditable *editable) {
   gchar buff[3];
   uint32_t idx, len;
   int ent;
@@ -620,18 +591,15 @@ Hours_Entry( GtkEditable *editable )
     Error_Dialog();
     return;
   }
+}
 
-} /* Hours_Entry() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Minutes_Entry()
  *
  * Handles the on_min_entry_changed CB
  */
-  void
-Minutes_Entry( GtkEditable *editable )
-{
+void Minutes_Entry(GtkEditable *editable) {
   gchar buff[3];
   uint32_t idx, len;
   int ent;
@@ -657,19 +625,16 @@ Minutes_Entry( GtkEditable *editable )
     Error_Dialog();
     return;
   }
+}
 
-} /* Minutes_Entry() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Enter_Center_Freq()
  *
  * Enters the center frequency to relevant
  * entry widget and displays in messages
  */
-  void
-Enter_Center_Freq( uint32_t freq )
-{
+void Enter_Center_Freq(uint32_t freq) {
   char text[12];
 
   /* Get center freq value in Hz, entry value is in kHz */
@@ -677,18 +642,15 @@ Enter_Center_Freq( uint32_t freq )
       Builder_Get_Object(main_window_builder, "sdr_freq_entry") );
   snprintf( text, sizeof(text), "%8.1f", (double)freq / 1000.0 );
   gtk_entry_set_text( entry, text );
+}
 
-} /* Enter_Center_Freq() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Fft_Drawingarea_Size_Alloc()
  *
  * Initializes the waterfall drawing area pixbuf
  */
-  void
-Fft_Drawingarea_Size_Alloc( GtkAllocation *allocation )
-{
+void Fft_Drawingarea_Size_Alloc(GtkAllocation *allocation) {
   /* Destroy existing pixbuff */
   if( wfall_pixbuf != NULL )
   {
@@ -719,18 +681,15 @@ Fft_Drawingarea_Size_Alloc( GtkAllocation *allocation )
    * that is a power of 2 */
   if( ! Initialize_IFFT((int16_t)wfall_width + 1) )
     return;
+}
 
-} /* Fft_Drawingarea_Size_Alloc() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Qpsk_Drawingarea_Size_Alloc()
  *
  * Initializes the QPSK constellation drawing area pixbuf
  */
-  void
-Qpsk_Drawingarea_Size_Alloc( GtkAllocation *allocation )
-{
+void Qpsk_Drawingarea_Size_Alloc(GtkAllocation *allocation) {
   /* Destroy existing pixbuff */
   if( qpsk_pixbuf != NULL )
   {
@@ -757,18 +716,15 @@ Qpsk_Drawingarea_Size_Alloc( GtkAllocation *allocation )
   qpsk_n_channels = gdk_pixbuf_get_n_channels( qpsk_pixbuf );
 
   gdk_pixbuf_fill( qpsk_pixbuf, 0 );
+}
 
-} /* Qpsk_Drawingarea_Size_Alloc() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Qpsk_Drawingarea_Draw()
  *
  * Draws the QPSK Constellation drawing area
  */
-  void
-Qpsk_Drawingarea_Draw( cairo_t *cr )
-{
+void Qpsk_Drawingarea_Draw(cairo_t *cr) {
   /* Draw the QPSK constellation */
   gdk_cairo_set_source_pixbuf( cr, qpsk_pixbuf, 0.0, 0.0 );
   cairo_paint( cr );
@@ -786,18 +742,15 @@ Qpsk_Drawingarea_Draw( cairo_t *cr )
 
   /* Fill pixbuf with background color */
   gdk_pixbuf_fill( qpsk_pixbuf, 0x000000ff );
+}
 
-} /* Qpsk_Drawingarea_Draw() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* BW_Entry_Activate()
  *
  * Handles the activate callback for bandwidth entry
  */
-  void
-BW_Entry_Activate( GtkEntry *entry )
-{
+void BW_Entry_Activate(GtkEntry *entry) {
 
   /* Prevent filter re-initialization when in use */
   if( isFlagSet(STATUS_SOAPYSDR_INIT) )
@@ -826,5 +779,4 @@ BW_Entry_Activate( GtkEntry *entry )
   snprintf( text, sizeof(text),
       "Low Pass Filter B/W %u kHz", rc_data.sdr_filter_bw / 1000 );
   Show_Message( text, "black" );
-
-} /* BW_Entry_Activate() */
+}

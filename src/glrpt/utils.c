@@ -12,6 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "utils.h"
 
 #include "../common/common.h"
@@ -34,6 +36,16 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+
+/*****************************************************************************/
+
+static gboolean MkdirRecurse(const char *path);
+static char *Filename(char *fpath);
+
+/*****************************************************************************/
+
+/* An int variable holding the single-bit flags */
+static int Flags = 0;
 
 /*****************************************************************************/
 
@@ -93,8 +105,7 @@ gboolean PrepareDirectories(void) {
  * Adapted from:
  * https://gist.github.com/JonathonReinhart/8c0d90191c38af2dcadb102c4e202950
  */
-
-gboolean MkdirRecurse(const char *path) {
+static gboolean MkdirRecurse(const char *path) {
     const size_t len = strlen(path);
     char _path[PATH_MAX];
     char *p;
@@ -137,9 +148,7 @@ gboolean MkdirRecurse(const char *path) {
  *
  *  Prepare a file name, use date and time if null argument
  */
-  void
-File_Name( char *file_name, uint32_t chn, const char *ext )
-{
+void File_Name(char *file_name, uint32_t chn, const char *ext) {
   int len; /* String length of file_name */
 
   /* If file_name is null, use date and time as file name */
@@ -173,38 +182,30 @@ File_Name( char *file_name, uint32_t chn, const char *ext )
       idx++;
     }
   }
+}
 
-} /* End of File_Name() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Filename()
  *
  * Finds file name in a file path
  * TODO may be it worth to use standard library routine
  */
-
-  static char *
-Filename( char *fpath )
-{
+static char *Filename(char *fpath) {
   int idx;
 
   idx = (int)strlen( fpath );
   while( (--idx >= 0) && (fpath[idx] != '/') );
   return( &fpath[++idx] );
+}
 
-} /* Filename() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /*  Usage()
  *
  *  Prints usage information
  */
-
-  void
-Usage( void )
-{
+void Usage(void) {
   fprintf( stderr, "%s\n",
       "Usage: glrpt [-hv]" );
 
@@ -213,19 +214,15 @@ Usage( void )
 
   fprintf( stderr, "%s\n",
       "       -v: Print version number and exit");
+}
 
-} /* End of Usage() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /*  Show_Message()
  *
  *  Prints a message string in the Text View scroller
  */
-
-  void
-Show_Message( const char *mesg, const char *attr )
-{
+void Show_Message(const char *mesg, const char *attr) {
   GtkAdjustment *adjustment;
 
   static GtkTextIter iter;
@@ -252,14 +249,12 @@ Show_Message( const char *mesg, const char *attr )
 
   /* Wait for GTK to complete its tasks */
   while( g_main_context_iteration(NULL, FALSE) );
+}
 
-} /* End of Show_Message() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /***  Memory allocation/freeing utils ***/
-void mem_alloc( void **ptr, size_t req )
-{
+void mem_alloc(void **ptr, size_t req) {
   *ptr = malloc( req );
   if( *ptr == NULL )
   {
@@ -267,38 +262,33 @@ void mem_alloc( void **ptr, size_t req )
     exit( -1 );
   }
   memset( *ptr, 0, req );
-} /* End of void mem_alloc() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-void mem_realloc( void **ptr, size_t req )
-{
+void mem_realloc(void **ptr, size_t req) {
   *ptr = realloc( *ptr, req );
   if( *ptr == NULL )
   {
     perror( "glrpt: A memory allocation request failed" );
     exit( -1 );
   }
-} /* End of void mem_realloc() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-void free_ptr( void **ptr )
-{
+void free_ptr(void **ptr) {
   if( *ptr != NULL ) free( *ptr );
   *ptr = NULL;
-} /* End of void free_ptr() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Open_File()
  *
  * Opens a file, aborts on error
  */
-
-  gboolean
-Open_File( FILE **fp, char *fname, const char *mode )
-{
+gboolean Open_File(FILE **fp, char *fname, const char *mode) {
   /* Message buffer */
   char mesg[MESG_SIZE];
 
@@ -318,22 +308,21 @@ Open_File( FILE **fp, char *fname, const char *mode )
   }
 
   return( TRUE );
-} /* End of Open_File() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Save_Image_JPEG()
  *
  * Write an image buffer to file
  */
-  void
-Save_Image_JPEG(
-    char *file_name,
-    int width, int height,
-    int num_channels,
-    const uint8_t *pImage_data,
-    compression_params_t *comp_params )
-{
+void Save_Image_JPEG(
+        char *file_name,
+        int width,
+        int height,
+        int num_channels,
+        const uint8_t *pImage_data,
+        compression_params_t *comp_params) {
   char mesg[MESG_SIZE];
   gboolean ret;
 
@@ -353,21 +342,21 @@ Save_Image_JPEG(
   }
 
   return;
-} /* Save_Image_JPEG() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Save_Image_Raw()
  *
  * Write an image buffer to file
  */
-
-  void
-Save_Image_Raw(
-    char *fname, const char *type,
-    uint32_t width, uint32_t height,
-    uint32_t max_val, uint8_t *buffer )
-{
+void Save_Image_Raw(
+        char *fname,
+        const char *type,
+        uint32_t width,
+        uint32_t height,
+        uint32_t max_val,
+        uint8_t *buffer) {
   size_t size, fw;
   int ret;
   FILE *fp = 0;
@@ -410,19 +399,15 @@ Save_Image_Raw(
 
   fclose( fp );
   return;
+}
 
-} /* Save_Image_Raw() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /*  Cleanup()
  *
  *  Cleanup before quitting or stopping action
  */
-
-  void
-Cleanup( void )
-{
+void Cleanup(void) {
   /* Deinitialize and free buffers when safe */
   if( isFlagClear(STATUS_DEMODULATING) &&
       isFlagClear(STATUS_RECEIVING) &&
@@ -439,49 +424,42 @@ Cleanup( void )
 
   /* Cancel any alarms */
   alarm( 0 );
+}
 
-} /* Cleanup() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* TODO may be it worth to make them inline and combine with another utils */
 /* Functions for testing and setting/clearing flags */
-
-/* An int variable holding the single-bit flags */
-/* TODO bad use of global */
-static int Flags = 0;
-
-  int
-isFlagSet( int flag )
-{
+int isFlagSet(int flag) {
   return( Flags & flag );
 }
 
-  int
-isFlagClear( int flag )
-{
+/*****************************************************************************/
+
+int isFlagClear(int flag) {
   return( !(Flags & flag) );
 }
 
-  void
-SetFlag( int flag )
-{
+/*****************************************************************************/
+
+void SetFlag(int flag) {
   Flags |= flag;
 }
 
-  void
-ClearFlag( int flag )
-{
+/*****************************************************************************/
+
+void ClearFlag(int flag) {
   Flags &= ~flag;
 }
 
-  void
-ToggleFlag( int flag )
-{
+/*****************************************************************************/
+
+/* TODO may be remove */
+void ToggleFlag(int flag) {
   Flags ^= flag;
 }
 
-/*------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Strlcpy()
  *
@@ -491,9 +469,7 @@ ToggleFlag( int flag )
  * terminating char. n would normally be the sizeof(dest) string but
  * copying will not go beyond the terminating null of src string
  */
-  void
-Strlcpy( char *dest, const char *src, size_t n )
-{
+void Strlcpy(char *dest, const char *src, size_t n) {
   char ch = src[0];
   int idx = 0;
 
@@ -511,10 +487,9 @@ Strlcpy( char *dest, const char *src, size_t n )
 
   /* Terminate dest string */
   dest[idx] = '\0';
+}
 
-} /* Strlcpy() */
-
-/*------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Strlcat()
  *
@@ -525,9 +500,8 @@ Strlcpy( char *dest, const char *src, size_t n )
  * string but copying will not go beyond the terminating null of src
 
  */
-  void
-Strlcat( char *dest, const char *src, size_t n )
-{
+/* TODO may be remove */
+void Strlcat(char *dest, const char *src, size_t n) {
   char ch = dest[0];
   int idd = 0; /* dest index */
   int ids = 0; /* src  index */
@@ -554,27 +528,23 @@ Strlcat( char *dest, const char *src, size_t n )
 
   /* Terminate dest string */
   dest[idd] = '\0';
+}
 
-} /* Strlcat() */
+/*****************************************************************************/
 
-/*------------------------------------------------------------------*/
-
+/* TODO review/move */
 /* Clamps a double value between min and max */
-  inline double
-dClamp( double x, double min, double max )
-{
+inline double dClamp(double x, double min, double max) {
   double ret = x;
   if( x < min ) ret = min;
   else if( x > max ) ret = max;
   return( ret );
 }
 
-/*------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Clamps an integer value between min and max */
-  inline int
-iClamp( int i, int min, int max )
-{
+inline int iClamp(int i, int min, int max) {
   int ret = i;
   if( i < min ) ret = min;
   else if( i > max ) ret = max;

@@ -12,6 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "rc_config.h"
 
 #include "../common/common.h"
@@ -32,7 +34,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
+
+static int Load_Line(char *buff, FILE *pfile, const char *mesg);
+
+/*****************************************************************************/
+
+static int found_cfg = 0;
+
+/*****************************************************************************/
 
 /*  Load_Line()
  *
@@ -41,9 +51,7 @@
  *  is returned. Lines assumed maximum 80 characters long.
  */
 
-  static int
-Load_Line( char *buff, FILE *pfile, const char *mesg )
-{
+static int Load_Line(char *buff, FILE *pfile, const char *mesg) {
   int
     num_chr, /* Number of characters read, excluding lf/cr */
     chr;     /* Character read by getc() */
@@ -140,21 +148,16 @@ Load_Line( char *buff, FILE *pfile, const char *mesg )
   buff[num_chr] = '\0';
 
   return( SUCCESS );
+}
 
-} /* End of Load_Line() */
-
-/*------------------------------------------------------------------------*/
-
-static int found_cfg = 0;
+/*****************************************************************************/
 
 /*  Load_Config()
  *
  *  Loads the glrptrc configuration file
  */
 
-  gboolean
-Load_Config( gpointer data )
-{
+gboolean Load_Config(gpointer data) {
   char
     rc_fpath[MESG_SIZE], /* File path to glrptrc */
     line[LINE_LEN];      /* Buffer for Load_Line */
@@ -506,18 +509,16 @@ Load_Config( gpointer data )
   fclose( glrptrc );
 
   return( FALSE );
-} /* End of Load_Config() */
+}
 
-/*------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Find_Config_Files()
  *
  * Searches glrpt's home directory for per-satellite configuration
  * files and sets up the "Select Satellite" menu item accordingly
  */
-  gboolean
-Find_Config_Files( gpointer data )
-{
+gboolean Find_Config_Files(gpointer data) {
   char *ext;
   struct dirent **file_list;
   int num_files, idx;
@@ -567,4 +568,4 @@ Find_Config_Files( gpointer data )
   }
 
   return( FALSE );
-} /* Find_Config_Files() */
+}

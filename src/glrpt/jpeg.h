@@ -13,17 +13,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*****************************************************************************/
+
 #ifndef GLRPT_JPEG_H
 #define GLRPT_JPEG_H
+
+/*****************************************************************************/
 
 #include <glib.h>
 
 #include <stdint.h>
 #include <stdio.h>
 
+/*****************************************************************************/
+
 /* TODO review, may be inlines are more appropriate */
 #define JPEG_MAX(a,b) (((a)>(b))?(a):(b))
 #define JPEG_MIN(a,b) (((a)<(b))?(a):(b))
+
+#define RGBA    TRUE  /* Signal image source to be rgba type */
+#define RGB     FALSE /* Signal image source to be rgb type */
+
+/*****************************************************************************/
 
 /* JPEG chroma subsampling factors. Y_ONLY (grayscale images)
  * and H2V2 (color images) are the most common
@@ -78,9 +89,6 @@ enum {
   MAX_HUFF_CODESIZE = 32
 };
 
-#define RGBA    TRUE  /* Signal image source to be rgba type */
-#define RGB     FALSE /* Signal image source to be rgb type */
-
 struct component {
   uint8_t m_h_samp, m_v_samp;
   int m_last_dc_val;
@@ -132,7 +140,21 @@ struct jpeg_encoder
   struct image m_image[3];
 };
 
-gboolean jpeg_encoder_compress_image_to_file(char *file_name, int width, int height, int num_channels, const uint8_t *pImage_data, compression_params_t *comp_params);
-gboolean jpeg_encoder_compression_parameters(compression_params_t *comp_params, float m_quality, enum subsampling_t m_subsampling, gboolean m_no_chroma_discrim_flag);
+/*****************************************************************************/
+
+gboolean jpeg_encoder_compression_parameters(
+        compression_params_t *comp_params,
+        float m_quality,
+        enum subsampling_t m_subsampling,
+        gboolean m_no_chroma_discrim_flag);
+gboolean jpeg_encoder_compress_image_to_file(
+        char *file_name,
+        int width,
+        int height,
+        int num_channels,
+        const uint8_t *pImage_data,
+        compression_params_t *comp_params);
+
+/*****************************************************************************/
 
 #endif

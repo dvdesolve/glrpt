@@ -12,13 +12,19 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #ifndef GLRPT_INTERFACE_H
 #define GLRPT_INTERFACE_H
+
+/*****************************************************************************/
 
 #include <glib.h>
 #include <gtk/gtk.h>
 
 #include <stddef.h>
+
+/*****************************************************************************/
 
 /* Gtk Builder object ids */
 #define ERROR_DIALOG_IDS \
@@ -101,13 +107,17 @@
   "decode_timer_spinbutton", \
   NULL
 
-GtkWidget *create_main_window(GtkBuilder **builder);
-GtkWidget *create_error_dialog(GtkBuilder **builder);
+/*****************************************************************************/
+
 GtkWidget *Builder_Get_Object(GtkBuilder *builder, gchar *name);
+GtkWidget *create_main_window(GtkBuilder **builder);
 GtkWidget *create_popup_menu(GtkBuilder **builder);
 GtkWidget *create_timer_dialog(GtkBuilder **builder);
+GtkWidget *create_error_dialog(GtkBuilder **builder);
 GtkWidget *create_startstop_timer(GtkBuilder **builder);
 GtkWidget *create_quit_dialog(GtkBuilder **builder);
 void Initialize_Top_Window(void);
+
+/*****************************************************************************/
 
 #endif

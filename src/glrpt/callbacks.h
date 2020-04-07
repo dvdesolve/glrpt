@@ -12,12 +12,20 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #ifndef GLRPT_CALLBACKS_H
 #define GLRPT_CALLBACKS_H
+
+/*****************************************************************************/
 
 #include <glib.h>
 #include <gtk/gtk.h>
 
-void on_satellite_menuitem_activate(GtkMenuItem *menuitem, gpointer user_data);
+/*****************************************************************************/
+
+void on_satellite_menuitem_activate(GtkMenuItem *menuitem, gpointer data);
+
+/*****************************************************************************/
 
 #endif

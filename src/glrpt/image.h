@@ -12,10 +12,16 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #ifndef GLRPT_IMAGE_H
 #define GLRPT_IMAGE_H
 
+/*****************************************************************************/
+
 #include <stdint.h>
+
+/*****************************************************************************/
 
 /* Normalized black value */
 #define NORM_BLACK  0
@@ -31,9 +37,17 @@
 #define BLACK_CUT_OFF   1 /* Black cut-off percentile for normalization */
 #define WHITE_CUT_OFF   1 /* White cut-off percentile for normalization */
 
+/*****************************************************************************/
+
+void Normalize_Image(
+        uint8_t *image_buffer,
+        uint32_t image_size,
+        uint8_t range_low,
+        uint8_t range_high);
+void Flip_Image(uint8_t *image_buffer, uint32_t image_size);
 void Display_Scaled_Image(uint8_t *chan_image[], uint32_t apid, int current_y);
 void Create_Combo_Image(uint8_t *combo_image);
-void Flip_Image(uint8_t *image_buffer, uint32_t image_size);
-void Normalize_Image(uint8_t *image_buffer, uint32_t image_size, uint8_t range_low, uint8_t range_high);
+
+/*****************************************************************************/
 
 #endif

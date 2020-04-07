@@ -12,6 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "image.h"
 
 #include "../common/common.h"
@@ -26,20 +28,17 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /*  Normalize_Image()
  *
  *  Does histogram (linear) normalization of a pgm (P5) image file
  */
-
-  void
-Normalize_Image(
-    uint8_t *image_buffer,
-    uint32_t image_size,
-    uint8_t range_low,
-    uint8_t range_high )
-{
+void Normalize_Image(
+        uint8_t *image_buffer,
+        uint32_t image_size,
+        uint8_t range_low,
+        uint8_t range_high) {
   uint32_t
     hist[MAX_WHITE+1],  /* Intensity histogram of pgm image file  */
     pixel_cnt,          /* Total pixels counter for cut-off point */
@@ -122,19 +121,15 @@ Normalize_Image(
     image_buffer[ pixel_cnt ] =
       range_low + ( pixel_val_in * val_range_out ) / val_range_in;
   }
+}
 
-} /* End of Normalize_Image() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /*  Flip_Image()
  *
  *  Flips a pgm (P5) image by 180 degrees
  */
-
-  void
-Flip_Image( uint8_t *image_buffer, uint32_t image_size )
-{
+void Flip_Image(uint8_t *image_buffer, uint32_t image_size) {
   uint32_t idx; /* Index for loops etc */
 
   uint8_t
@@ -164,22 +159,16 @@ Flip_Image( uint8_t *image_buffer, uint32_t image_size )
     *( idx_temp ) = *( idx_swap );
     *( idx_swap ) = temp;
   }
+}
 
-} /* End of Flip_Image() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Display_Scaled_Image
  *
  * Scales an LRPT image horizontal line by the scale
  * factor and stores the result in the image pixbuf
  */
-  void
-Display_Scaled_Image(
-    uint8_t *chan_image[],
-    uint32_t apid,
-    int current_y )
-{
+void Display_Scaled_Image(uint8_t *chan_image[], uint32_t apid, int current_y) {
   int chn, idx, idy, cnt, scale;
   int scaled_width, scaled_x, scaled_idx;
   static int
@@ -281,10 +270,9 @@ Display_Scaled_Image(
 
   /* Set lrpt image from pixbuff */
   gtk_image_set_from_pixbuf( GTK_IMAGE(lrpt_image), scaled_image_pixbuf );
+}
 
-} /* Display_Scaled_Image() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Create_Combo_Image()
  *
@@ -292,9 +280,7 @@ Display_Scaled_Image(
  * If enabled, it performs some speculative enhancement of watery
  * areas and clouds.
  */
-  void
-Create_Combo_Image( uint8_t *combo_image )
-{
+void Create_Combo_Image(uint8_t *combo_image) {
   /* Color channels are 0 = red, 1 = green, 2 = blue
    * but it all depends on the APID options in glrptrc */
   uint32_t idx = 0, cnt;
@@ -384,5 +370,4 @@ Create_Combo_Image( uint8_t *combo_image )
           ( channel_image[blue][cnt] * range_blue ) / MAX_WHITE;
       } /* for( cnt = 0; cnt < (int)channel_image_size; cnt++ ) */
     }
-
-} /* Create_Combo_Image() */
+}

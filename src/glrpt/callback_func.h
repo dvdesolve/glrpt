@@ -12,8 +12,12 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #ifndef GLRPT_CALLBACK_FUNC_H
 #define GLRPT_CALLBACK_FUNC_H
+
+/*****************************************************************************/
 
 #include <cairo/cairo.h>
 #include <glib.h>
@@ -21,8 +25,11 @@
 
 #include <stdint.h>
 
+/*****************************************************************************/
+
 void Error_Dialog(void);
 gboolean Cancel_Timer(gpointer data);
+void Set_Check_Menu_Item(gchar *item_name, gboolean flag);
 void Popup_Menu(void);
 void Start_Togglebutton_Toggled(GtkToggleButton *togglebutton);
 void Start_Receiver_Menuitem_Toggled(GtkCheckMenuItem *menuitem);
@@ -37,6 +44,7 @@ void Fft_Drawingarea_Size_Alloc(GtkAllocation *allocation);
 void Qpsk_Drawingarea_Size_Alloc(GtkAllocation *allocation);
 void Qpsk_Drawingarea_Draw(cairo_t *cr);
 void BW_Entry_Activate(GtkEntry *entry);
-void Set_Check_Menu_Item(gchar *item_name, gboolean flag);
+
+/*****************************************************************************/
 
 #endif

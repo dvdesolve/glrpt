@@ -12,6 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "interface.h"
 
 #include "../common/common.h"
@@ -29,13 +31,17 @@
 #include <stddef.h>
 #include <stdio.h>
 
+/*****************************************************************************/
+
+static void Gtk_Builder(GtkBuilder **builder, gchar **object_ids);
+
+/*****************************************************************************/
+
 /* Gtk_Builder()
  *
  * Returns a GtkBuilder with required objects from file
  */
-  static void
-Gtk_Builder( GtkBuilder **builder, gchar **object_ids )
-{
+static void Gtk_Builder(GtkBuilder **builder, gchar **object_ids) {
   GError *gerror = NULL;
   int ret = 0;
 
@@ -58,18 +64,15 @@ Gtk_Builder( GtkBuilder **builder, gchar **object_ids )
     exit( -1 );
   }
   gtk_builder_connect_signals( *builder, NULL );
+}
 
-} /* Gtk_Builder() */
-
-/*------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Builder_Get_Object()
  *
  * Gets a named object from the GtkBuilder builder object
  */
-  GtkWidget *
-Builder_Get_Object( GtkBuilder *builder, gchar *name )
-{
+GtkWidget *Builder_Get_Object(GtkBuilder *builder, gchar *name) {
   GObject *object = gtk_builder_get_object( builder, name );
   if( object == NULL )
   {
@@ -80,16 +83,14 @@ Builder_Get_Object( GtkBuilder *builder, gchar *name )
   }
 
   return( GTK_WIDGET(object) );
-} /* Builder_Get_Object() */
+}
 
-/*------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /*
  * These functions below create various widgets using GtkBuilder
  */
-  GtkWidget *
-create_main_window( GtkBuilder **builder )
-{
+GtkWidget *create_main_window(GtkBuilder **builder) {
   gchar *object_ids[] = { MAIN_WINDOW_IDS };
   Gtk_Builder( builder, object_ids );
   GtkWidget *window =
@@ -97,11 +98,9 @@ create_main_window( GtkBuilder **builder )
   return( window );
 }
 
-/*------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  GtkWidget *
-create_popup_menu( GtkBuilder **builder )
-{
+GtkWidget *create_popup_menu(GtkBuilder **builder) {
   gchar *object_ids[] = { POPUP_MENU_IDS };
   Gtk_Builder( builder, object_ids );
   GtkWidget *menu =
@@ -109,11 +108,9 @@ create_popup_menu( GtkBuilder **builder )
   return( menu );
 }
 
-/*------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  GtkWidget *
-create_timer_dialog( GtkBuilder **builder )
-{
+GtkWidget *create_timer_dialog(GtkBuilder **builder) {
   gchar *object_ids[] = { OPER_TIMER_DIALOG_IDS };
   Gtk_Builder( builder, object_ids );
   GtkWidget *dialog =
@@ -121,11 +118,9 @@ create_timer_dialog( GtkBuilder **builder )
   return( dialog );
 }
 
-/*------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  GtkWidget *
-create_error_dialog( GtkBuilder **builder )
-{
+GtkWidget *create_error_dialog(GtkBuilder **builder) {
   gchar *object_ids[] = { ERROR_DIALOG_IDS };
   Gtk_Builder( builder, object_ids );
   GtkWidget *dialog =
@@ -133,11 +128,9 @@ create_error_dialog( GtkBuilder **builder )
   return( dialog );
 }
 
-/*------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  GtkWidget *
-create_startstop_timer( GtkBuilder **builder )
-{
+GtkWidget *create_startstop_timer(GtkBuilder **builder) {
   gchar *object_ids[] = { AUTO_TIMER_DIALOG_IDS };
   Gtk_Builder( builder, object_ids );
   GtkWidget *dialog =
@@ -145,11 +138,9 @@ create_startstop_timer( GtkBuilder **builder )
   return( dialog );
 }
 
-/*------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  GtkWidget *
-create_quit_dialog( GtkBuilder **builder )
-{
+GtkWidget *create_quit_dialog(GtkBuilder **builder) {
   gchar *object_ids[] = { QUIT_DIALOG_IDS };
   Gtk_Builder( builder, object_ids );
   GtkWidget *dialog =
@@ -157,13 +148,12 @@ create_quit_dialog( GtkBuilder **builder )
   return( dialog );
 }
 
-/*------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /*  Initialize_Top_Window()
  *
  *  Initializes glrpt's top window
  */
-
 void Initialize_Top_Window(void) {
   /* The scrolled window image container */
   gchar text[48];
@@ -221,5 +211,4 @@ void Initialize_Top_Window(void) {
 
   /* Set window size as required (minimal) */
   gtk_window_resize( GTK_WINDOW(main_window), 10, 10 );
-
 }

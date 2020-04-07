@@ -12,6 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "display.h"
 
 #include "../common/shared.h"
@@ -27,15 +29,18 @@
 #include <stdint.h>
 #include <stdio.h>
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
+
+static int IFFT_Bin_Value(int sum_i, int sum_q, gboolean reset);
+static void Colorize(guchar *pix, int pixel_val);
+
+/*****************************************************************************/
 
 /* IFFT_Bin_Value()
  *
  * Calculates IFFT bin values with auto level control
  */
-  static int
-IFFT_Bin_Value( int sum_i, int sum_q, gboolean reset )
-{
+static int IFFT_Bin_Value(int sum_i, int sum_q, gboolean reset) {
   /* Value of ifft output "bin" */
   static int bin_val = 0;
 
@@ -67,16 +72,14 @@ IFFT_Bin_Value( int sum_i, int sum_q, gboolean reset )
   }
 
   return( 0 );
-} /* IFFT_Bin_Value() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Color codes the pixels of the
  * waterfall according to their value
  */
-  static void
-Colorize( guchar *pix, int pixel_val )
-{
+static void Colorize(guchar *pix, int pixel_val) {
   int n;
 
   if( pixel_val < 64 ) // From black to blue
@@ -106,18 +109,15 @@ Colorize( guchar *pix, int pixel_val )
     pix[1] = 66 - (guchar)n * 3;
     pix[2] = 0;
   }
+}
 
-} /* Colorize() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Display_Waterfall()
  *
  * Displays IFFT Spectrum as "waterfall"
  */
-  void
-Display_Waterfall( void )
-{
+void Display_Waterfall(void) {
   int
     vert_lim,  /* Limit of vertical index for copying lines */
     idh, idv,  /* Index to hor. and vert. position in warterfall */
@@ -194,18 +194,15 @@ Display_Waterfall( void )
 
   /* Wait for GTK to complete its tasks */
   while( g_main_context_iteration(NULL, FALSE) );
+}
 
-} /* Display_Waterfall() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /*  Display_QPSK_Const()
  *
  *  Displays the QPSK constellation
  */
-  void
-Display_QPSK_Const( int8_t *buffer )
-{
+void Display_QPSK_Const(int8_t *buffer) {
   /* Pointer to current pixel */
   static guchar *pix;
 
@@ -231,36 +228,30 @@ Display_QPSK_Const( int8_t *buffer )
   /* Wait for GTK to complete its tasks */
   gtk_widget_queue_draw( qpsk_drawingarea );
   while( g_main_context_iteration(NULL, FALSE) );
+}
 
-} /* Display_QPSK_Const */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Display_Icon()
  *
  * Sets an icon to be displayed in a GTK_IMAGE
  */
-  void
-Display_Icon( GtkWidget *img, const gchar *name )
-{
+void Display_Icon(GtkWidget *img, const gchar *name) {
   /* Set the icon in the image */
   gtk_image_set_from_icon_name(
       GTK_IMAGE(img), name, GTK_ICON_SIZE_BUTTON );
 
   /* Wait for GTK to complete its tasks */
   while( g_main_context_iteration(NULL, FALSE) );
+}
 
-} /* Display_Icon() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Display_Demod_Params()
  *
  * Displays Demodulator parameters (AGC gain PLL freq etc)
  */
-  void
-Display_Demod_Params( Demod_t *demod )
-{
+void Display_Demod_Params(Demod_t *demod) {
   char txt[10];
   double freq, gain;
   uint32_t level;
@@ -293,18 +284,15 @@ Display_Demod_Params( Demod_t *demod )
 
   /* Wait for GTK to complete its tasks */
   while( g_main_context_iteration(NULL, FALSE) );
+}
 
-}/* Display_Demod_Params() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Draw_Level_Gauge()
  *
  * Draws a color-coded level gauge into a drawingarea
  */
-  void
-Draw_Level_Gauge( GtkWidget *widget, cairo_t *cr, double level )
-{
+void Draw_Level_Gauge(GtkWidget *widget, cairo_t *cr, double level) {
   GtkAllocation allocation;
   double dWidth, dHeight;
   int iWidth, idx;
@@ -354,5 +342,4 @@ Draw_Level_Gauge( GtkWidget *widget, cairo_t *cr, double level )
     cairo_set_source_rgb( cr, red, green, 0.0 );
     cairo_stroke( cr );
   }
-
-} /* Draw_Level_Gauge() */
+}

@@ -12,8 +12,12 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #ifndef GLRPT_DISPLAY_H
 #define GLRPT_DISPLAY_H
+
+/*****************************************************************************/
 
 #include "../lrpt_demod/demod.h"
 
@@ -22,6 +26,8 @@
 #include <gtk/gtk.h>
 
 #include <stdint.h>
+
+/*****************************************************************************/
 
 /* IFFT Signal Amplitude averaging window */
 #define AMPL_AVE_WIN   4
@@ -32,10 +38,14 @@
 #define RED_THRESHOLD     4.0
 #define GREEN_THRESHOLD   1.5
 
-void Draw_Level_Gauge(GtkWidget *widget, cairo_t *cr, double level);
+/*****************************************************************************/
+
+void Display_Waterfall(void);
+void Display_QPSK_Const(int8_t *buffer);
 void Display_Icon(GtkWidget *img, const gchar *name);
 void Display_Demod_Params(Demod_t *demod);
-void Display_QPSK_Const(int8_t *buffer);
-void Display_Waterfall(void);
+void Draw_Level_Gauge(GtkWidget *widget, cairo_t *cr, double level);
+
+/*****************************************************************************/
 
 #endif

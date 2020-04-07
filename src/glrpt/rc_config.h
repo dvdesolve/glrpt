@@ -12,14 +12,30 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #ifndef GLRPT_RC_CONFIG_H
 #define GLRPT_RC_CONFIG_H
+
+/*****************************************************************************/
 
 #include "../common/common.h"
 
 #include <glib.h>
 
 #include <stdint.h>
+
+/*****************************************************************************/
+
+/* Special characters */
+#define LF   0x0A /* Line Feed */
+#define CR   0x0D /* Carriage Return */
+#define HT   0x09 /* Horizontal Tab  */
+
+/* Max length of lines in config file */
+#define LINE_LEN   81
+
+/*****************************************************************************/
 
 /* Runtime config data storage type */
 typedef struct rc_data_t {
@@ -98,15 +114,11 @@ typedef struct rc_data_t {
     float jpeg_quality;
 } rc_data_t;
 
+/*****************************************************************************/
+
 gboolean Load_Config(gpointer data);
 gboolean Find_Config_Files(gpointer data);
 
-/* Special characters */
-#define LF   0x0A /* Line Feed */
-#define CR   0x0D /* Carriage Return */
-#define HT   0x09 /* Horizontal Tab  */
-
-/* Max length of lines in config file */
-#define LINE_LEN   81
+/*****************************************************************************/
 
 #endif

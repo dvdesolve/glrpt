@@ -12,6 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "jpeg.h"
 
 #include "utils.h"
@@ -23,6 +25,138 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+/*****************************************************************************/
+
+static void image_init(struct image *img);
+static void image_deinit(struct image *img);
+static inline void image_set_px(struct image *img, float px, int x, int y);
+static inline float image_get_px(struct image *img, int x, int y);
+static dctq_t *image_get_dctq(struct image *img, int x, int y);
+static void image_load_block(struct image *img, dct_t *pDst, int x, int y);
+static inline dct_t image_blend_dual(
+        struct image *img,
+        int x,
+        int y,
+        struct image *luma);
+static inline dct_t image_blend_quad(
+        struct image *img,
+        int x,
+        int y,
+        struct image *luma);
+static void image_subsample(struct image *img, struct image *luma, int v_samp);
+static void RGB_to_YCC(
+        struct image *img,
+        const uint8_t *pSrc,
+        gboolean ch_a, // If source is rgba
+        int width,
+        int y);
+static void RGB_to_Y(
+        struct image *img,
+        const uint8_t *pSrc,
+        gboolean ch_a, // If source is rgba
+        int width,
+        int y);
+static void Y_to_YCC(
+        struct image *img,
+        const uint8_t *pSrc,
+        int width,
+        int y);
+static void dct(dct_t *data);
+static inline struct sym_freq *radix_sort_syms(
+        uint32_t num_syms,
+        struct sym_freq *pSyms0,
+        struct sym_freq *pSyms1);
+static void calculate_minimum_redundancy(struct sym_freq *A, int n);
+static void huffman_enforce_max_code_size(
+        int *pNum_codes,
+        int code_list_len,
+        int max_code_size);
+static void huffman_table_optimize(struct huffman_table *table, int table_len);
+static void huffman_table_compute(struct huffman_table *table);
+static gboolean jpeg_encoder_put_buf(const void *pBuf, int len, FILE *stream);
+static void jpeg_encoder_emit_byte(struct jpeg_encoder *enc, uint8_t c);
+static void jpeg_encoder_emit_word(struct jpeg_encoder *enc, uint32_t i);
+static void jpeg_encoder_emit_marker(struct jpeg_encoder *enc, int marker);
+static void jpeg_encoder_emit_jfif_app0(struct jpeg_encoder *enc);
+static void jpeg_encoder_emit_dqt(struct jpeg_encoder *enc);
+static void jpeg_encoder_emit_sof(struct jpeg_encoder *enc);
+static void jpeg_encoder_emit_dht(
+        struct jpeg_encoder *enc,
+        uint8_t *bits,
+        uint8_t *val,
+        int index,
+        gboolean ac_flag);
+static void jpeg_encoder_emit_dhts(struct jpeg_encoder *enc);
+static void jpeg_encoder_emit_sos(struct jpeg_encoder *enc);
+static void jpeg_encoder_emit_start_markers(struct jpeg_encoder *enc);
+static void jpeg_encoder_compute_quant_table(
+        struct jpeg_encoder *enc,
+        int32_t *pDst,
+        int16_t *pSrc);
+static void jpeg_encoder_reset_last_dc(struct jpeg_encoder *enc);
+static void jpeg_encoder_compute_huffman_tables(struct jpeg_encoder *enc);
+static gboolean jpeg_encoder_jpg_open(
+        struct jpeg_encoder *enc,
+        int p_x_res,
+        int p_y_res);
+inline static dctq_t round_to_zero(const dct_t j, const int32_t quant);
+static void jpeg_encoder_quantize_pixels(
+        struct jpeg_encoder *enc,
+        dct_t *pSrc,
+        dctq_t *pDst,
+        const int32_t *quant);
+static void jpeg_encoder_flush_output_buffer(struct jpeg_encoder *enc);
+inline static uint32_t bit_count(int temp1);
+static void jpeg_encoder_put_bits(
+        struct jpeg_encoder *enc,
+        uint32_t bits,
+        uint32_t len);
+static void jpeg_encoder_put_signed_int_bits(
+        struct jpeg_encoder *enc,
+        int num,
+        uint32_t len);
+static void jpeg_encoder_code_block(
+        struct jpeg_encoder *enc,
+        dctq_t *src,
+        struct huffman_dcac *huff,
+        struct component *comp,
+        gboolean write);
+static void jpeg_encoder_code_mcu_row(
+        struct jpeg_encoder *enc,
+        int y,
+        gboolean write);
+static gboolean jpeg_encoder_emit_end_markers(struct jpeg_encoder *enc);
+static gboolean jpeg_encoder_compress_image(struct jpeg_encoder *enc);
+static void jpeg_encoder_load_mcu_Y(
+        struct jpeg_encoder *enc,
+        const uint8_t *pSrc,
+        int width,
+        int bpp,
+        int y);
+static void jpeg_encoder_load_mcu_YCC(
+        struct jpeg_encoder *enc,
+        const uint8_t *pSrc,
+        int width,
+        int bpp,
+        int y);
+static void jpeg_encoder_clear(struct jpeg_encoder *enc);
+static void jpeg_encoder_deinit(struct jpeg_encoder *enc);
+static inline gboolean params_check(compression_params_t *parm);
+static gboolean jpeg_encoder_init(
+        struct jpeg_encoder *enc,
+        FILE *pStream,
+        int width,
+        int height,
+        compression_params_t *comp_params);
+static gboolean jpeg_encoder_read_image(
+        struct jpeg_encoder *enc,
+        const uint8_t *image_data,
+        int width,
+        int height,
+        int bpp);
+
+/*****************************************************************************/
 
 static int16_t s_std_croma_quant[64] = {
   17,18,18,24,21,24,47,26,26,47,99,66,56,66,99,99,99,99,99,99,99,
@@ -42,60 +176,45 @@ static uint8_t s_zag[64] = {
   23,30,37,44,51,58,59,52,45,38,31,39,46,53,60,61,54,47,55,62,63
 };
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-image_init( struct image *img )
-{
+static void image_init(struct image *img) {
   mem_alloc( (void **)&(img->m_pixels),
       sizeof(float) * (size_t)(img->m_x * img->m_y) );
   mem_alloc( (void **)&(img->m_dctqs),
       sizeof(dctq_t) * (size_t)(img->m_x * img->m_y) );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-image_deinit( struct image *img )
-{
+static void image_deinit(struct image *img) {
   free_ptr( (void **)&(img->m_pixels) );
   free_ptr( (void **)&(img->m_dctqs) );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static inline void
-image_set_px( struct image *img, float px, int x, int y )
-{
+static inline void image_set_px(struct image *img, float px, int x, int y) {
   img->m_pixels[y * img->m_x + x] = px;
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static inline float
-image_get_px( struct image *img, int x, int y )
-{
+static inline float image_get_px(struct image *img, int x, int y) {
   float px = img->m_pixels[y * img->m_x + x];
   return( px );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static dctq_t *
-image_get_dctq( struct image *img, int x, int y )
-{
+static dctq_t *image_get_dctq(struct image *img, int x, int y) {
   dctq_t *dctq = &(img->m_dctqs[64 * (y/8 * img->m_x/8 + x/8)]);
   return( dctq );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-image_load_block(
-    struct image *img,
-    dct_t *pDst,
-    int x, int y )
-{
+static void image_load_block(struct image *img, dct_t *pDst, int x, int y) {
   for( int i = 0; i < 8; i++ )
   {
     pDst[0] = (double)image_get_px( img, x + 0, y + i );
@@ -110,14 +229,13 @@ image_load_block(
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static inline
-dct_t image_blend_dual(
-    struct image *img,
-    int x, int y,
-    struct image *luma )
-{
+static inline dct_t image_blend_dual(
+        struct image *img,
+        int x,
+        int y,
+        struct image *luma) {
   float pxa, pxb;
   dct_t blend;
 
@@ -134,14 +252,13 @@ dct_t image_blend_dual(
   return( blend );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static inline
-dct_t image_blend_quad(
-    struct image *img,
-    int x, int y,
-    struct image *luma )
-{
+static inline dct_t image_blend_quad(
+        struct image *img,
+        int x,
+        int y,
+        struct image *luma) {
   float pxa, pxb, pxc, pxd;
   dct_t blend;
 
@@ -167,14 +284,9 @@ dct_t image_blend_quad(
   return( blend );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-image_subsample(
-    struct image *img,
-    struct image *luma,
-    int v_samp )
-{
+static void image_subsample(struct image *img, struct image *luma, int v_samp) {
   if( v_samp == 2 )
   {
     for( int y = 0; y < img->m_y; y += 2 )
@@ -202,15 +314,14 @@ image_subsample(
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-RGB_to_YCC(
-    struct image *img,
-    const uint8_t *pSrc,
-    gboolean ch_a, // If source is rgba
-    int width, int y )
-{
+static void RGB_to_YCC(
+        struct image *img,
+        const uint8_t *pSrc,
+        gboolean ch_a, // If source is rgba
+        int width,
+        int y) {
   int r, g, b;
   float px;
   int idx = 0;
@@ -231,15 +342,14 @@ RGB_to_YCC(
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-RGB_to_Y(
-    struct image *img,
-    const uint8_t *pSrc,
-    gboolean ch_a, // If source is rgba
-    int width, int y )
-{
+static void RGB_to_Y(
+        struct image *img,
+        const uint8_t *pSrc,
+        gboolean ch_a, // If source is rgba
+        int width,
+        int y) {
   float r, g, b, px;
   int idx = 0;
 
@@ -255,14 +365,13 @@ RGB_to_Y(
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-Y_to_YCC(
-    struct image *img,
-    const uint8_t *pSrc,
-    int width, int y )
-{
+static void Y_to_YCC(
+        struct image *img,
+        const uint8_t *pSrc,
+        int width,
+        int y) {
   for( int x = 0; x < width; x++ )
   {
     image_set_px( &img[0], pSrc[x] - 128.0f, x, y );
@@ -271,12 +380,10 @@ Y_to_YCC(
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 // Forward DCT
-  static void
-dct( dct_t *data )
-{
+static void dct(dct_t *data) {
   dct_t
     z1, z2, z3, z4, z5, tmp0, tmp1, tmp2, tmp3, tmp4, tmp5,
     tmp6, tmp7, tmp10, tmp11, tmp12, tmp13, *data_ptr;
@@ -368,16 +475,14 @@ dct( dct_t *data )
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 // Radix sorts sym_freq[] array by 32-bit key m_key.
 // Returns pointer to sorted values.
-  static inline struct sym_freq *
-radix_sort_syms(
-    uint32_t num_syms,
-    struct sym_freq *pSyms0,
-    struct sym_freq *pSyms1 )
-{
+static inline struct sym_freq *radix_sort_syms(
+        uint32_t num_syms,
+        struct sym_freq *pSyms0,
+        struct sym_freq *pSyms1) {
   const uint32_t cMaxPasses = 4;
   uint32_t hist[256 * 4];
 
@@ -423,14 +528,12 @@ radix_sort_syms(
   return( pCur_syms );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 // calculate_minimum_redundancy() originally written by:
 // Alistair Moffat, alistair@cs.mu.oz.au, Jyrki Katajainen,
 // jyrki@diku.dk, November 1996.
-  static void
-calculate_minimum_redundancy( struct sym_freq *A, int n )
-{
+static void calculate_minimum_redundancy(struct sym_freq *A, int n) {
   int root, leaf, next, avbl, used, dpth;
 
   if( n == 0 )
@@ -501,16 +604,14 @@ calculate_minimum_redundancy( struct sym_freq *A, int n )
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 // Limits canonical Huffman code table's
 // max code size to max_code_size.
-  static void
-huffman_enforce_max_code_size(
-    int *pNum_codes,
-    int code_list_len,
-    int max_code_size )
-{
+static void huffman_enforce_max_code_size(
+        int *pNum_codes,
+        int code_list_len,
+        int max_code_size) {
   if( code_list_len <= 1 )
   {
     return;
@@ -543,14 +644,10 @@ huffman_enforce_max_code_size(
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 // Generates an optimized huffman table.
-  static void
-huffman_table_optimize(
-    struct huffman_table *table,
-    int table_len )
-{
+static void huffman_table_optimize(struct huffman_table *table, int table_len) {
   struct sym_freq
     syms0[MAX_HUFF_SYMBOLS],
     syms1[MAX_HUFF_SYMBOLS];
@@ -613,13 +710,11 @@ huffman_table_optimize(
     }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 // Compute the actual canonical Huffman codes/code
 // sizes given the JPEG huff bits and val arrays.
-  static void
-huffman_table_compute( struct huffman_table *table )
-{
+static void huffman_table_compute(struct huffman_table *table) {
   int last_p, si;
   uint8_t huff_size[257];
   uint32_t huff_code[257];
@@ -662,21 +757,17 @@ huffman_table_compute( struct huffman_table *table )
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static gboolean
-jpeg_encoder_put_buf( const void *pBuf, int len, FILE *stream )
-{
+static gboolean jpeg_encoder_put_buf(const void *pBuf, int len, FILE *stream) {
   gboolean status = ( fwrite(pBuf, (size_t)len, 1, stream) == 1 );
   return( status );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 // JPEG marker generation.
-  static void
-jpeg_encoder_emit_byte( struct jpeg_encoder *enc, uint8_t c )
-{
+static void jpeg_encoder_emit_byte(struct jpeg_encoder *enc, uint8_t c) {
   gboolean ret = jpeg_encoder_put_buf(
       (void *)&c, sizeof(c), enc->m_pStream );
 
@@ -684,30 +775,24 @@ jpeg_encoder_emit_byte( struct jpeg_encoder *enc, uint8_t c )
     enc->m_all_stream_writes_succeeded && ret;
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-jpeg_encoder_emit_word( struct jpeg_encoder *enc, uint32_t i )
-{
+static void jpeg_encoder_emit_word(struct jpeg_encoder *enc, uint32_t i) {
   jpeg_encoder_emit_byte( enc, (uint8_t)(i >> 8) );
   jpeg_encoder_emit_byte( enc, (uint8_t)(i & 0xFF) );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-jpeg_encoder_emit_marker( struct jpeg_encoder *enc, int marker )
-{
+static void jpeg_encoder_emit_marker(struct jpeg_encoder *enc, int marker) {
   jpeg_encoder_emit_byte( enc, (uint8_t)(0xFF) );
   jpeg_encoder_emit_byte( enc, (uint8_t)(marker) );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 // Emit JFIF marker
-  static void
-jpeg_encoder_emit_jfif_app0( struct jpeg_encoder *enc )
-{
+static void jpeg_encoder_emit_jfif_app0(struct jpeg_encoder *enc) {
   jpeg_encoder_emit_marker(enc, M_APP0);
   jpeg_encoder_emit_word( enc, 2 + 4 + 1 + 2 + 1 + 2 + 2 + 1 + 1 );
 
@@ -727,12 +812,10 @@ jpeg_encoder_emit_jfif_app0( struct jpeg_encoder *enc )
   jpeg_encoder_emit_byte( enc, 0 );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 // Emit quantization tables
-  static void
-jpeg_encoder_emit_dqt( struct jpeg_encoder *enc )
-{
+static void jpeg_encoder_emit_dqt(struct jpeg_encoder *enc) {
   int n = (enc->m_num_components == 3) ? 2 : 1;
   for( int i = 0; i < n; i++ )
   {
@@ -747,12 +830,10 @@ jpeg_encoder_emit_dqt( struct jpeg_encoder *enc )
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 // Emit start of frame marker
-  static void
-jpeg_encoder_emit_sof( struct jpeg_encoder *enc )
-{
+static void jpeg_encoder_emit_sof(struct jpeg_encoder *enc) {
   jpeg_encoder_emit_marker( enc, M_SOF0 );  /* baseline */
   jpeg_encoder_emit_word( enc, 3 * enc->m_num_components + 2 + 5 + 1 );
   jpeg_encoder_emit_byte( enc, 8 );    /* precision */
@@ -771,15 +852,15 @@ jpeg_encoder_emit_sof( struct jpeg_encoder *enc )
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 // Emit Huffman table.
-  static void
-jpeg_encoder_emit_dht(
-    struct jpeg_encoder *enc,
-    uint8_t *bits, uint8_t *val,
-    int index, gboolean ac_flag )
-{
+static void jpeg_encoder_emit_dht(
+        struct jpeg_encoder *enc,
+        uint8_t *bits,
+        uint8_t *val,
+        int index,
+        gboolean ac_flag) {
   jpeg_encoder_emit_marker( enc, M_DHT );
 
   int length = 0;
@@ -802,12 +883,10 @@ jpeg_encoder_emit_dht(
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 // Emit all Huffman tables.
-  static void
-jpeg_encoder_emit_dhts( struct jpeg_encoder *enc )
-{
+static void jpeg_encoder_emit_dhts(struct jpeg_encoder *enc) {
   jpeg_encoder_emit_dht(
       enc, enc->m_huff[0].dc.m_bits, enc->m_huff[0].dc.m_val, 0, FALSE );
   jpeg_encoder_emit_dht(
@@ -822,12 +901,10 @@ jpeg_encoder_emit_dhts( struct jpeg_encoder *enc )
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 // emit start of scan
-  static void
-jpeg_encoder_emit_sos( struct jpeg_encoder *enc )
-{
+static void jpeg_encoder_emit_sos(struct jpeg_encoder *enc) {
   jpeg_encoder_emit_marker( enc, M_SOS );
   jpeg_encoder_emit_word( enc, 2 * enc->m_num_components + 2 + 1 + 3 );
   jpeg_encoder_emit_byte( enc, enc->m_num_components );
@@ -848,12 +925,10 @@ jpeg_encoder_emit_sos( struct jpeg_encoder *enc )
   jpeg_encoder_emit_byte( enc, 0 );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 // Emit all markers at beginning of image file.
-  static void
-jpeg_encoder_emit_start_markers( struct jpeg_encoder *enc )
-{
+static void jpeg_encoder_emit_start_markers(struct jpeg_encoder *enc) {
   jpeg_encoder_emit_marker( enc, M_SOI );
   jpeg_encoder_emit_jfif_app0( enc );
   jpeg_encoder_emit_dqt( enc );
@@ -862,14 +937,13 @@ jpeg_encoder_emit_start_markers( struct jpeg_encoder *enc )
   jpeg_encoder_emit_sos( enc );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 // Quantization table generation.
-  static void
-jpeg_encoder_compute_quant_table(
-    struct jpeg_encoder *enc,
-    int32_t *pDst, int16_t *pSrc )
-{
+static void jpeg_encoder_compute_quant_table(
+        struct jpeg_encoder *enc,
+        int32_t *pDst,
+        int16_t *pSrc) {
   float q;
   if( enc->m_params.m_quality < 50 )
   {
@@ -892,11 +966,9 @@ jpeg_encoder_compute_quant_table(
   if( pDst[2] > 24 ) pDst[2] = ( pDst[2] + 24 ) / 2;
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-jpeg_encoder_reset_last_dc( struct jpeg_encoder *enc )
-{
+static void jpeg_encoder_reset_last_dc(struct jpeg_encoder *enc) {
   enc->m_bit_buffer = 0;
   enc->m_bits_in = 0;
   enc->m_comp[0].m_last_dc_val = 0;
@@ -904,11 +976,9 @@ jpeg_encoder_reset_last_dc( struct jpeg_encoder *enc )
   enc->m_comp[2].m_last_dc_val = 0;
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-jpeg_encoder_compute_huffman_tables( struct jpeg_encoder *enc )
-{
+static void jpeg_encoder_compute_huffman_tables(struct jpeg_encoder *enc) {
   huffman_table_optimize( &(enc->m_huff[0].dc), DC_LUM_CODES );
   huffman_table_compute(  &(enc->m_huff[0].dc) );
 
@@ -925,13 +995,12 @@ jpeg_encoder_compute_huffman_tables( struct jpeg_encoder *enc )
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static gboolean
-jpeg_encoder_jpg_open(
-    struct jpeg_encoder *enc,
-    int p_x_res, int p_y_res )
-{
+static gboolean jpeg_encoder_jpg_open(
+        struct jpeg_encoder *enc,
+        int p_x_res,
+        int p_y_res) {
   enc->m_num_components = 3;
   switch( enc->m_params.m_subsampling  )
   {
@@ -1009,11 +1078,9 @@ jpeg_encoder_jpg_open(
   return( enc->m_all_stream_writes_succeeded );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  inline static dctq_t
-round_to_zero( const dct_t j, const int32_t quant )
-{
+inline static dctq_t round_to_zero(const dct_t j, const int32_t quant) {
   if( j < 0 )
   {
     dctq_t jtmp = (dctq_t)(-j) + (dctq_t)(quant >> 1);
@@ -1026,15 +1093,13 @@ round_to_zero( const dct_t j, const int32_t quant )
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-jpeg_encoder_quantize_pixels(
-    struct jpeg_encoder *enc,
-    dct_t *pSrc,
-    dctq_t *pDst,
-    const int32_t *quant )
-{
+static void jpeg_encoder_quantize_pixels(
+        struct jpeg_encoder *enc,
+        dct_t *pSrc,
+        dctq_t *pDst,
+        const int32_t *quant) {
   dct( pSrc );
   for( int i = 0; i < 64; i++ )
   {
@@ -1042,11 +1107,9 @@ jpeg_encoder_quantize_pixels(
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-jpeg_encoder_flush_output_buffer( struct jpeg_encoder *enc )
-{
+static void jpeg_encoder_flush_output_buffer(struct jpeg_encoder *enc) {
   if( enc->m_out_buf_left != JPEG_OUT_BUF_SIZE )
   {
     int len = JPEG_OUT_BUF_SIZE - (int)enc->m_out_buf_left;
@@ -1060,11 +1123,9 @@ jpeg_encoder_flush_output_buffer( struct jpeg_encoder *enc )
   enc->m_out_buf_left = JPEG_OUT_BUF_SIZE;
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  inline static uint32_t
-bit_count( int temp1 )
-{
+inline static uint32_t bit_count(int temp1) {
   if( temp1 < 0 )
   {
     temp1 = -temp1;
@@ -1080,7 +1141,7 @@ bit_count( int temp1 )
   return( nbits );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* TODO may be optimized */
 #define JPEG_PUT_BYTE(c) \
@@ -1090,11 +1151,10 @@ bit_count( int temp1 )
   jpeg_encoder_flush_output_buffer( enc ); \
 }
 
-  static void
-jpeg_encoder_put_bits(
-    struct jpeg_encoder *enc,
-    uint32_t bits, uint32_t len )
-{
+static void jpeg_encoder_put_bits(
+        struct jpeg_encoder *enc,
+        uint32_t bits,
+        uint32_t len) {
   uint8_t c;
 
   uint32_t shift = 24 - (enc->m_bits_in += len);
@@ -1113,14 +1173,12 @@ jpeg_encoder_put_bits(
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-jpeg_encoder_put_signed_int_bits(
-    struct jpeg_encoder *enc,
-    int num, uint32_t len )
-
-{
+static void jpeg_encoder_put_signed_int_bits(
+        struct jpeg_encoder *enc,
+        int num,
+        uint32_t len) {
   if( num < 0 )
   {
     num--;
@@ -1128,16 +1186,14 @@ jpeg_encoder_put_signed_int_bits(
   jpeg_encoder_put_bits( enc, num & ((1 << len) - 1), len );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-jpeg_encoder_code_block(
-    struct jpeg_encoder *enc,
-    dctq_t *src,
-    struct huffman_dcac *huff,
-    struct component *comp,
-    gboolean write )
-{
+static void jpeg_encoder_code_block(
+        struct jpeg_encoder *enc,
+        dctq_t *src,
+        struct huffman_dcac *huff,
+        struct component *comp,
+        gboolean write) {
   const int dc_delta  = src[0] - comp->m_last_dc_val;
   comp->m_last_dc_val = src[0];
 
@@ -1212,13 +1268,12 @@ jpeg_encoder_code_block(
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-jpeg_encoder_code_mcu_row(
-    struct jpeg_encoder *enc,
-    int y, gboolean write )
-{
+static void jpeg_encoder_code_mcu_row(
+        struct jpeg_encoder *enc,
+        int y,
+        gboolean write) {
   dctq_t *dctq;
   if( enc->m_num_components == 1 )
   {
@@ -1294,22 +1349,18 @@ jpeg_encoder_code_mcu_row(
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static gboolean
-jpeg_encoder_emit_end_markers( struct jpeg_encoder *enc )
-{
+static gboolean jpeg_encoder_emit_end_markers(struct jpeg_encoder *enc) {
   jpeg_encoder_put_bits( enc, 0x7F, 7 );
   jpeg_encoder_flush_output_buffer( enc );
   jpeg_encoder_emit_marker( enc, M_EOI );
   return( enc->m_all_stream_writes_succeeded );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static gboolean
-jpeg_encoder_compress_image( struct jpeg_encoder *enc )
-{
+static gboolean jpeg_encoder_compress_image(struct jpeg_encoder *enc) {
   for( int c = 0; c < enc->m_num_components; c++ )
   {
     for( int y = 0; y < enc->m_image[c].m_y; y+= 8 )
@@ -1345,14 +1396,14 @@ jpeg_encoder_compress_image( struct jpeg_encoder *enc )
   return( jpeg_encoder_emit_end_markers(enc) );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-jpeg_encoder_load_mcu_Y(
-    struct jpeg_encoder *enc,
-    const uint8_t *pSrc,
-    int width, int bpp, int y )
-{
+static void jpeg_encoder_load_mcu_Y(
+        struct jpeg_encoder *enc,
+        const uint8_t *pSrc,
+        int width,
+        int bpp,
+        int y) {
   if( bpp == 4 )
   {
     RGB_to_Y( &(enc->m_image[0]), pSrc, RGBA, width, y );
@@ -1377,14 +1428,14 @@ jpeg_encoder_load_mcu_Y(
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-jpeg_encoder_load_mcu_YCC(
-    struct jpeg_encoder *enc,
-    const uint8_t *pSrc,
-    int width, int bpp, int y )
-{
+static void jpeg_encoder_load_mcu_YCC(
+        struct jpeg_encoder *enc,
+        const uint8_t *pSrc,
+        int width,
+        int bpp,
+        int y) {
   if( bpp == 4 )
   {
     RGB_to_YCC( enc->m_image, pSrc, RGBA, width, y );
@@ -1411,20 +1462,16 @@ jpeg_encoder_load_mcu_YCC(
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-jpeg_encoder_clear( struct jpeg_encoder *enc )
-{
+static void jpeg_encoder_clear(struct jpeg_encoder *enc) {
   enc->m_num_components = 0;
   enc->m_all_stream_writes_succeeded = TRUE;
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-jpeg_encoder_deinit( struct jpeg_encoder *enc )
-{
+static void jpeg_encoder_deinit(struct jpeg_encoder *enc) {
   for( int c = 0; c < enc->m_num_components; c++ )
   {
     image_deinit( &(enc->m_image[c]) );
@@ -1432,11 +1479,9 @@ jpeg_encoder_deinit( struct jpeg_encoder *enc )
   jpeg_encoder_clear( enc );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static inline gboolean
-params_check( compression_params_t *parm )
-{
+static inline gboolean params_check(compression_params_t *parm) {
   if( (parm->m_quality < 1) || (parm->m_quality > 100) )
   {
     return( FALSE );
@@ -1448,15 +1493,14 @@ params_check( compression_params_t *parm )
   return( TRUE );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static gboolean
-jpeg_encoder_init(
-    struct jpeg_encoder *enc,
-    FILE *pStream,
-    int width, int height,
-    compression_params_t *comp_params )
-{
+static gboolean jpeg_encoder_init(
+        struct jpeg_encoder *enc,
+        FILE *pStream,
+        int width,
+        int height,
+        compression_params_t *comp_params) {
   //jpeg_encoder_deinit( enc );
   jpeg_encoder_clear( enc );
 
@@ -1474,15 +1518,14 @@ jpeg_encoder_init(
   return( jpeg_encoder_jpg_open(enc, width, height) );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static gboolean
-jpeg_encoder_read_image(
-    struct jpeg_encoder *enc,
-    const uint8_t *image_data,
-    int width, int height,
-    int bpp )
-{
+static gboolean jpeg_encoder_read_image(
+        struct jpeg_encoder *enc,
+        const uint8_t *image_data,
+        int width,
+        int height,
+        int bpp) {
   if( (bpp != 1) && (bpp != 3) && (bpp != 4) )
   {
     return( FALSE );
@@ -1551,7 +1594,7 @@ jpeg_encoder_read_image(
   return( TRUE );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /******* My own higher-level helper/wrapper functions *******/
 
@@ -1560,33 +1603,30 @@ jpeg_encoder_read_image(
  * Sets the JPEG compression parameters
  * to a compression_params_t struct
  */
-  gboolean
-jpeg_encoder_compression_parameters(
-    compression_params_t *comp_params,
-    float m_quality,
-    enum subsampling_t m_subsampling,
-    gboolean m_no_chroma_discrim_flag )
-{
+gboolean jpeg_encoder_compression_parameters(
+        compression_params_t *comp_params,
+        float m_quality,
+        enum subsampling_t m_subsampling,
+        gboolean m_no_chroma_discrim_flag) {
   comp_params->m_quality = m_quality;
   comp_params->m_subsampling = m_subsampling;
   comp_params->m_no_chroma_discrim_flag = m_no_chroma_discrim_flag;
   return( params_check(comp_params) );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* jpeg_encoder_compress_image_to_file()
  *
  * Saves an image buffer to a JPEG-compressed file
  */
-  gboolean
-jpeg_encoder_compress_image_to_file(
-    char *file_name,
-    int width, int height,
-    int num_channels,
-    const uint8_t *pImage_data,
-    compression_params_t *comp_params )
-{
+gboolean jpeg_encoder_compress_image_to_file(
+        char *file_name,
+        int width,
+        int height,
+        int num_channels,
+        const uint8_t *pImage_data,
+        compression_params_t *comp_params) {
   struct jpeg_encoder encoder;
   FILE *pFile = NULL;
   gboolean ret;
@@ -1624,5 +1664,4 @@ jpeg_encoder_compress_image_to_file(
   fclose( pFile );
 
   return( TRUE );
-
-}/* jpeg_encoder_compress_image_to_file */
+}

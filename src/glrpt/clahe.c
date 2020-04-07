@@ -23,6 +23,8 @@
  * Utrecht, The Netherlands (karel@cv.ruu.nl)
  */
 
+/*****************************************************************************/
+
 #include "clahe.h"
 
 #include "utils.h"
@@ -32,7 +34,43 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/*-----------------------------------------------------------------------*/
+/*****************************************************************************/
+
+static void ClipHistogram(
+        unsigned long *pulHistogram,
+        uint32_t uiNrGreylevels,
+        unsigned long ulClipLimit);
+static void MakeHistogram(
+        kz_pixel_t *pImage,
+        uint32_t uiXRes,
+        uint32_t uiSizeX,
+        uint32_t uiSizeY,
+        unsigned long *pulHistogram,
+        uint32_t uiNrGreylevels,
+        kz_pixel_t *pLookupTable);
+static void MapHistogram(
+        unsigned long *pulHistogram,
+        kz_pixel_t Min,
+        kz_pixel_t Max,
+        uint32_t uiNrGreylevels,
+        unsigned long ulNrOfPixels);
+static void MakeLut(
+        kz_pixel_t *pLUT,
+        kz_pixel_t Min,
+        kz_pixel_t Max,
+        uint32_t uiNrBins);
+static void Interpolate(
+        kz_pixel_t *pImage,
+        uint32_t uiXRes,
+        unsigned long *pulMapLU,
+        unsigned long *pulMapRU,
+        unsigned long *pulMapLB,
+        unsigned long *pulMapRB,
+        uint32_t uiXSize,
+        uint32_t uiYSize,
+        kz_pixel_t *pLUT);
+
+/*****************************************************************************/
 
 /* ClipHistogram()
  *
@@ -42,13 +80,11 @@
  * across the whole histogram ( providing the bin count is smaller than
  * the cliplimit ).
  */
-  static void
-ClipHistogram(
-    unsigned long* pulHistogram,
-    uint32_t   uiNrGreylevels,
-    unsigned long  ulClipLimit )
-{
-  unsigned long* pulBinPointer, *pulEndPointer, *pulHisto;
+static void ClipHistogram(
+        unsigned long *pulHistogram,
+        uint32_t uiNrGreylevels,
+        unsigned long ulClipLimit) {
+  unsigned long *pulBinPointer, *pulEndPointer, *pulHisto;
   unsigned long ulNrExcess, ulUpper, ulBinIncr, ulStepSize, i;
   long lBinExcess;
 
@@ -120,10 +156,9 @@ ClipHistogram(
       pulHisto++;
     }
   }
+}
 
-} /* ClipHistogram() */
-
-/*-----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* MakeHistogram()
  *
@@ -132,16 +167,14 @@ ClipHistogram(
  * between the greyvalue of the pixel (typically between 0 and 4095) and
  * the corresponding bin in the histogram (usually containing only 128 bins).
  */
-  static void
-MakeHistogram(
-    kz_pixel_t*    pImage,
-    uint32_t   uiXRes,
-    uint32_t   uiSizeX,
-    uint32_t   uiSizeY,
-    unsigned long* pulHistogram,
-    uint32_t   uiNrGreylevels,
-    kz_pixel_t*    pLookupTable )
-{
+static void MakeHistogram(
+        kz_pixel_t *pImage,
+        uint32_t uiXRes,
+        uint32_t uiSizeX,
+        uint32_t uiSizeY,
+        unsigned long *pulHistogram,
+        uint32_t uiNrGreylevels,
+        kz_pixel_t *pLookupTable) {
   kz_pixel_t* pImagePointer;
   uint32_t i;
 
@@ -159,10 +192,9 @@ MakeHistogram(
     /* go to bdeginning of next row */
     pImage = &pImagePointer[ -(int)uiSizeX ];
   }
+}
 
-} /* MakeHistogram() */
-
-/*-----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* MapHistogram()
  *
@@ -170,14 +202,12 @@ MakeHistogram(
  * (mapping) by cumulating the input histogram. Note:
  * lookup table is rescaled in range [Min..Max].
  */
-  static void
-MapHistogram(
-    unsigned long* pulHistogram,
-    kz_pixel_t     Min,
-    kz_pixel_t     Max,
-    uint32_t   uiNrGreylevels,
-    unsigned long  ulNrOfPixels )
-{
+static void MapHistogram(
+        unsigned long *pulHistogram,
+        kz_pixel_t Min,
+        kz_pixel_t Max,
+        uint32_t uiNrGreylevels,
+        unsigned long ulNrOfPixels) {
   uint32_t i;
   unsigned long ulSum = 0;
   const float fScale = ( (float)(Max - Min) ) / ulNrOfPixels;
@@ -189,32 +219,28 @@ MapHistogram(
     pulHistogram[i] = (unsigned long)( ulMin + ulSum * fScale );
     if( pulHistogram[i] > Max ) pulHistogram[i] = Max;
   }
+}
 
-} /* MapHistogram() */
-
-/*-----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* MakeLut()
  *
  * To speed up histogram clipping, the input image [Min, Max] is
  * scaled down to [0, uiNrBins-1]. This function calculates the LUT.
  */
-  static void
-MakeLut(
-    kz_pixel_t  *pLUT,
-    kz_pixel_t   Min,
-    kz_pixel_t   Max,
-    uint32_t uiNrBins )
-{
+static void MakeLut(
+        kz_pixel_t *pLUT,
+        kz_pixel_t Min,
+        kz_pixel_t Max,
+        uint32_t uiNrBins) {
   int i;
   const kz_pixel_t BinSize = (kz_pixel_t)( 1 + ( Max - Min ) / uiNrBins );
 
   for( i = Min; i <= Max; i++ )
     pLUT[i] = (kz_pixel_t)( (i - (int)Min) / (int)BinSize );
+}
 
-} /* MakeLut() */
-
-/*-----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Interpolate()
  *
@@ -231,18 +257,16 @@ MakeLut(
  * uiYSize     - uiYSize of image submatrix
  * pLUT        - lookup table containing mapping greyvalues to bins
  */
-  static void
-Interpolate(
-    kz_pixel_t    *pImage,
-    uint32_t   uiXRes,
-    unsigned long *pulMapLU,
-    unsigned long *pulMapRU,
-    unsigned long *pulMapLB,
-    unsigned long *pulMapRB,
-    uint32_t   uiXSize,
-    uint32_t   uiYSize,
-    kz_pixel_t    *pLUT )
-{
+static void Interpolate(
+        kz_pixel_t *pImage,
+        uint32_t uiXRes,
+        unsigned long *pulMapLU,
+        unsigned long *pulMapRU,
+        unsigned long *pulMapLB,
+        unsigned long *pulMapRB,
+        uint32_t uiXSize,
+        uint32_t uiYSize,
+        kz_pixel_t *pLUT) {
   /* Pointer increment after processing row */
   const uint32_t uiIncr = uiXRes - uiXSize;
 
@@ -300,10 +324,9 @@ Interpolate(
       }
     }
   }
+}
 
-} /*Interpolate() */
-
-/*-----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* CLAHE()
  *
@@ -322,18 +345,16 @@ Interpolate(
  *   uiNrBins - Number of greybins for histogram ("dynamic range")
  *   double fCliplimit - Normalized cliplimit (higher values give more contrast)
  */
-  gboolean
-CLAHE(
-    kz_pixel_t  *pImage,
-    uint32_t uiXRes,
-    uint32_t uiYRes,
-    kz_pixel_t   Min,
-    kz_pixel_t   Max,
-    uint32_t uiNrX,
-    uint32_t uiNrY,
-    uint32_t uiNrBins,
-    double       fCliplimit )
-{
+gboolean CLAHE(
+        kz_pixel_t *pImage,
+        uint32_t uiXRes,
+        uint32_t uiYRes,
+        kz_pixel_t Min,
+        kz_pixel_t Max,
+        uint32_t uiNrX,
+        uint32_t uiNrY,
+        uint32_t uiNrBins,
+        double fCliplimit) {
   /* counters */
   uint32_t uiX, uiY;
 
@@ -486,5 +507,4 @@ CLAHE(
 
   /* return status OK */
   return( TRUE );
-
-} /* CLAHE() */
+}
