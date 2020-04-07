@@ -1,33 +1,3 @@
-# TODO recheck this part
-## check for headers
-#include(CheckIncludeFiles)
-#
-#check_include_files("string.h" HAVE_STRING_H)
-#check_include_files("stdlib.h" HAVE_STDLIB_H)
-#check_include_files("math.h" HAVE_MATH_H)
-#
-#if((NOT HAVE_STRING_H) OR (NOT HAVE_STDLIB_H) OR (NOT HAVE_MATH_H))
-#    message(FATAL_ERROR "Can't find some important headers! Exiting.")
-#endif()
-#
-#
-## check for functions
-#include(CheckSymbolExists)
-#
-#check_symbol_exists(memset "string.h" HAVE_MEMSET)
-#check_symbol_exists(strstr "string.h" HAVE_STRSTR)
-#check_symbol_exists(malloc "stdlib.h" HAVE_MALLOC)
-#check_symbol_exists(realloc "stdlib.h" HAVE_REALLOC)
-#
-#set(CMAKE_REQUIRED_LIBRARIES m)
-#check_symbol_exists(sqrt "math.h" HAVE_SQRT)
-#unset(CMAKE_REQUIRED_LIBRARIES)
-#
-#if((NOT HAVE_MEMSET) OR (NOT HAVE_STRSTR) OR (NOT HAVE_MALLOC) OR (NOT HAVE_REALLOC) OR (NOT HAVE_SQRT))
-#    message(FATAL_ERROR "Can't find some important functions! Exiting.")
-#endif()
-
-
 # check for packages
 find_package(PkgConfig REQUIRED)
 
