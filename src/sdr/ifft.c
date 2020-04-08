@@ -46,6 +46,8 @@
  * size rather than FFT order and it is modified to some extend.
  */
 
+/*****************************************************************************/
+
 #include "ifft.h"
 
 #include "../common/shared.h"
@@ -59,6 +61,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
+/*****************************************************************************/
+
+static inline int16_t Imply(int16_t a, int16_t b);
+
+/*****************************************************************************/
+
 static int16_t
   ifft_order = 0,
   ifft_width = 0;
@@ -66,16 +74,14 @@ static int16_t
 static int16_t *Sinewave = NULL;
 static char ifft_init = 0;
 
-/*----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Initialize_IFFT()
  *
  * Initializes IFFT() by creating a dynamically allocated
  * Sinewave table and by calculating the FFT order (log2 N)
  */
-  gboolean
-Initialize_IFFT( int16_t width )
-{
+gboolean Initialize_IFFT(int16_t width) {
   int16_t a, b;
   size_t mreq;
   double w, dw;
@@ -124,32 +130,27 @@ Initialize_IFFT( int16_t width )
 
   ifft_init = 1;
   return( TRUE );
+}
 
-} /* Initialize_IFFT() */
-
-/*----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Deinit_Ifft()
  *
  * Deinitializes IFFT (frees buffer pointers)
  */
-  void
-Deinit_Ifft( void )
-{
+void Deinit_Ifft(void) {
   free_ptr( (void **)&Sinewave );
   free_ptr( (void **)&ifft_data );
   ifft_width = 0;
-} /* Deinit_Ifft() */
+}
 
-/*----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /*
    Imply() - fixed-point multiplication & scaling.
    Scaling ensures that result remains 16-bit.
  */
-  static inline int16_t
-Imply( int16_t a, int16_t b )
-{
+static inline int16_t Imply(int16_t a, int16_t b) {
   /* Shift right one less bit (i.e. 15-1) */
   int c = ( (int)a * (int)b ) >> 14;
 
@@ -159,10 +160,9 @@ Imply( int16_t a, int16_t b )
   /* Last shift + rounding bit */
   a = (int16_t)( c >> 1 ) + b;
   return( a );
+}
 
-} /* Imply() */
-
-/*----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* IFFT()
  *
@@ -173,9 +173,7 @@ Imply( int16_t a, int16_t b )
  * the number of "bins" returned by the function. The "forward"
  * flag controls the forward or reverse FFT direction.
  */
-  void
-IFFT( int16_t *data )
-{
+void IFFT(int16_t *data) {
   int16_t a, b, b2, b3, c, c2, c3, d, e, t, dt;
   int16_t shift, step, dft, bfly;
   int16_t tr, ti, wr, wi, qr, qi;
@@ -273,11 +271,11 @@ IFFT( int16_t *data )
       } /* for( bfly = a; bfly < ifft_width; bfly += d ) */
     } /* for( dft = 0; dft < e; dft++ ) */
   } /* for( step = 0; step < ifft_order; step++ ) */
+}
 
-} /* IFFT() */
+/*****************************************************************************/
 
-/*----------------------------------------------------------------------*/
-
+/* TODO may be unnecessary */
 /* Compute the forward or inverse Fourier Transform of data, with
    data containing real valued points only. The output is complex
    valued after the first two entries, stored in alternating real
@@ -290,9 +288,7 @@ IFFT( int16_t *data )
    of points in the time domain in sequence X1, X0, X3, X2 ... Xn+1, Xn.
    "forward" TRUE for a forward transform, FALSE for inverse transform
  */
-  void
-IFFT_Real( int16_t *data )
-{
+void IFFT_Real(int16_t *data) {
   int16_t tkr, tki, tjr, tji, wr, wi;
   int16_t a, b, c, d, e, f, g, tmp;
   int16_t j, j2, j3, k2, k3, dt;
@@ -343,19 +339,17 @@ IFFT_Real( int16_t *data )
   tmp      = data[0];
   data[0] += data[1];
   data[1]  = tmp - data[1];
+}
 
-} /* IFFT_Real() */
+/*****************************************************************************/
 
-/*----------------------------------------------------------------------*/
-
+/* TODO may be unnecessary */
 /* IFFT_Data()
  *
  * Collects signal samples and does an IFFT when
  * enough samples are collected for the Waterfall Display
  */
-  void
-IFFT_Data( short sample )
-{
+void IFFT_Data(short sample) {
   static int data = 0;
 
   static uint
@@ -392,5 +386,4 @@ IFFT_Data( short sample )
     data = 0;
     cnt = 0;
   } /* if( ++cnt >= rc_data.ifft_stride ) */
-
-} /* IFFT_Data() */
+}

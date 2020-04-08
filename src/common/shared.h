@@ -12,8 +12,12 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #ifndef COMMON_SHARED_H
 #define COMMON_SHARED_H
+
+/*****************************************************************************/
 
 #include "../glrpt/rc_config.h"
 #include "../lrpt_decode/huffman.h"
@@ -27,6 +31,8 @@
 #include <semaphore.h>
 #include <stddef.h>
 #include <stdint.h>
+
+/*****************************************************************************/
 
 /* Runtime config data */
 extern rc_data_t rc_data;
@@ -126,5 +132,7 @@ extern size_t   channel_image_size;
 extern uint32_t channel_image_width, channel_image_height;
 
 extern mtd_rec_t mtd_record;
+
+/*****************************************************************************/
 
 #endif

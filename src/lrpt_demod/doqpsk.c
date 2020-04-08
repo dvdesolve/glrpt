@@ -12,6 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "doqpsk.h"
 
 #include "../glrpt/utils.h"
@@ -23,14 +25,29 @@
 #include <stdint.h>
 #include <string.h>
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
+
+static uint8_t Byte_at_Offset(uint8_t *data);
+static gboolean Find_Sync(
+        uint8_t *data,
+        int block_siz,
+        int step,
+        int depth,
+        int *offset,
+        uint8_t *sync);
+static void Resync_Stream(uint8_t *raw_buf, int raw_siz, int *resync_siz);
+static inline int8_t Isqrt(int a);
+
+/*****************************************************************************/
+
+static uint8_t *isqrt_table = NULL;
+
+/*****************************************************************************/
 
 /* Uses hard decision (thresholding) to produce an 8-bit
  * byte at a given offset in the soft symbol stream, used
  * to find a sync word for the resynchronizing function */
-  static uint8_t
-Byte_at_Offset( uint8_t *data )
-{
+static uint8_t Byte_at_Offset(uint8_t *data) {
   uint8_t result, tst, idx;
 
   result = 0;
@@ -42,19 +59,20 @@ Byte_at_Offset( uint8_t *data )
   }
 
   return( result );
-} /* Byte_at_Offset() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* The sync word could be in any of 8 different orientations, so we
  * will just look for a repeating bit pattern the right distance apart
  * to find the position of a sync word (8-bit byte, 00100111) */
-  static gboolean
-Find_Sync(
-    uint8_t *data,
-    int block_siz, int step, int depth,
-    int *offset, uint8_t *sync )
-{
+static gboolean Find_Sync(
+        uint8_t *data,
+        int block_siz,
+        int step,
+        int depth,
+        int *offset,
+        uint8_t *sync) {
   int idx, jdx, limit;
   uint8_t test;
   gboolean result;
@@ -95,15 +113,13 @@ Find_Sync(
   } /* for( idx = 0; idx < limit; idx++ ) */
 
   return( result );
-} /* Find_Sync() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* 80k symbol rate stream: 00100111 36 bits 36 bits 00100111 36 bits 36 bits
  * The sync words must be removed and the stream "stitched" back together */
-  static void
-Resync_Stream( uint8_t *raw_buf, int raw_siz, int *resync_siz )
-{
+static void Resync_Stream(uint8_t *raw_buf, int raw_siz, int *resync_siz) {
   uint8_t *src_buf = NULL;
 
   int idx, tmp,
@@ -167,17 +183,16 @@ Resync_Stream( uint8_t *raw_buf, int raw_siz, int *resync_siz )
   } /* while( pos < lim1 ) */
 
   free_ptr( (void **)&src_buf );
+}
 
-} /* Resync_Stream() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Re-synchronizes a stream of soft symbols and de-interleaves */
-  void
-De_Interleave(
-    uint8_t *raw, int raw_siz,
-    uint8_t **resync, int *resync_siz )
-{
+void De_Interleave(
+        uint8_t *raw,
+        int raw_siz,
+        uint8_t **resync,
+        int *resync_siz) {
   int resync_buf_idx, raw_buf_idx;
 
 
@@ -202,53 +217,43 @@ De_Interleave(
     if( raw_buf_idx < *resync_siz )
       (*resync)[resync_buf_idx] = raw[raw_buf_idx];
   }
+}
 
-} /* De_Interleave() */
-
-/*------------------------------------------------------------------------*/
-
-static uint8_t *isqrt_table = NULL;
+/*****************************************************************************/
 
 /* Make_Isqrt_Table()
  *
  * Makes the Integer square root table
  */
-  void
-Make_Isqrt_Table( void )
-{
+void Make_Isqrt_Table(void) {
   uint16_t idx;
 
   mem_alloc( (void **)&isqrt_table, sizeof(uint8_t) * 16385 );
   for( idx = 0; idx < 16385; idx++ )
     isqrt_table[idx] = (uint8_t)( sqrt( (double)idx ) );
+}
 
-} /* Make_Isqrt_Table() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Isqrt()
  *
  * Integer square root function
  */
-  static inline int8_t
-Isqrt( int a )
-{
+static inline int8_t Isqrt(int a) {
   if( a >= 0 )
     return( (int8_t)isqrt_table[a] );
   else
     return( -((int8_t)isqrt_table[-a]) );
-} /* Isqrt() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* De_Diffcode()
  *
  * "Fixes" a Differential Offset QPSK soft symbols
  * buffer so that it can be decoded by the LRPT decoder
  */
-  void
-De_Diffcode( int8_t *buff, uint32_t length )
-{
+void De_Diffcode(int8_t *buff, uint32_t length) {
   uint32_t idx;
   int x, y;
   int tmp1, tmp2;
@@ -279,12 +284,10 @@ De_Diffcode( int8_t *buff, uint32_t length )
   prev_q = tmp2;
 
   return;
-} /* De_Diffcode */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  void
-Free_Isqrt_Table( void )
-{
+void Free_Isqrt_Table(void) {
   free_ptr( (void **)&isqrt_table );
 }

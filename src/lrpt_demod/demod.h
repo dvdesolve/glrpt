@@ -12,8 +12,12 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #ifndef LRPT_DEMOD_DEMOD_H
 #define LRPT_DEMOD_DEMOD_H
+
+/*****************************************************************************/
 
 #include "doqpsk.h"
 
@@ -21,6 +25,8 @@
 
 #include <complex.h>
 #include <stdint.h>
+
+/*****************************************************************************/
 
 /* For displaying PLL data and gauge */
 #define PLL_AVE_RANGE1   0.6
@@ -39,6 +45,8 @@
 #define DEMOD_BUF_MIDL      16384  // 1 * SOFT_FRAME_LEN
 #define DEMOD_BUF_LOWR      32768  // 2 * SOFT_FRAME_LEN
 #define RAW_BUF_REALLOC     INTLV_BASE_LEN
+
+/*****************************************************************************/
 
 /* LRPT Demodulator data */
 typedef struct Agc_t {
@@ -79,11 +87,15 @@ typedef struct Demod_t {
   Filter_t *rrc;
 } Demod_t;
 
+/*****************************************************************************/
+
 void Demod_Init(void);
 void Demod_Deinit(void);
 double Agc_Gain(double *gain);
 double Signal_Level(uint32_t *level);
 double Pll_Average(void);
 gboolean Demodulator_Run(gpointer data);
+
+/*****************************************************************************/
 
 #endif

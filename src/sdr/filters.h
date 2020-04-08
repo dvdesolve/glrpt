@@ -12,12 +12,18 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #ifndef SDR_FILTERS_H
 #define SDR_FILTERS_H
+
+/*****************************************************************************/
 
 #include <glib.h>
 
 #include <stdint.h>
+
+/*****************************************************************************/
 
 /* DSP filter data */
 typedef struct filter_data_t {
@@ -47,9 +53,20 @@ typedef struct filter_data_t {
     uint32_t samples_buf_len;
 } filter_data_t;
 
+/*****************************************************************************/
+
+gboolean Init_Chebyshev_Filter(
+        filter_data_t *filter_data,
+        uint32_t buf_len,
+        uint32_t filter_bw,
+        double sample_rate,
+        double ripple,
+        uint32_t num_poles,
+        uint32_t type);
 void Enter_Filter_BW(void);
-void Deinit_Chebyshev_Filter(filter_data_t *data);
 void DSP_Filter(filter_data_t *filter_data);
-gboolean Init_Chebyshev_Filter(filter_data_t *filter_data, uint32_t buf_len, uint32_t filter_bw, double sample_rate, double ripple, uint32_t num_poles, uint32_t type);
+void Deinit_Chebyshev_Filter(filter_data_t *data);
+
+/*****************************************************************************/
 
 #endif

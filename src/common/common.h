@@ -12,8 +12,12 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #ifndef COMMON_COMMON_H
 #define COMMON_COMMON_H
+
+/*****************************************************************************/
 
 /* Flow control flags */
 #define STATUS_RECEIVING        0x00000001 /* SDR Receiver Running or Not     */
@@ -56,20 +60,6 @@
 #define MIN_BANDWIDTH   100000
 #define MAX_BANDWIDTH   200000
 
-/* Filter type for above struct */
-enum {
-  FILTER_LOWPASS = 0,
-  FILTER_HIGHPASS,
-  FILTER_BANDPASS
-};
-
-/* Image channels (0-2) */
-enum {
-  RED = 0,
-  GREEN,
-  BLUE
-};
-
 /* Size of char arrays (strings) for error messages etc */
 #define MESG_SIZE   128
 
@@ -90,6 +80,36 @@ enum {
 
 /* Neoklis Kyriazis' addition, width (pixels per line) of image (MCU_PER_LINE * 8) */
 #define METEOR_IMAGE_WIDTH 1568
+
+/* TODO recheck */
+/* Return values */
+#define ERROR       1
+#define SUCCESS     0
+
+/* TODO use system limits */
+/* General definitions for image processing */
+#define MAX_FILE_NAME   128 /* Max length for filenames */
+
+/* Safe fallback */
+#ifndef M_2PI
+#define M_2PI 6.28318530717958647692
+#endif
+
+/*****************************************************************************/
+
+/* Filter type for above struct */
+enum {
+  FILTER_LOWPASS = 0,
+  FILTER_HIGHPASS,
+  FILTER_BANDPASS
+};
+
+/* Image channels (0-2) */
+enum {
+  RED = 0,
+  GREEN,
+  BLUE
+};
 
 /* Flags to select images to output */
 enum {
@@ -114,18 +134,6 @@ enum
   COMBO
 };
 
-/* TODO recheck */
-/* Return values */
-#define ERROR       1
-#define SUCCESS     0
-
-/* TODO use system limits */
-/* General definitions for image processing */
-#define MAX_FILE_NAME   128 /* Max length for filenames */
-
-/* Safe fallback */
-#ifndef M_2PI
-#define M_2PI 6.28318530717958647692
-#endif
+/*****************************************************************************/
 
 #endif

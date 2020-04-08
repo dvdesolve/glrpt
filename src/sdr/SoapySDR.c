@@ -12,6 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "SoapySDR.h"
 
 #include "../common/common.h"
@@ -34,6 +36,13 @@
 #include <stdio.h>
 #include <string.h>
 
+/*****************************************************************************/
+
+static void SoapySDR_Close_Device(void);
+static void *SoapySDR_Stream(void *pid);
+
+/*****************************************************************************/
+
 static SoapySDRDevice *sdr = NULL;
 static SoapySDRStream *rxStream    = NULL;
 static complex short  *stream_buff = NULL;
@@ -43,15 +52,13 @@ static size_t   stream_mtu;
 static uint32_t sdr_decimate;
 static double   data_scale;
 
-/*----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* SoapySDR_Close_Device()
  *
  * Closes thr RTL-SDR device, if open
  */
-  void
-SoapySDR_Close_Device( void )
-{
+static void SoapySDR_Close_Device(void) {
   int ret;
 
   /* Deactivate and close the stream */
@@ -103,19 +110,16 @@ SoapySDR_Close_Device( void )
 
   ClearFlag( STATUS_STREAMING );
   Display_Icon( status_icon, "gtk-no" );
+}
 
-} /* SoapySDR_Close_Device() */
-
-/*----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* SoapySDR_Stream()
  *
  * Runs in a thread of its own and loops around the
  * SoapySDRDevice_readStream() streaming function
  */
-  static void *
-SoapySDR_Stream( void *pid )
-{
+static void *SoapySDR_Stream(void *pid) {
   /* Soapy streaming buffers */
   void *buffs[] = { stream_buff };
   int flags = 0;
@@ -231,18 +235,15 @@ SoapySDR_Stream( void *pid )
   Cleanup();
 
   return( NULL );
+}
 
-} /* SoapySDR_Stream() */
-
-/*----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* SoapySDR_Set_Center_Freq()
  *
  * Sets the Center Frequency of the RTL-SDR Tuner
  */
-  gboolean
-SoapySDR_Set_Center_Freq( uint32_t center_freq )
-{
+gboolean SoapySDR_Set_Center_Freq(uint32_t center_freq) {
   /* Set the Center Frequency of the Tuner */
   int ret = SoapySDRDevice_setFrequency(
       sdr, SOAPY_SDR_RX, 0, (double)center_freq, NULL );
@@ -264,17 +265,15 @@ SoapySDR_Set_Center_Freq( uint32_t center_freq )
   Display_Icon( status_icon, "gtk-yes" );
 
   return( TRUE );
-} /* SoapySDR_Set_Center_Freq() */
+}
 
-/*-----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* SoapySDR_Set_Tuner_Gain_Mode()
  *
  * Sets the Tuner Gain mode to Auto or Manual
  */
-  void
-SoapySDR_Set_Tuner_Gain_Mode( void )
-{
+void SoapySDR_Set_Tuner_Gain_Mode(void) {
   int ret;
 
   if( isFlagSet(TUNER_GAIN_AUTO) )
@@ -319,18 +318,15 @@ SoapySDR_Set_Tuner_Gain_Mode( void )
     Display_Icon( status_icon, "gtk-yes" );
     SoapySDR_Set_Tuner_Gain( rc_data.tuner_gain );
   }
+}
 
-} /* SoapySDR_Set_Tuner_Gain_Mode() */
-
-/*----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* SoapySDR_Set_Tuner_Gain()
  *
  * Set the Tuner Gain if in Manual mode
  */
-  void
-SoapySDR_Set_Tuner_Gain( double gain )
-{
+void SoapySDR_Set_Tuner_Gain(double gain) {
   gchar mesg[MESG_SIZE];
 
   /* Get range of available gains */
@@ -355,18 +351,15 @@ SoapySDR_Set_Tuner_Gain( double gain )
       "Set Tuner Gain to %d dB", (int)gain );
   Show_Message( mesg, "green" );
   Display_Icon( status_icon, "gtk-yes" );
+}
 
-} /* SoapySDR_Set_Tuner_Gain() */
-
-/*----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* SoapySDR_Init()
  *
  * Initialize SoapySDR by finding the specified SDR device,
  * instance it and setting up its working parameters */
-  gboolean
-SoapySDR_Init( void )
-{
+gboolean SoapySDR_Init(void) {
   int ret = 0;
   size_t length, key, idx, mreq;
   gchar mesg[ MESG_SIZE ];
@@ -649,17 +642,15 @@ SoapySDR_Init( void )
   Display_Icon( status_icon, "gtk-yes" );
 
   return( TRUE );
-} /* SoapySDR_Init() */
+}
 
-/*----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* SoapySDR_Activate_Stream()
  *
  * Closes thr RTL-SDR device, if open
  */
-  gboolean
-SoapySDR_Activate_Stream( void )
-{
+gboolean SoapySDR_Activate_Stream(void) {
   /* Thread ID for the newly created thread */
   pthread_t pthread_id;
 
@@ -690,4 +681,4 @@ SoapySDR_Activate_Stream( void )
   Display_Icon( status_icon, "gtk-yes" );
 
   return( TRUE );
-} /* SoapySDR_Activate_Stream() */
+}

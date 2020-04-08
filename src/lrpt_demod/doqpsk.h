@@ -12,10 +12,16 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #ifndef LRPT_DEMOD_DOQPSK_H
 #define LRPT_DEMOD_DOQPSK_H
 
+/*****************************************************************************/
+
 #include <stdint.h>
+
+/*****************************************************************************/
 
 /* The Interleaver parameters */
 /* The Interleaver branch delay INTLV_DELAY: 2048 */
@@ -33,9 +39,13 @@
 #define RAW_BUF_SIZE        3000000 // Raw symbols buffer size
 #define DEINT_RESYNC_LEN    345792  // RAW_BUF_SIZ - INTLV_MESG_LEN
 
+/*****************************************************************************/
+
 void De_Interleave(uint8_t *raw, int raw_siz, uint8_t **resync, int *resync_siz);
-void De_Diffcode(int8_t *buff, uint32_t length);
 void Make_Isqrt_Table(void);
+void De_Diffcode(int8_t *buff, uint32_t length);
 void Free_Isqrt_Table(void);
+
+/*****************************************************************************/
 
 #endif

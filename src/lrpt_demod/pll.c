@@ -12,6 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "pll.h"
 
 #include "../common/common.h"
@@ -25,49 +27,52 @@
 #include <math.h>
 #include <stddef.h>
 
+/*****************************************************************************/
+
+static void Costas_Recompute_Coeffs(Costas_t *self, double damping, double bw);
+static double Lut_Tanh(double val);
+
+/*****************************************************************************/
+
 static double *lut_tanh = NULL;
 static double costas_err_scale;
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Costas_Recompute_Coeffs()
  *
  * Compute the alpha and beta coefficients of the Costas loop from
  * damping and bandwidth, and update them in the Costas object
  */
-  void
-Costas_Recompute_Coeffs( Costas_t *self, double damping, double bw )
-{
+static void Costas_Recompute_Coeffs(Costas_t *self, double damping, double bw) {
   double denom, bw2;
 
   bw2 = bw * bw;
   denom = ( 1.0 + 2.0 * damping * bw + bw2 );
   self->alpha = ( 4.0 * damping * bw ) / denom;
   self->beta  = ( 4.0 * bw2 ) / denom;
-} /* Costas_Recompute_Coeffs() */
+}
+
+/*****************************************************************************/
 
 /* Lut_Tanh()
  *
  * Reads the tanh table for a given input
  */
-  static double
-Lut_Tanh( double val )
-{
+static double Lut_Tanh(double val) {
   int ival = (int)val;
   if( ival >  127 ) return(  1.0 );
   if( ival < -128 ) return( -1.0 );
   return( lut_tanh[ival + 128] );
-} /* Lut_Tanh() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Costas_Init()
  *
  * Initialize a Costas loop for carrier frequency/phase recovery
  */
-  Costas_t *
-Costas_Init( double bw, ModScheme mode )
-{
+Costas_t *Costas_Init(double bw, ModScheme mode) {
   int idx;
   Costas_t *costas = NULL;
 
@@ -110,17 +115,15 @@ Costas_Init( double bw, ModScheme mode )
     lut_tanh[idx] = tanh( (double)(idx - 128) );
 
   return( costas );
-} /* Costas_Init() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Costas_Mix()
  *
  * Mixes a sample with the PLL nco frequency
  */
-  complex double
-Costas_Mix( Costas_t *self, complex double samp )
-{
+complex double Costas_Mix(Costas_t *self, complex double samp) {
   complex double nco_out;
   complex double retval;
 
@@ -130,17 +133,15 @@ Costas_Mix( Costas_t *self, complex double samp )
   self->nco_phase  = fmod( self->nco_phase, M_2PI );
 
   return( retval );
-} /* Costas_Mix() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Costas_Correct_Phase()
  *
  * Corrects the phase angle of the Costas PLL
  */
-  void
-Costas_Correct_Phase( Costas_t *self, double error )
-{
+void Costas_Correct_Phase(Costas_t *self, double error) {
   static double avg_winsize   = AVG_WINSIZE;
   static double avg_winsize_1 = AVG_WINSIZE - 1.0;
   static double delta = 0.0; /* Average phase error */
@@ -189,33 +190,27 @@ Costas_Correct_Phase( Costas_t *self, double error )
   if( (self->nco_freq <= -FREQ_MAX) ||
       (self->nco_freq >= FREQ_MAX) )
     self->nco_freq = 0.0;
+}
 
-} /* Costas_Correct_Phase() */
-
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Costas_Free()
  *
  * Free the memory associated with the Costas loop object
  */
-  void
-Costas_Free( Costas_t *self )
-{
+void Costas_Free(Costas_t *self) {
   free_ptr( (void **)&self );
   free_ptr( (void **)& lut_tanh );
-} /* Costas_Free() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Costas_Delta()
  *
  * Compute the delta phase value to use when
  * correcting the NCO frequency (OQPSK)
  */
-  double
-Costas_Delta( complex double sample, complex double cosample )
-{
+double Costas_Delta(complex double sample, complex double cosample) {
   double error;
 
   error  = ( Lut_Tanh(creal(sample))   * cimag(sample) ) -
@@ -223,4 +218,4 @@ Costas_Delta( complex double sample, complex double cosample )
   error /= costas_err_scale;
 
   return( error );
-} /* Costas_Delta() */
+}

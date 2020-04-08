@@ -12,6 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "filters.h"
 
 #include "../glrpt/utils.h"
@@ -23,16 +25,27 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
+
+static double Compute_RRC_Coeff(
+        int stage_no,
+        uint32_t taps,
+        double osf,
+        double alpha);
+static Filter_t *Filter_New(uint32_t fwd_count, double *fwd_coeff);
+
+/*****************************************************************************/
 
 /* Compute_RRC_Coeff()
  *
  * Variable alpha RRC filter coefficients
  * Taken from https://www.michael-joost.de/rrcfilter.pdf
  */
-  static double
-Compute_RRC_Coeff( int stage_no, uint32_t taps, double osf, double alpha )
-{
+static double Compute_RRC_Coeff(
+        int stage_no,
+        uint32_t taps,
+        double osf,
+        double alpha) {
   double coeff;
   double t, mpt, at4;
   double interm;
@@ -53,6 +66,8 @@ Compute_RRC_Coeff( int stage_no, uint32_t taps, double osf, double alpha )
   return( coeff / interm );
 } /* Compute_RRC_Coeff() */
 
+/*****************************************************************************/
+
 /*------------------------------------------------------------------------*/
 
 /* Filter_New()
@@ -61,9 +76,7 @@ Compute_RRC_Coeff( int stage_no, uint32_t taps, double osf, double alpha )
  * otherwise. Variable length arguments are two ptrs to doubles,
  * holding the coefficients to use in the filter
  */
-  Filter_t *
-Filter_New( uint32_t fwd_count, double *fwd_coeff )
-{
+static Filter_t *Filter_New(uint32_t fwd_count, double *fwd_coeff) {
   Filter_t *flt = NULL;
   uint32_t idx;
 
@@ -81,17 +94,19 @@ Filter_New( uint32_t fwd_count, double *fwd_coeff )
   }
 
   return( flt );
-} /* Filter_New() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Filter_RRC()
  *
  * Create a RRC (root raised cosine) filter
  */
-  Filter_t *
-Filter_RRC( uint32_t order, uint32_t factor, double osf, double alpha )
-{
+Filter_t *Filter_RRC(
+        uint32_t order,
+        uint32_t factor,
+        double osf,
+        double alpha) {
   uint32_t idx;
   uint32_t taps;
   double  *coeffs = NULL;
@@ -108,17 +123,15 @@ Filter_RRC( uint32_t order, uint32_t factor, double osf, double alpha )
   free_ptr( (void **)&coeffs );
 
   return( rrc );
-} /* Filter_RRC() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Filter_Fwd()
  *
  * Feed a signal through a filter, and output the result
  */
-  complex double
-Filter_Fwd( Filter_t *const self, complex double in )
-{
+complex double Filter_Fwd(Filter_t *const self, complex double in) {
   uint32_t idc;       /* Coefficients index */
   static int idm = 0; /* Ring buiffer (memory) index */
   complex double out;
@@ -161,22 +174,19 @@ Filter_Fwd( Filter_t *const self, complex double in )
     out += self->memory[idx] * self->fwd_coeff[idx];
   return( out );
   *********/
+}
 
-} /* Filter_Fwd() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Filter_Free()
  *
  * Free a filter object
  */
-  void
-Filter_Free( Filter_t *self )
-{
+void Filter_Free(Filter_t *self) {
   if( self->memory )
     free_ptr( (void **)&(self->memory) );
   if( self->fwd_count )
     free_ptr( (void **)&(self->fwd_coeff) );
 
   free_ptr( (void **)&self );
-} /* Filter_Free() */
+}

@@ -12,6 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "filters.h"
 
 #include "../common/common.h"
@@ -27,23 +29,21 @@
 #include <stdint.h>
 #include <stdio.h>
 
-/*-----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Init_Chebyshev_Filter()
  *
  * Calculates Chebyshev recursive filter coefficients.
  * The filter_data_t struct is defined in common.h.
  */
-  gboolean
-Init_Chebyshev_Filter(
-    filter_data_t *filter_data,
-    uint32_t buf_len,
-    uint32_t filter_bw,
-    double   sample_rate,
-    double   ripple,
-    uint32_t num_poles,
-    uint32_t type )
-{
+gboolean Init_Chebyshev_Filter(
+        filter_data_t *filter_data,
+        uint32_t buf_len,
+        uint32_t filter_bw,
+        double sample_rate,
+        double ripple,
+        uint32_t num_poles,
+        uint32_t type) {
   double *ta = NULL, *tb = NULL;
   double a0, a1, a2, b1, b2, sa, sb, gain;
   int i, p;
@@ -201,35 +201,30 @@ Init_Chebyshev_Filter(
   Enter_Filter_BW();
 
   return( TRUE );
-} /* Init_Chebyshev_Filter() */
+}
 
-/*-----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Enter_Filter_BW()
  *
  * Enters the Low Pass Filter B/W to the relevant entry widget
  */
-  void
-Enter_Filter_BW( void )
-{
+void Enter_Filter_BW(void) {
   char text[10];
   GtkEntry *entry = GTK_ENTRY(
       Builder_Get_Object(main_window_builder, "sdr_bw_entry") );
   uint32_t bw = rc_data.sdr_filter_bw / 1000;
   snprintf( text, sizeof(text), "%4u", bw );
   gtk_entry_set_text( entry, text );
+}
 
-} /* Enter_Filter_BW() */
-
-/*-----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* DSP_Filter()
  *
  * DSP Recursive Filter, normally used as low pass
  */
-  void
-DSP_Filter( filter_data_t *filter_data )
-{
+void DSP_Filter(filter_data_t *filter_data) {
   /* Index to samples buffer */
   uint32_t buf_idx, idx, npp1, len;
   double y, yn0;
@@ -271,20 +266,17 @@ DSP_Filter( filter_data_t *filter_data )
     filter_data->samples_buf[buf_idx] = yn0;
 
   } /* for( buf_idx = 0; buf_idx < len; buf_idx++ ) */
+}
 
-} /* DSP_Filter() */
-
-/*-----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Deinit_Chebyshev_Filter()
  *
  * Deinitializes Chebyshev filter (free's allocations)
  */
-  void
-Deinit_Chebyshev_Filter( filter_data_t *data )
-{
+void Deinit_Chebyshev_Filter(filter_data_t *data) {
   free_ptr( (void **)&(data->a) );
   free_ptr( (void **)&(data->b) );
   free_ptr( (void **)&(data->x) );
   free_ptr( (void **)&(data->y) );
-} /* Deinit_Chebyshev_Filter() */
+}

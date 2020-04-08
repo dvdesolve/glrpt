@@ -12,6 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "demod.h"
 
 #include "../common/common.h"
@@ -38,19 +40,24 @@
 #include <stdint.h>
 #include <string.h>
 
-static Demod_t   *demodulator = NULL;
-static gboolean (*Demod_PSK)(complex double, int8_t *);
-//static int8_t    *deint_buf = NULL; /* De-interleave buffer */
+/*****************************************************************************/
 
-/*------------------------------------------------------------------------*/
+static gboolean Demod_QPSK(complex double fdata, int8_t *buffer);
+static gboolean Demod_DOQPSK(complex double fdata, int8_t *buffer);
+static gboolean Demod_IDOQPSK(complex double fdata, int8_t *demod_buf);
+
+/*****************************************************************************/
+
+static Demod_t *demodulator = NULL;
+static gboolean (*Demod_PSK)(complex double, int8_t *);
+
+/*****************************************************************************/
 
 /* Demod_QPSK()
  *
  * Demodulate QPSK signal from Meteor
  */
-  static gboolean
-Demod_QPSK( complex double fdata, int8_t *buffer )
-{
+static gboolean Demod_QPSK(complex double fdata, int8_t *buffer) {
   static complex double
     before  = 0.0,
     middle  = 0.0,
@@ -116,18 +123,15 @@ Demod_QPSK( complex double fdata, int8_t *buffer )
 
   resync_offset += 1.0;
   return( FALSE );
+}
 
-} /* Demod_QPSK() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Demod_DOQPSK()
  *
  * Demodulate DOQPSK signal from Meteor
  */
-  static gboolean
-Demod_DOQPSK( complex double fdata, int8_t *buffer )
-{
+static gboolean Demod_DOQPSK(complex double fdata, int8_t *buffer) {
   complex double quad, agc;
 
   static complex double
@@ -204,18 +208,15 @@ Demod_DOQPSK( complex double fdata, int8_t *buffer )
 
   resync_offset += 1.0;
   return( FALSE );
+}
 
-} /* Demod_DOQPSK() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Demod_IDOQPSK()
  *
  * Demodulate Interleaved DOQPSK signal from Meteor
  */
-  static gboolean
-Demod_IDOQPSK( complex double fdata, int8_t *demod_buf )
-{
+static gboolean Demod_IDOQPSK(complex double fdata, int8_t *demod_buf) {
   complex double quad, agc;
 
   static complex double
@@ -341,18 +342,15 @@ Demod_IDOQPSK( complex double fdata, int8_t *demod_buf )
   ClearFlag( STATUS_RECEIVING );
   ClearFlag( STATUS_IDOQPSK_STOP );
   return( FALSE );
+}
 
-} /* Demod_IDOQPSK() */
-
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Demod_Init()
  *
  * Initializes Demodulator Object
  */
-  void
-Demod_Init( void )
-{
+void Demod_Init(void) {
   /* Create and allocate a Demodulator object */
   mem_alloc( (void **)&demodulator, sizeof(Demod_t) );
 
@@ -401,33 +399,28 @@ Demod_Init( void )
   ClearFlag( IMAGES_PROCESSED );
   ClearFlag( IMAGES_RECTIFIED );
   ClearFlag( IMAGE_COLORIZED );  
-} /* Demod_Init() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Demod_Deinit()
  *
  * De-initializes (frees) Demodulator Object
  */
-  void
-Demod_Deinit( void )
-{
+void Demod_Deinit(void) {
   Agc_Free( demodulator->agc );
   Costas_Free( demodulator->costas );
   Filter_Free( demodulator->rrc );
   free_ptr( (void **)&demodulator );
-} /* Demod_Deinit() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /*
  * These functions return Agc Gain, Signal Level and Costas PLL
  * Average Error in the range of 0.0-1.0 for the level gauges
  */
-
-  double
-Agc_Gain( double *gain )
-{
+double Agc_Gain(double *gain) {
   double ret = 0.0;
 
   /* Return gain if non-null argument */
@@ -439,13 +432,11 @@ Agc_Gain( double *gain )
   }
 
   return( ret );
-} /* Agc_Gain() */
+}
 
-/*----------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  double
-Signal_Level( uint32_t *level )
-{
+double Signal_Level(uint32_t *level) {
   double ret = 0.0;
 
   /* Return signal level if non-null argument */
@@ -456,13 +447,11 @@ Signal_Level( uint32_t *level )
     if( level ) *level = (uint32_t)demodulator->agc->average;
   }
   return( ret );
-} /* Signal_Level() */
+}
 
-/*----------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  double
-Pll_Average( void )
-{
+double Pll_Average(void) {
   double ret = 0.0;
 
   /* We display a range of 0.1 to 0.5 */
@@ -473,18 +462,16 @@ Pll_Average( void )
     ret = dClamp( ret, 0.0, 1.0 );
   }
   return( ret );
-} /* Pll_Average() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Demodulator_Run()
  *
  * Runs the Demodulator functions and supplies
  * soft symbols to the LRPT decoder functions
  */
-  gboolean
-Demodulator_Run( gpointer data )
-{
+gboolean Demodulator_Run(gpointer data) {
   uint32_t count, done, idx, buf_idx;
   complex double  cdata, fdata;
   static int8_t  *out_buffer = NULL;
@@ -597,4 +584,4 @@ Demodulator_Run( gpointer data )
   }
 
   return( TRUE );
-} /* Demodulator_Run() */
+}
