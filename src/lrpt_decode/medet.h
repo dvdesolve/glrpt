@@ -12,16 +12,26 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #ifndef LRPT_DECODE_MEDET_H
 #define LRPT_DECODE_MEDET_H
 
+/*****************************************************************************/
+
 #include <stdint.h>
+
+/*****************************************************************************/
 
 #define SIG_QUAL_RANGE  100.0
 
-double Sig_Quality(void);
+/*****************************************************************************/
+
 void Medet_Init(void);
 void Medet_Deinit(void);
 void Decode_Image(uint8_t *in_buffer, int buf_len);
+double Sig_Quality(void);
+
+/*****************************************************************************/
 
 #endif

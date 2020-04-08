@@ -35,6 +35,8 @@
  * interpolated pixel values to fill the gaps.
  */
 
+/*****************************************************************************/
+
 #include "rectify_meteor.h"
 
 #include "../common/shared.h"
@@ -46,11 +48,28 @@
 #include <stdio.h>
 #include <string.h>
 
-/*-----------------------------------------------------------------------*/
+/*****************************************************************************/
+
+static double Calculate_beta(double phi);
+static void Rectify_Grayscale_1(
+        uint8_t *in_buff,
+        uint32_t in_width,
+        uint32_t in_height,
+        uint8_t *rect_buff);
+static void Calculate_Pixel_Spacing_1(uint32_t in_width, uint32_t *rect_width);
+static void Rectify_Grayscale_2(
+        uint8_t *in_buff,
+        uint32_t in_width,
+        uint32_t in_height,
+        uint8_t *rect_buff);
+static void Calculate_Pixel_Spacing_2(
+        uint32_t orig_width,
+        uint32_t *rect_width);
+
+/*****************************************************************************/
 
 /* Gap between rectified pixels */
 static uint8_t *gap = NULL;
-
 
 /* Array that holds buffer indices for the reference
  * pixels that are the right ones to use to extrapolate
@@ -61,7 +80,7 @@ static uint32_t *indices = NULL;
  * calculate rectified image's pixel values */
 static double *factors = NULL;
 
-/*-----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Calculate_beta()
  *
@@ -71,9 +90,7 @@ static double *factors = NULL;
  * function uses the Newton-Raphson method to numerically solve
  * the equation R*sin(beta)-[A + R(1-cos(beta))]*tan(phi) = 0.
  * A = Satellite Altitude R = Earth Radius phi = Scanner angle */
-  static double
-Calculate_beta( double phi )
-{
+static double Calculate_beta(double phi) {
   double
     beta_np1 = 0.0,  /* New beta value, beta_n+1 */
              sin_b, cos_b,    /* sin and cos of current beta_n */
@@ -105,22 +122,20 @@ Calculate_beta( double phi )
   }
 
   return( beta_np1 );
-} /* Calculate_beta() */
+}
 
-/*-----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Rectify_Grayscale_1()
  *
  * Corrects tangential geometric distortion and the effect
  * of Earth's curvature on the raw Meteor-M images.
  */
-  static void
-Rectify_Grayscale_1(
-    uint8_t *in_buff,
-    uint32_t in_width,
-    uint32_t in_height,
-    uint8_t *rect_buff )
-{
+static void Rectify_Grayscale_1(
+        uint8_t *in_buff,
+        uint32_t in_width,
+        uint32_t in_height,
+        uint8_t *rect_buff) {
   uint8_t
     byteA_right = 0,
     byteB_right = 0,
@@ -222,19 +237,16 @@ Rectify_Grayscale_1(
 
     } /* for( idx = 0; idx < in_width-1; idx++ ) */
   } /* for( line_count = 0; line_count < height; line_count++ ) */
+}
 
-} /* Rectify_Grayscale_1() */
-
-/*-----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Calculate_Pixel_Spacing_1()
  *
  * Calculates the correct pixel spacing of Meteor-M images taking into
  * account the Earth's curvature and the scanner's tangential distortion
  */
-  static void
-Calculate_Pixel_Spacing_1( uint32_t in_width, uint32_t *rect_width )
-{
+static void Calculate_Pixel_Spacing_1(uint32_t in_width, uint32_t *rect_width) {
   /* A little geometry of the satellite, Earth, and the scans */
   double
     phi,         // instantaneous scan angle from vertical
@@ -324,22 +336,20 @@ Calculate_Pixel_Spacing_1( uint32_t in_width, uint32_t *rect_width )
   }
 
   free_ptr( (void **) &newposition );
-} /* Calculate_Pixel_Spacing_1() */
+}
 
-/*-----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Rectify_Grayscale_2()
  *
  * Corrects tangential geometric distortion and the effect
  * of Earth's curvature on the raw Meteor-M scanner images.
  */
-  static void
-Rectify_Grayscale_2(
-    uint8_t *in_buff,
-    uint32_t in_width,
-    uint32_t in_height,
-    uint8_t *rect_buff )
-{
+static void Rectify_Grayscale_2(
+        uint8_t *in_buff,
+        uint32_t in_width,
+        uint32_t in_height,
+        uint8_t *rect_buff) {
   uint32_t
     in_buff_idx,    /* Index to the unrectified input image buffer    */
     rect_buff_idx,  /* Index to the rectified output image buffer     */
@@ -398,10 +408,9 @@ Rectify_Grayscale_2(
       rect_buff[rect_buff_idx] = (uint8_t)pixel_value;
     }
   } /* for( horiz_cnt = 0; horiz_cnt < rect_width2; horiz_cnt++ ) */
+}
 
-} /* Rectify_Grayscale_2() */
-
-/*-----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Calculate_Pixel_Spacing_2()
  *
@@ -409,9 +418,9 @@ Rectify_Grayscale_2(
  * images taking into account the Earth's curvature
  * and the scanner's tangential distortion
  */
-  static void
-Calculate_Pixel_Spacing_2( uint32_t orig_width, uint32_t *rect_width )
-{
+static void Calculate_Pixel_Spacing_2(
+        uint32_t orig_width,
+        uint32_t *rect_width) {
   double
     beta_max,   /* Max beta angle, corresponding to PHI_MAX (54 deg) */
     phi,        /* Current scanner angle */
@@ -514,18 +523,15 @@ Calculate_Pixel_Spacing_2( uint32_t orig_width, uint32_t *rect_width )
     factors[rect_idx] /= prev_center - orig_pixel_center;
     rect_idx++;
   } /* while( rect_idx < rect_center ) */
+}
 
-} /* Calculate_Pixel_Spacing_2() */
-
-/*-----------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Rectify_Images()
  *
  * Rectifies (corrects geometric distortion) of Meteor images
  */
-  void
-Rectify_Images( void )
-{
+void Rectify_Images(void) {
   /* Create a temp image buffer to save original images
    * and re-allocate channel images to be rectified */
   uint8_t *temp_image = NULL;
@@ -580,4 +586,4 @@ Rectify_Images( void )
 
   SetFlag( IMAGES_RECTIFIED );
   free_ptr( (void **) &temp_image );
-} /* Rectify_Images() */
+}

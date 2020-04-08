@@ -12,20 +12,26 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "dct.h"
 
 #include <glib.h>
 
 #include <math.h>
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
+
+static void Init_Cos(void);
+
+/*****************************************************************************/
 
 static double cosine[8][8];
 static double alpha[8];
 
-  static void
-Init_Cos( void )
-{
+/*****************************************************************************/
+
+static void Init_Cos(void) {
   static gboolean cos_inited = FALSE;
   int x, y;
 
@@ -41,11 +47,9 @@ Init_Cos( void )
     alpha[x] = 1.0;
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  void
-Flt_Idct_8x8( double *res, const double *inpt  )
-{
+void Flt_Idct_8x8(double *res, const double *inpt) {
   int x, y, u;
   double s, cxu;
 

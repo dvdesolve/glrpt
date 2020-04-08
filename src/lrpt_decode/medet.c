@@ -12,6 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "medet.h"
 
 #include "../common/common.h"
@@ -29,13 +31,13 @@
 #include <stdint.h>
 #include <stdio.h>
 
+/*****************************************************************************/
+
 static int ok_cnt, total_cnt;
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  void
-Medet_Init( void )
-{
+void Medet_Init(void) {
   int idx;
 
   /* Initialize things */
@@ -54,30 +56,26 @@ Medet_Init( void )
   total_cnt = 1;
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Medet_Deinit()
  *
  * My addition, de-inits the met decoder (free's buffer pointers)
  */
-  void
-Medet_Deinit( void )
-{
+void Medet_Deinit(void) {
   free_ptr( (void **)&(mtd_record.v.pair_distances) );
   free_ptr( (void **)&ac_table );
   uint8_t **dec = ret_decoded();
   free_ptr( (void **)dec );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Decode_Image()
  *
  * Decodes images from soft symbols supplied by the demodulator
  */
-  void
-Decode_Image( uint8_t *in_buffer, int buf_len )
-{
+void Decode_Image(uint8_t *in_buffer, int buf_len) {
   gboolean ok;
   gchar txt[16];
 
@@ -114,17 +112,15 @@ Decode_Image( uint8_t *in_buffer, int buf_len )
   snprintf( txt, sizeof(txt), "%d:%d%%", ok_cnt, percent );
   gtk_entry_set_text( GTK_ENTRY(packet_cnt_entry), txt );
 
-} /* Decode_Image() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Sig_Quality()
  *
  * Returns the signal quality in the range 0.0-1.0 for the gauge
  */
-  double
-Sig_Quality( void )
-{
+double Sig_Quality(void) {
   double ret = (double)mtd_record.sig_q / SIG_QUAL_RANGE;
   ret = dClamp( ret, 0.0, 1.0 );
   return( ret );

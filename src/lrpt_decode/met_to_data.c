@@ -12,6 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "met_to_data.h"
 
 #include "../glrpt/utils.h"
@@ -26,11 +28,19 @@
 #include <stdint.h>
 #include <string.h>
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  void
-Mtd_Init( mtd_rec_t *mtd )
-{
+static void Do_Full_Correlate(mtd_rec_t *mtd, uint8_t *raw, uint8_t *aligned);
+static void Do_Next_Correlate(mtd_rec_t *mtd, uint8_t *raw, uint8_t *aligned);
+static gboolean Try_Frame(mtd_rec_t *mtd, uint8_t *aligned);
+
+/*****************************************************************************/
+
+static uint8_t *decoded = NULL;
+
+/*****************************************************************************/
+
+void Mtd_Init(mtd_rec_t *mtd) {
   //sync is $1ACFFC1D,  00011010 11001111 11111100 00011101
   Correlator_Init( &(mtd->c), (uint64_t)0xfca2b63db00d9794 );
   Mk_Viterbi27( &(mtd->v) );
@@ -40,11 +50,9 @@ Mtd_Init( mtd_rec_t *mtd )
   mtd->corr = 64;
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-Do_Full_Correlate( mtd_rec_t *mtd, uint8_t *raw, uint8_t *aligned )
-{
+static void Do_Full_Correlate(mtd_rec_t *mtd, uint8_t *raw, uint8_t *aligned) {
   mtd->word = (uint16_t)
     ( Corr_Correlate(&(mtd->c), &(raw[mtd->pos]), SOFT_FRAME_LEN) );
   mtd->cpos = (uint16_t)( mtd->c.position[mtd->word] );
@@ -74,11 +82,9 @@ Do_Full_Correlate( mtd_rec_t *mtd, uint8_t *raw, uint8_t *aligned )
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-Do_Next_Correlate( mtd_rec_t *mtd, uint8_t *raw, uint8_t *aligned )
-{
+static void Do_Next_Correlate(mtd_rec_t *mtd, uint8_t *raw, uint8_t *aligned) {
   mtd->cpos = 0;
   memmove( aligned, &(raw[mtd->pos]), SOFT_FRAME_LEN );
   mtd->prev_pos = mtd->pos;
@@ -87,20 +93,15 @@ Do_Next_Correlate( mtd_rec_t *mtd, uint8_t *raw, uint8_t *aligned )
   Fix_Packet( aligned, SOFT_FRAME_LEN, (int)mtd->word );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-static uint8_t *decoded = NULL;
-  uint8_t **
-ret_decoded( void )
-{
+uint8_t ** ret_decoded(void) {
   return( &decoded );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static gboolean
-Try_Frame( mtd_rec_t *mtd, uint8_t *aligned )
-{
+static gboolean Try_Frame(mtd_rec_t *mtd, uint8_t *aligned) {
   int j;
   uint8_t ecc_buf[256];
   uint32_t temp;
@@ -150,11 +151,9 @@ Try_Frame( mtd_rec_t *mtd, uint8_t *aligned )
       (mtd->r[3] != -1) );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  gboolean
-Mtd_One_Frame( mtd_rec_t *mtd, uint8_t *raw )
-{
+gboolean Mtd_One_Frame(mtd_rec_t *mtd, uint8_t *raw) {
   uint8_t aligned[SOFT_FRAME_LEN];
   gboolean result = FALSE;
 

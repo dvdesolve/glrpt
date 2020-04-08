@@ -12,6 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "met_packet.h"
 
 #include "../common/shared.h"
@@ -25,14 +27,21 @@
 #include <stdio.h>
 #include <string.h>
 
+/*****************************************************************************/
+
+static void Parse_70(uint8_t *p);
+static void Act_Apd(uint8_t *p, uint32_t apid, int pck_cnt);
+static void Parse_Apd(uint8_t *p);
+static int Parse_Partial(uint8_t *p, int len);
+
+/*****************************************************************************/
+
 static gboolean partial_packet = FALSE;
 static int last_frame = 0;
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-Parse_70( uint8_t *p )
-{
+static void Parse_70(uint8_t *p) {
   int h, m, s;
   gchar txt[12];
 
@@ -45,11 +54,9 @@ Parse_70( uint8_t *p )
   gtk_entry_set_text( GTK_ENTRY(ob_time_entry), txt );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-Act_Apd( uint8_t *p, uint32_t apid, int pck_cnt )
-{
+static void Act_Apd(uint8_t *p, uint32_t apid, int pck_cnt) {
   int mcu_id, q;
 
   mcu_id   = p[0];
@@ -58,11 +65,9 @@ Act_Apd( uint8_t *p, uint32_t apid, int pck_cnt )
   Mj_Dec_Mcus( &p[6], apid, pck_cnt, mcu_id, (uint8_t)q );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-Parse_Apd( uint8_t *p )
-{
+static void Parse_Apd(uint8_t *p) {
   uint16_t w;
   int pck_cnt;
   uint32_t apid;
@@ -84,11 +89,9 @@ Parse_Apd( uint8_t *p )
     Act_Apd( &p[14], apid, pck_cnt );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static int
-Parse_Partial( uint8_t *p, int len )
-{
+static int Parse_Partial(uint8_t *p, int len) {
   int len_pck;
 
   if( len < 6 )
@@ -110,11 +113,9 @@ Parse_Partial( uint8_t *p, int len )
   return( len_pck + 6 + 1 );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  void
-Parse_Cvcdu( uint8_t *p, int len )
-{
+void Parse_Cvcdu(uint8_t *p, int len) {
   int n, data_len, off;
   int ver, fid;
   int frame_cnt;

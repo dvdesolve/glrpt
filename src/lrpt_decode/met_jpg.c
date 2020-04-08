@@ -12,6 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "met_jpg.h"
 
 #include "../common/common.h"
@@ -32,7 +34,14 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
+
+static void Save_Images(int type);
+static void Fill_Dqt_by_Q(int *dqt, int q);
+static void Fill_Pix(double *img_dct, uint32_t apid, int mcu_id, int m);
+static gboolean Progress_Image(uint32_t apid, int mcu_id, int pck_cnt);
+
+/*****************************************************************************/
 
 static int last_mcu  = -1;
 static int cur_y     = 0;
@@ -40,15 +49,13 @@ static int last_y    = -1;
 static int first_pck = 0;
 static int prev_pck  = 0;
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 /* Save_Images()
  *
  * My addition, separated code that saves images
  */
-  static void
-Save_Images( int type )
-{
+static void Save_Images(int type) {
   char fname[MAX_FILE_NAME];
   uint32_t idx;
 
@@ -146,13 +153,11 @@ Save_Images( int type )
     free_ptr( (void **)&combo_image );
   } /* if( isFlagSet(IMAGE_OUT_COMBO) ) */
 
-} /* Save_Images() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  void
-Mj_Dump_Image( void )
-{
+void Mj_Dump_Image(void) {
   uint32_t idx;
 
   /* Abort if no images successfully decoded */
@@ -225,13 +230,11 @@ Mj_Dump_Image( void )
 
   } /* if( isFlagClear(STATUS_RECEIVING) ) */
 
-} /* Mj_Dump_Image() */
+}
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-Fill_Dqt_by_Q( int *dqt, int q )
-{
+static void Fill_Dqt_by_Q(int *dqt, int q) {
   double f;
   int i;
 
@@ -247,11 +250,9 @@ Fill_Dqt_by_Q( int *dqt, int q )
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-Fill_Pix( double *img_dct, uint32_t apid, int mcu_id, int m )
-{
+static void Fill_Pix(double *img_dct, uint32_t apid, int mcu_id, int m) {
   int i, j, t, x, y, off = 0, inv = 0;
 
   for( i = 0; i <= 63; i++ )
@@ -287,11 +288,9 @@ Fill_Pix( double *img_dct, uint32_t apid, int mcu_id, int m )
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static gboolean
-Progress_Image( uint32_t apid, int mcu_id, int pck_cnt )
-{
+static gboolean Progress_Image(uint32_t apid, int mcu_id, int pck_cnt) {
   static size_t prev_len = 0;
   size_t delta_len = 0, i, s;
   int j;
@@ -340,16 +339,14 @@ Progress_Image( uint32_t apid, int mcu_id, int pck_cnt )
   return( TRUE );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  void
-Mj_Dec_Mcus(
-    uint8_t *p,
-    uint32_t apid,
-    int pck_cnt,
-    int mcu_id,
-    uint8_t q )
-{
+void Mj_Dec_Mcus(
+        uint8_t *p,
+        uint32_t apid,
+        int pck_cnt,
+        int mcu_id,
+        uint8_t q) {
   bit_io_rec_t b;
   int i, m;
   uint16_t k, n;
@@ -436,11 +433,9 @@ Mj_Dec_Mcus(
   Display_Scaled_Image( channel_image, apid, cur_y );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  void
-Mj_Init( void )
-{
+void Mj_Init(void) {
   Default_Huffman_Table();
   last_mcu  = -1;
   cur_y     = 0;

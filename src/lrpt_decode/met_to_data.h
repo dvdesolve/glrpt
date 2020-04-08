@@ -12,8 +12,12 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #ifndef LRPT_DECODE_MET_TO_DATA_H
 #define LRPT_DECODE_MET_TO_DATA_H
+
+/*****************************************************************************/
 
 #include "viterbi27.h"
 
@@ -21,12 +25,16 @@
 
 #include <stdint.h>
 
+/*****************************************************************************/
+
 /* LRPT Decoder data */
 #define PATTERN_SIZE        64
 #define PATTERN_CNT         8
 #define MIN_CORRELATION     45
 #define SOFT_FRAME_LEN      16384
 #define HARD_FRAME_LEN      1024
+
+/*****************************************************************************/
 
 static const uint8_t prand[255] =
 {
@@ -86,8 +94,12 @@ typedef struct mtd_rec_t {
   int r[4], sig_q;
 } mtd_rec_t;
 
+/*****************************************************************************/
+
 void Mtd_Init(mtd_rec_t *mtd);
 uint8_t **ret_decoded(void);
 gboolean Mtd_One_Frame(mtd_rec_t *mtd, uint8_t *raw);
+
+/*****************************************************************************/
 
 #endif

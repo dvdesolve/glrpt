@@ -12,13 +12,21 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #ifndef LRPT_DECODE_MET_JPG_H
 #define LRPT_DECODE_MET_JPG_H
 
+/*****************************************************************************/
+
 #include <stdint.h>
+
+/*****************************************************************************/
 
 #define MCU_PER_PACKET  14
 #define MCU_PER_LINE    196
+
+/*****************************************************************************/
 
 static const uint8_t standard_quantization_table[64] =
 {
@@ -51,8 +59,12 @@ enum {
   COLORIZED_CHAN = 3
 };
 
+/*****************************************************************************/
+
 void Mj_Dump_Image(void);
 void Mj_Dec_Mcus(uint8_t *p, uint32_t apid, int pck_cnt, int mcu_id, uint8_t q);
 void Mj_Init(void);
+
+/*****************************************************************************/
 
 #endif

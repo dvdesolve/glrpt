@@ -12,12 +12,18 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #ifndef LRPT_DECODE_ALIB_H
 #define LRPT_DECODE_ALIB_H
+
+/*****************************************************************************/
 
 #include "viterbi27.h"
 
 #include <stdint.h>
+
+/*****************************************************************************/
 
 static const int bitcnt[256] =
 {
@@ -127,14 +133,18 @@ static const uint8_t indx[256] =
   246, 135, 165,  23,  58, 163,  60, 183
 };
 
+/*****************************************************************************/
+
+int Count_Bits(uint32_t n);
+uint32_t Bio_Peek_n_Bits(bit_io_rec_t *b, const int n);
+void Bio_Advance_n_Bits(bit_io_rec_t *b, const int n);
 uint32_t Bio_Fetch_n_Bits(bit_io_rec_t *b, const int n);
 void Bit_Writer_Create(bit_io_rec_t *w, uint8_t *bytes, int len);
 void Bio_Write_Bitlist_Reversed(bit_io_rec_t *w, uint8_t *l, int len);
-int Count_Bits(uint32_t n);
 int Ecc_Decode(uint8_t *idata, int pad);
 void Ecc_Deinterleave(uint8_t *data, uint8_t *output, int pos, int n);
 void Ecc_Interleave(uint8_t *data, uint8_t *output, int pos, int n);
-uint32_t Bio_Peek_n_Bits(bit_io_rec_t *b, const int n);
-void Bio_Advance_n_Bits(bit_io_rec_t *b, const int n);
+
+/*****************************************************************************/
 
 #endif

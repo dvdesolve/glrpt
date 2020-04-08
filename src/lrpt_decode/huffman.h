@@ -12,10 +12,16 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #ifndef LRPT_DECODE_HUFFMAN_H
 #define LRPT_DECODE_HUFFMAN_H
 
+/*****************************************************************************/
+
 #include <stdint.h>
+
+/*****************************************************************************/
 
 /* Decoder AC table data */
 typedef struct ac_table_rec_t {
@@ -23,9 +29,13 @@ typedef struct ac_table_rec_t {
   uint32_t mask, code;
 } ac_table_rec_t;
 
+/*****************************************************************************/
+
 int Get_AC(const uint16_t w);
 int Get_DC(const uint16_t w);
 int Map_Range(const int cat, const int vl);
 void Default_Huffman_Table(void);
+
+/*****************************************************************************/
 
 #endif

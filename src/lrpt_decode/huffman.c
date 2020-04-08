@@ -12,6 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "huffman.h"
 
 #include "../common/shared.h"
@@ -21,6 +23,13 @@
 
 #include <stddef.h>
 #include <stdint.h>
+
+/*****************************************************************************/
+
+static int Get_AC_Real(const uint16_t w);
+static int Get_DC_Real(const uint16_t w);
+
+/*****************************************************************************/
 
 int ac_lookup[65536], dc_lookup[65536];
 
@@ -45,27 +54,21 @@ static uint8_t t_ac_0[178] =
  249, 250
 };
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  inline int
-Get_AC( const uint16_t w )
-{
+inline int Get_AC(const uint16_t w) {
   return( ac_lookup[w] );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  inline int
-Get_DC( const uint16_t w )
-{
+inline int Get_DC(const uint16_t w) {
   return( dc_lookup[w] );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static int
-Get_AC_Real( const uint16_t w )
-{
+static int Get_AC_Real(const uint16_t w) {
   int i;
 
   for( i = 0; (size_t)i < ac_table_len; i++ )
@@ -78,11 +81,9 @@ Get_AC_Real( const uint16_t w )
   return( -1 );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static int
-Get_DC_Real( const uint16_t w )
-{
+static int Get_DC_Real(const uint16_t w) {
   if( (w >> 14) == 0 ) return( 0 );
 
   switch( w >> 13 )
@@ -103,11 +104,9 @@ Get_DC_Real( const uint16_t w )
   else return( -1 );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  int
-Map_Range( const int cat, const int vl )
-{
+int Map_Range(const int cat, const int vl) {
   int maxval, result;
   gboolean sig;
 
@@ -119,11 +118,9 @@ Map_Range( const int cat, const int vl )
   return( result );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  void
-Default_Huffman_Table( void )
-{
+void Default_Huffman_Table(void) {
   int k, i, n;
   uint32_t code;
   uint8_t *t;

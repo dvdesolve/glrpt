@@ -12,31 +12,37 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "correlator.h"
 
 #include "met_to_data.h"
 
 #include <stdint.h>
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
+
+static uint8_t Rotate_IQ(uint8_t data, int shift);
+static uint64_t Rotate_IQ_QW(uint64_t data, int shift);
+static uint64_t Flip_IQ_QW(uint64_t data);
+static void Corr_Set_Patt(corr_rec_t *c, int n, uint64_t p);
+static void Corr_Reset(corr_rec_t *c);
+
+/*****************************************************************************/
 
 static uint8_t rotate_iq_tab[256];
 static uint8_t invert_iq_tab[256];
 int corr_tab[256][256];
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  inline int
-Hard_Correlate( const uint8_t d, const uint8_t w )
-{
+inline int Hard_Correlate(const uint8_t d, const uint8_t w) {
   return( corr_tab[d][w] );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  void
-Init_Correlator_Tables( void )
-{
+void Init_Correlator_Tables(void) {
   int i, j;
 
   for( i = 0; i <= 255; i++ )
@@ -51,11 +57,9 @@ Init_Correlator_Tables( void )
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static uint8_t
-Rotate_IQ( uint8_t data, int shift )
-{
+static uint8_t Rotate_IQ(uint8_t data, int shift) {
   uint8_t result = data;
   if( (shift == 1) | (shift == 3) )
     result = rotate_iq_tab[result];
@@ -66,11 +70,9 @@ Rotate_IQ( uint8_t data, int shift )
   return( result );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static uint64_t
-Rotate_IQ_QW( uint64_t data, int shift )
-{
+static uint64_t Rotate_IQ_QW(uint64_t data, int shift) {
   int i;
   uint64_t result = 0;
   uint8_t  bdata;
@@ -85,11 +87,9 @@ Rotate_IQ_QW( uint64_t data, int shift )
   return( result );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static uint64_t
-Flip_IQ_QW( uint64_t data )
-{
+static uint64_t Flip_IQ_QW(uint64_t data) {
   int i;
   uint64_t result = 0;
   uint8_t  bdata;
@@ -104,11 +104,9 @@ Flip_IQ_QW( uint64_t data )
   return( result );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  void
-Fix_Packet( void *data, int len, int shift )
-{
+void Fix_Packet(void *data, int len, int shift) {
   int j;
   int8_t *d;
   int8_t b;
@@ -149,11 +147,9 @@ Fix_Packet( void *data, int len, int shift )
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-Corr_Set_Patt( corr_rec_t *c, int n, uint64_t p )
-{
+static void Corr_Set_Patt(corr_rec_t *c, int n, uint64_t p) {
   int i;
 
   for( i = 0; i < PATTERN_SIZE; i++ )
@@ -165,11 +161,9 @@ Corr_Set_Patt( corr_rec_t *c, int n, uint64_t p )
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  void
-Correlator_Init( corr_rec_t *c, uint64_t q )
-{
+void Correlator_Init(corr_rec_t *c, uint64_t q) {
   int i;
 
   bzero( c->correlation, PATTERN_CNT * 4 );
@@ -183,21 +177,17 @@ Correlator_Init( corr_rec_t *c, uint64_t q )
     Corr_Set_Patt( c, i + 4, Rotate_IQ_QW(Flip_IQ_QW(q), i) );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-Corr_Reset( corr_rec_t *c )
-{
+static void Corr_Reset(corr_rec_t *c) {
   bzero( c->correlation, PATTERN_CNT * 4 );
   bzero( c->position,    PATTERN_CNT * 4 );
   bzero( c->tmp_corr,    PATTERN_CNT * 4 );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  int
-Corr_Correlate( corr_rec_t *c, uint8_t *data, uint32_t len )
-{
+int Corr_Correlate(corr_rec_t *c, uint8_t *data, uint32_t len) {
   int i, n, k;
   int *d;
   uint8_t *p;

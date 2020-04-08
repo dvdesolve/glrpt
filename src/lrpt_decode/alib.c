@@ -12,6 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "alib.h"
 
 #include "viterbi27.h"
@@ -21,11 +23,14 @@
 #include <stdint.h>
 #include <string.h>
 #include <strings.h>
-/*------------------------------------------------------------------------*/
 
-  int
-Count_Bits( uint32_t n )
-{
+/*****************************************************************************/
+
+static uint8_t Byte_Off(uint8_t *l, int n);
+
+/*****************************************************************************/
+
+int Count_Bits(uint32_t n) {
   int result =
     bitcnt[n & 0xFF] +
     bitcnt[(n >>  8) & 0xFF] +
@@ -35,11 +40,9 @@ Count_Bits( uint32_t n )
   return( result );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  uint32_t
-Bio_Peek_n_Bits( bit_io_rec_t *b, const int n )
-{
+uint32_t Bio_Peek_n_Bits(bit_io_rec_t *b, const int n) {
   int bit, i, p;
   uint32_t result = 0;
 
@@ -53,30 +56,24 @@ Bio_Peek_n_Bits( bit_io_rec_t *b, const int n )
   return( result );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  inline void
-Bio_Advance_n_Bits( bit_io_rec_t *b, const int n )
-{
+inline void Bio_Advance_n_Bits(bit_io_rec_t *b, const int n) {
   b->pos += n;
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  uint32_t
-Bio_Fetch_n_Bits( bit_io_rec_t *b, const int n )
-{
+uint32_t Bio_Fetch_n_Bits(bit_io_rec_t *b, const int n) {
   uint32_t result = Bio_Peek_n_Bits( b, n );
   Bio_Advance_n_Bits( b, n );
 
   return( result );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  void
-Bit_Writer_Create( bit_io_rec_t *w, uint8_t *bytes, int len )
-{
+void Bit_Writer_Create(bit_io_rec_t *w, uint8_t *bytes, int len) {
   w->p   = bytes;
   w->len = len;
   w->cur = 0;
@@ -84,21 +81,17 @@ Bit_Writer_Create( bit_io_rec_t *w, uint8_t *bytes, int len )
   w->cur_len = 0;
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static uint8_t
-Byte_Off( uint8_t *l, int n )
-{
+static uint8_t Byte_Off(uint8_t *l, int n) {
   uint8_t *p = l;
   p += n;
   return( *p );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  void
-Bio_Write_Bitlist_Reversed( bit_io_rec_t *w, uint8_t *l, int len )
-{
+void Bio_Write_Bitlist_Reversed(bit_io_rec_t *w, uint8_t *l, int len) {
   uint8_t *bytes;
   int i, byte_index, close_len, full_bytes;
   uint16_t b;
@@ -167,11 +160,9 @@ Bio_Write_Bitlist_Reversed( bit_io_rec_t *w, uint8_t *l, int len )
   w->cur_len = len;
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  int
-Ecc_Decode( uint8_t *idata, int pad )
-{
+int Ecc_Decode(uint8_t *idata, int pad) {
   int i, j, r, k, deg_lambda, el, deg_omega;
   int syn_error;
   uint8_t q, tmp, num1, num2, den, discr_r;
@@ -333,21 +324,17 @@ Ecc_Decode( uint8_t *idata, int pad )
   return( TRUE );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  void
-Ecc_Deinterleave( uint8_t *data, uint8_t *output, int pos, int n )
-{
+void Ecc_Deinterleave(uint8_t *data, uint8_t *output, int pos, int n) {
   int i;
   for( i = 0; i < 255; i++ )
     output[i] = data[ i * n + pos ];
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  void
-Ecc_Interleave( uint8_t *data, uint8_t *output, int pos, int n )
-{
+void Ecc_Interleave(uint8_t *data, uint8_t *output, int pos, int n) {
   int i;
   for( i = 0; i < 255; i++ )
     output[ i * n + pos] = data[i];

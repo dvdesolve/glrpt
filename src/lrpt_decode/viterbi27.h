@@ -12,11 +12,17 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #ifndef LRPT_DECODE_VITERBI27_H
 #define LRPT_DECODE_VITERBI27_H
 
+/*****************************************************************************/
+
 #include <stddef.h>
 #include <stdint.h>
+
+/*****************************************************************************/
 
 #define VITERBI27_POLYA     79      // 1001111
 #define VITERBI27_POLYB     109     // 1101101
@@ -32,6 +38,8 @@
 #define NUM_STATES          128
 #define MIN_TRACEBACK       35      // 5*7
 #define TRACEBACK_LENGTH    105     // 15*7
+
+/*****************************************************************************/
 
 /* Bit input-output data */
 typedef struct bit_io_rec_t {
@@ -67,8 +75,12 @@ typedef struct viterbi27_rec_t {
   uint16_t *read_errors, *write_errors;
 } viterbi27_rec_t;
 
-void Mk_Viterbi27(viterbi27_rec_t *v);
-void Vit_Decode(viterbi27_rec_t *v, uint8_t *input, uint8_t *output);
+/*****************************************************************************/
+
 double Vit_Get_Percent_BER(const viterbi27_rec_t *v);
+void Vit_Decode(viterbi27_rec_t *v, uint8_t *input, uint8_t *output);
+void Mk_Viterbi27(viterbi27_rec_t *v);
+
+/*****************************************************************************/
 
 #endif

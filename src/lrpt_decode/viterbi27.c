@@ -12,6 +12,8 @@
  *  http://www.gnu.org/copyleft/gpl.txt
  */
 
+/*****************************************************************************/
+
 #include "viterbi27.h"
 
 #include "../glrpt/utils.h"
@@ -23,22 +25,46 @@
 #include <stdlib.h>
 #include <strings.h>
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
+static uint16_t Metric_Soft_Distance(
+        uint8_t hard,
+        uint8_t soft_y0,
+        uint8_t soft_y1);
+static void Pair_Lookup_Create(viterbi27_rec_t *v);
+static void Pair_Lookup_Fill_Distance(viterbi27_rec_t *v);
+static uint32_t History_Buffer_Search(viterbi27_rec_t *v, int search_every);
+static void History_Buffer_Renormalize(
+        viterbi27_rec_t *v,
+        uint32_t min_register);
+static void History_Buffer_Traceback(
+        viterbi27_rec_t *v,
+        uint32_t bestpath,
+        uint32_t min_traceback_length);
+static void History_Buffer_Process_Skip(viterbi27_rec_t *v, int skip);
+static void Error_Buffer_Swap(viterbi27_rec_t *v);
+static void Vit_Inner(viterbi27_rec_t *v, uint8_t *soft);
+static void Vit_Tail(viterbi27_rec_t *v, uint8_t *soft);
+static void Vit_Conv_Decode(
+        viterbi27_rec_t *v,
+        uint8_t *msg,
+        uint8_t *soft_encoded);
+static void Vit_Conv_Encode(
+        viterbi27_rec_t *v,
+        uint8_t *input,
+        uint8_t *output);
 
-  inline double
-Vit_Get_Percent_BER( const viterbi27_rec_t *v )
-{
+/*****************************************************************************/
+
+inline double Vit_Get_Percent_BER(const viterbi27_rec_t *v) {
   return( 100.0 * v->BER ) / (double)FRAME_BITS;
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static uint16_t
-Metric_Soft_Distance(
-    uint8_t hard,
-    uint8_t soft_y0,
-    uint8_t soft_y1 )
-{
+static uint16_t Metric_Soft_Distance(
+        uint8_t hard,
+        uint8_t soft_y0,
+        uint8_t soft_y1) {
   const int mag = 255;
   int soft_x0, soft_x1;
   uint16_t result;
@@ -82,11 +108,9 @@ Metric_Soft_Distance(
   return( result );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-Pair_Lookup_Create( viterbi27_rec_t *v )
-{
+static void Pair_Lookup_Create(viterbi27_rec_t *v) {
   uint32_t inv_outputs[16];
   uint32_t output_counter, o;
   int i;
@@ -114,11 +138,9 @@ Pair_Lookup_Create( viterbi27_rec_t *v )
       v->pair_distances_len * sizeof(uint32_t) );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-Pair_Lookup_Fill_Distance( viterbi27_rec_t *v )
-{
+static void Pair_Lookup_Fill_Distance(viterbi27_rec_t *v) {
   int i;
   uint32_t c, i0, i1;
 
@@ -133,11 +155,9 @@ Pair_Lookup_Fill_Distance( viterbi27_rec_t *v )
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static uint32_t
-History_Buffer_Search( viterbi27_rec_t *v, int search_every )
-{
+static uint32_t History_Buffer_Search(viterbi27_rec_t *v, int search_every) {
   uint32_t least, bestpath;
   int state;
 
@@ -158,13 +178,11 @@ History_Buffer_Search( viterbi27_rec_t *v, int search_every )
   return( bestpath );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-History_Buffer_Renormalize(
-    viterbi27_rec_t *v,
-    uint32_t min_register )
-{
+static void History_Buffer_Renormalize(
+        viterbi27_rec_t *v,
+        uint32_t min_register) {
   uint16_t min_distance;
   int i;
 
@@ -173,14 +191,12 @@ History_Buffer_Renormalize(
     v->write_errors[i] -= min_distance;
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-History_Buffer_Traceback(
-    viterbi27_rec_t *v,
-    uint32_t bestpath,
-    uint32_t min_traceback_length )
-{
+static void History_Buffer_Traceback(
+        viterbi27_rec_t *v,
+        uint32_t bestpath,
+        uint32_t min_traceback_length) {
   int j;
   uint32_t index, fetched_index, pathbit, prefetch_index, len;
   uint8_t history;
@@ -227,11 +243,9 @@ History_Buffer_Traceback(
   v->len -= fetched_index;
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-History_Buffer_Process_Skip( viterbi27_rec_t *v, int skip )
-{
+static void History_Buffer_Process_Skip(viterbi27_rec_t *v, int skip) {
   uint32_t bestpath;
 
   v->hist_index++;
@@ -256,21 +270,17 @@ History_Buffer_Process_Skip( viterbi27_rec_t *v, int skip )
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-Error_Buffer_Swap( viterbi27_rec_t *v )
-{
+static void Error_Buffer_Swap(viterbi27_rec_t *v) {
   v->read_errors  = &(v->errors[v->err_index][0]);
   v->err_index    = (v->err_index + 1) % 2;
   v->write_errors = &(v->errors[v->err_index][0]);
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-Vit_Inner( viterbi27_rec_t *v, uint8_t *soft )
-{
+static void Vit_Inner(viterbi27_rec_t *v, uint8_t *soft) {
   uint32_t highbase, low, high, base, offset, base_offset;
   int i, j;
   uint8_t *history;
@@ -371,11 +381,9 @@ Vit_Inner( viterbi27_rec_t *v, uint8_t *soft )
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-Vit_Tail( viterbi27_rec_t *v, uint8_t *soft )
-{
+static void Vit_Tail(viterbi27_rec_t *v, uint8_t *soft) {
   int i, j;
   uint8_t *history;
   uint32_t skip, base_skip, highbase, low, high;
@@ -441,14 +449,12 @@ Vit_Tail( viterbi27_rec_t *v, uint8_t *soft )
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-Vit_Conv_Decode(
-    viterbi27_rec_t *v,
-    uint8_t *msg,
-    uint8_t *soft_encoded )
-{
+static void Vit_Conv_Decode(
+        viterbi27_rec_t *v,
+        uint8_t *msg,
+        uint8_t *soft_encoded) {
   Bit_Writer_Create( &(v->bit_writer), msg, (FRAME_BITS * 2) / 8 );
 
   //history_buffer
@@ -468,14 +474,12 @@ Vit_Conv_Decode(
   History_Buffer_Traceback( v, 0, 0 );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  static void
-Vit_Conv_Encode(
-    viterbi27_rec_t *v,
-    uint8_t *input,
-    uint8_t *output )
-{
+static void Vit_Conv_Encode(
+        viterbi27_rec_t *v,
+        uint8_t *input,
+        uint8_t *output) {
   uint32_t sh;
   int i;
   bit_io_rec_t b;
@@ -496,11 +500,9 @@ Vit_Conv_Encode(
   }
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  void
-Vit_Decode( viterbi27_rec_t *v, uint8_t *input, uint8_t *output )
-{
+void Vit_Decode(viterbi27_rec_t *v, uint8_t *input, uint8_t *output) {
   int i;
   uint8_t corrected[FRAME_BITS * 2];
 
@@ -513,11 +515,9 @@ Vit_Decode( viterbi27_rec_t *v, uint8_t *input, uint8_t *output )
     v->BER += Hard_Correlate( input[i], corrected[i] ^ 0xFF );
 }
 
-/*------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-  void
-Mk_Viterbi27( viterbi27_rec_t *v )
-{
+void Mk_Viterbi27(viterbi27_rec_t *v) {
   int i, j;
 
   v->BER = 0;
