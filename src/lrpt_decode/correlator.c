@@ -32,11 +32,11 @@ static void Corr_Reset(corr_rec_t *c);
 
 static uint8_t rotate_iq_tab[256];
 static uint8_t invert_iq_tab[256];
-int corr_tab[256][256];
+static int corr_tab[256][256];
 
 /*****************************************************************************/
 
-inline int Hard_Correlate(const uint8_t d, const uint8_t w) {
+int Hard_Correlate(const uint8_t d, const uint8_t w) {
   return( corr_tab[d][w] );
 }
 

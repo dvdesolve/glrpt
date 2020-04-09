@@ -135,9 +135,14 @@ static const uint8_t indx[256] =
 
 /*****************************************************************************/
 
+static inline void Bio_Advance_n_Bits(bit_io_rec_t *b, const int n) {
+    b->pos += n;
+}
+
+/*****************************************************************************/
+
 int Count_Bits(uint32_t n);
 uint32_t Bio_Peek_n_Bits(bit_io_rec_t *b, const int n);
-void Bio_Advance_n_Bits(bit_io_rec_t *b, const int n);
 uint32_t Bio_Fetch_n_Bits(bit_io_rec_t *b, const int n);
 void Bit_Writer_Create(bit_io_rec_t *w, uint8_t *bytes, int len);
 void Bio_Write_Bitlist_Reversed(bit_io_rec_t *w, uint8_t *l, int len);

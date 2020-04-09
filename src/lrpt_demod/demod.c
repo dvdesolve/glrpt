@@ -29,7 +29,6 @@
 #include "doqpsk.h"
 #include "filters.h"
 #include "pll.h"
-#include "utils.h"
 
 #include <glib.h>
 
@@ -42,6 +41,7 @@
 
 /*****************************************************************************/
 
+static inline int8_t Clamp_Int8(double x);
 static gboolean Demod_QPSK(complex double fdata, int8_t *buffer);
 static gboolean Demod_DOQPSK(complex double fdata, int8_t *buffer);
 static gboolean Demod_IDOQPSK(complex double fdata, int8_t *demod_buf);
@@ -50,6 +50,25 @@ static gboolean Demod_IDOQPSK(complex double fdata, int8_t *demod_buf);
 
 static Demod_t *demodulator = NULL;
 static gboolean (*Demod_PSK)(complex double, int8_t *);
+
+/*****************************************************************************/
+
+/* Clamp_Int8()
+ *
+ * Clamp a double value to a int8_t range
+ */
+static inline int8_t Clamp_Int8(double x) {
+    if (x < -128.0)
+        return -128;
+    else if (x > 127.0)
+        return 127;
+    else if ((x > 0.0) && (x < 1.0))
+        return 1;
+    else if ((x > -1.0) && (x < 0.0))
+        return -1;
+    else
+        return (int8_t)x;
+}
 
 /*****************************************************************************/
 

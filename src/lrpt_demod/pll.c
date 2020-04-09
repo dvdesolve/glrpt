@@ -21,7 +21,6 @@
 #include "../glrpt/display.h"
 #include "../glrpt/utils.h"
 #include "demod.h"
-#include "utils.h"
 
 #include <complex.h>
 #include <math.h>
@@ -29,6 +28,7 @@
 
 /*****************************************************************************/
 
+static inline double Clamp_Double(double x, double max_abs);
 static void Costas_Recompute_Coeffs(Costas_t *self, double damping, double bw);
 static double Lut_Tanh(double val);
 
@@ -36,6 +36,21 @@ static double Lut_Tanh(double val);
 
 static double *lut_tanh = NULL;
 static double costas_err_scale;
+
+/*****************************************************************************/
+
+/* Clamp_Double()
+ *
+ * Clamp a double value in the range [-max_abs, max_abs]
+ */
+static inline double Clamp_Double(double x, double max_abs) {
+    if (x > max_abs)
+        return max_abs;
+    else if (x < -max_abs)
+        return -max_abs;
+    else
+        return x;
+}
 
 /*****************************************************************************/
 

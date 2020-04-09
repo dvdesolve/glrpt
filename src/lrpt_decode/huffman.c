@@ -31,7 +31,8 @@ static int Get_DC_Real(const uint16_t w);
 
 /*****************************************************************************/
 
-int ac_lookup[65536], dc_lookup[65536];
+static int ac_lookup[65536];
+static int dc_lookup[65536];
 
 static uint8_t t_ac_0[178] =
 {
@@ -56,13 +57,13 @@ static uint8_t t_ac_0[178] =
 
 /*****************************************************************************/
 
-inline int Get_AC(const uint16_t w) {
+int Get_AC(const uint16_t w) {
   return( ac_lookup[w] );
 }
 
 /*****************************************************************************/
 
-inline int Get_DC(const uint16_t w) {
+int Get_DC(const uint16_t w) {
   return( dc_lookup[w] );
 }
 

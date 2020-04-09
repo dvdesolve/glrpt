@@ -28,7 +28,6 @@ set(glrpt_SOURCES
     lrpt_demod/doqpsk.c
     lrpt_demod/filters.c
     lrpt_demod/pll.c
-    lrpt_demod/utils.c
     lrpt_decode/alib.c
     lrpt_decode/correlator.c
     lrpt_decode/dct.c
@@ -60,7 +59,6 @@ set(glrpt_HEADERS
     lrpt_demod/doqpsk.h
     lrpt_demod/filters.h
     lrpt_demod/pll.h
-    lrpt_demod/utils.h
     lrpt_decode/alib.h
     lrpt_decode/correlator.h
     lrpt_decode/dct.h

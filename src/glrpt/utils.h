@@ -29,6 +29,30 @@
 
 /*****************************************************************************/
 
+/* Clamps a double value between min and max */
+static inline double dClamp(double x, double min, double max) {
+    if (x < min)
+        return min;
+    else if (x > max)
+        return max;
+    else
+        return x;
+}
+
+/*****************************************************************************/
+
+/* Clamps an integer value between min and max */
+static inline int iClamp(int i, int min, int max) {
+    if (i < min)
+        return min;
+    else if (i > max)
+        return max;
+    else
+        return i;
+}
+
+/*****************************************************************************/
+
 gboolean PrepareDirectories(void);
 void File_Name(char *file_name, uint32_t chn, const char *ext);
 void Usage(void);

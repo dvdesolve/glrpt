@@ -27,7 +27,6 @@
 
 /*****************************************************************************/
 
-/* TODO review, may be inlines are more appropriate */
 #define JPEG_MAX(a,b) (((a)>(b))?(a):(b))
 #define JPEG_MIN(a,b) (((a)<(b))?(a):(b))
 

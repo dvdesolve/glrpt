@@ -100,14 +100,14 @@ static gboolean jpeg_encoder_jpg_open(
         struct jpeg_encoder *enc,
         int p_x_res,
         int p_y_res);
-inline static dctq_t round_to_zero(const dct_t j, const int32_t quant);
+static inline dctq_t round_to_zero(const dct_t j, const int32_t quant);
 static void jpeg_encoder_quantize_pixels(
         struct jpeg_encoder *enc,
         dct_t *pSrc,
         dctq_t *pDst,
         const int32_t *quant);
 static void jpeg_encoder_flush_output_buffer(struct jpeg_encoder *enc);
-inline static uint32_t bit_count(int temp1);
+static inline uint32_t bit_count(int temp1);
 static void jpeg_encoder_put_bits(
         struct jpeg_encoder *enc,
         uint32_t bits,
@@ -1080,7 +1080,7 @@ static gboolean jpeg_encoder_jpg_open(
 
 /*****************************************************************************/
 
-inline static dctq_t round_to_zero(const dct_t j, const int32_t quant) {
+static inline dctq_t round_to_zero(const dct_t j, const int32_t quant) {
   if( j < 0 )
   {
     dctq_t jtmp = (dctq_t)(-j) + (dctq_t)(quant >> 1);
@@ -1125,7 +1125,7 @@ static void jpeg_encoder_flush_output_buffer(struct jpeg_encoder *enc) {
 
 /*****************************************************************************/
 
-inline static uint32_t bit_count(int temp1) {
+static inline uint32_t bit_count(int temp1) {
   if( temp1 < 0 )
   {
     temp1 = -temp1;

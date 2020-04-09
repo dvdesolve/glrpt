@@ -55,12 +55,6 @@ static void Vit_Conv_Encode(
 
 /*****************************************************************************/
 
-inline double Vit_Get_Percent_BER(const viterbi27_rec_t *v) {
-  return( 100.0 * v->BER ) / (double)FRAME_BITS;
-}
-
-/*****************************************************************************/
-
 static uint16_t Metric_Soft_Distance(
         uint8_t hard,
         uint8_t soft_y0,

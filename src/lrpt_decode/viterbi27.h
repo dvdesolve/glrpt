@@ -77,7 +77,12 @@ typedef struct viterbi27_rec_t {
 
 /*****************************************************************************/
 
-double Vit_Get_Percent_BER(const viterbi27_rec_t *v);
+static inline double Vit_Get_Percent_BER(const viterbi27_rec_t *v) {
+  return( 100.0 * v->BER ) / (double)FRAME_BITS;
+}
+
+/*****************************************************************************/
+
 void Vit_Decode(viterbi27_rec_t *v, uint8_t *input, uint8_t *output);
 void Mk_Viterbi27(viterbi27_rec_t *v);
 

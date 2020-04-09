@@ -44,6 +44,7 @@ static char *Filename(char *fpath);
 
 /*****************************************************************************/
 
+/* TODO may be move to another place */
 /* An int variable holding the single-bit flags */
 static int Flags = 0;
 
@@ -428,7 +429,6 @@ void Cleanup(void) {
 
 /*****************************************************************************/
 
-/* TODO may be it worth to make them inline and combine with another utils */
 /* Functions for testing and setting/clearing flags */
 int isFlagSet(int flag) {
   return( Flags & flag );
@@ -528,25 +528,4 @@ void Strlcat(char *dest, const char *src, size_t n) {
 
   /* Terminate dest string */
   dest[idd] = '\0';
-}
-
-/*****************************************************************************/
-
-/* TODO review/move */
-/* Clamps a double value between min and max */
-inline double dClamp(double x, double min, double max) {
-  double ret = x;
-  if( x < min ) ret = min;
-  else if( x > max ) ret = max;
-  return( ret );
-}
-
-/*****************************************************************************/
-
-/* Clamps an integer value between min and max */
-inline int iClamp(int i, int min, int max) {
-  int ret = i;
-  if( i < min ) ret = min;
-  else if( i > max ) ret = max;
-  return( ret );
 }

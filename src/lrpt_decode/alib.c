@@ -58,12 +58,6 @@ uint32_t Bio_Peek_n_Bits(bit_io_rec_t *b, const int n) {
 
 /*****************************************************************************/
 
-inline void Bio_Advance_n_Bits(bit_io_rec_t *b, const int n) {
-  b->pos += n;
-}
-
-/*****************************************************************************/
-
 uint32_t Bio_Fetch_n_Bits(bit_io_rec_t *b, const int n) {
   uint32_t result = Bio_Peek_n_Bits( b, n );
   Bio_Advance_n_Bits( b, n );
