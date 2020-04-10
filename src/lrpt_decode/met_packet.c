@@ -29,6 +29,10 @@
 
 /*****************************************************************************/
 
+#define PACKET_FULL_MARK    2047
+
+/*****************************************************************************/
+
 static void Parse_70(uint8_t *p);
 static void Act_Apd(uint8_t *p, uint32_t apid, int pck_cnt);
 static void Parse_Apd(uint8_t *p);

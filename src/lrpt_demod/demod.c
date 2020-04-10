@@ -41,6 +41,27 @@
 
 /*****************************************************************************/
 
+/* For displaying PLL data and gauge */
+#define PLL_AVE_RANGE1  0.6
+#define PLL_AVE_RANGE2  3.0
+
+/* Range factors for level gauges */
+#define AGC_RANGE1      1.2
+#define AGC_AVE_RANGE   2000.0
+
+#define RESYNC_SCALE_QPSK       2000000.0
+#define RESYNC_SCALE_DOQPSK     2000000.0
+#define RESYNC_SCALE_IDOQPSK    2000000.0
+
+/* TODO seems like mess-up; recheck and refer to SOFT_FRAME_LENGTH directly */
+#define DEMOD_BUF_SIZE  49152 // 3 * SOFT_FRAME_LEN
+#define DEMOD_BUF_MIDL  16384 // 1 * SOFT_FRAME_LEN
+#define DEMOD_BUF_LOWR  32768 // 2 * SOFT_FRAME_LEN
+/* TODO refer directly */
+#define RAW_BUF_REALLOC 73728 // INTLV_BASE_LEN
+
+/*****************************************************************************/
+
 static inline int8_t Clamp_Int8(double x);
 static gboolean Demod_QPSK(complex double fdata, int8_t *buffer);
 static gboolean Demod_DOQPSK(complex double fdata, int8_t *buffer);

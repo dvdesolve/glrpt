@@ -37,57 +37,55 @@
 /* Runtime config data */
 extern rc_data_t rc_data;
 
-/* QPSK Constellation drawingarea pixbuf */
+/* QPSK constellation drawing area pixbuf */
 extern GdkPixbuf *qpsk_pixbuf;
 extern guchar    *qpsk_pixels;
 extern gint
-  qpsk_rowstride,
-  qpsk_n_channels,
-  qpsk_width,
-  qpsk_height,
-  qpsk_center_x,
-  qpsk_center_y;
+    qpsk_rowstride,
+    qpsk_n_channels,
+    qpsk_width,
+    qpsk_height,
+    qpsk_center_x,
+    qpsk_center_y;
 
 /* Waterfall window pixbuf */
 extern GdkPixbuf *wfall_pixbuf;
 extern guchar    *wfall_pixels;
 extern gint
-  wfall_rowstride,
-  wfall_n_channels,
-  wfall_width,
-  wfall_height;
+    wfall_rowstride,
+    wfall_n_channels,
+    wfall_width,
+    wfall_height;
 
 /* Global widgets */
-/* TODO check if these objects should be local; order of enumeration */
 extern GtkWidget
-  *qpsk_drawingarea,    /* QPSK Constellation drawingarea */
-  *ifft_drawingarea,    /* IFFT Spectrum drawingarea */
-  *main_window,         /* glrpt's top window   */
-  *start_togglebutton,  /* Start Receive and Decode toggle button */
-  *text_scroller,       /* Text view scroller    */
-  *lrpt_image,          /* Image to be displayed */
-  *pll_lock_icon,       /* PLL Lock indicator icon */
-  *pll_ave_entry,       /* PLL lock detect level */
-  *pll_freq_entry,      /* PLL frequency indicator */
-  *sig_level_entry,     /* Average Signal level in AGC */
-  *agc_gain_entry,      /* AGC gain level */
-  *frame_icon,          /* Frame Status indicator icon */
-  *status_icon,         /* Receiver Status indicator icon */
-  *sig_quality_entry,   /* Signal Quality as given by Packet Decoder */
-  *packet_cnt_entry,    /* OK and Total count of Packets */
-  *ob_time_entry,       /* On Board Time indicator */
-  *sig_level_drawingarea, /* Signal level drawingarea */
-  *sig_qual_drawingarea,  /* Signal quality drawingarea */
-  *agc_gain_drawingarea,  /* Agc gain drawingarea */
-  *pll_ave_drawingarea;   /* PLL average drawingarea */
+    *qpsk_drawingarea,    /* QPSK constellation drawing area                  */
+    *ifft_drawingarea,    /* IFFT spectrum drawing area                       */
+    *main_window,         /* glrpt's top window                               */
+    *start_togglebutton,  /* Start receive and decode toggle button           */
+    *text_scroller,       /* Text view scroller                               */
+    *lrpt_image,          /* Image to be displayed                            */
+    *pll_lock_icon,       /* PLL lock indicator icon                          */
+    *pll_ave_entry,       /* PLL lock detect level                            */
+    *pll_freq_entry,      /* PLL frequency indicator                          */
+    *sig_level_entry,     /* Average signal level in AGC                      */
+    *agc_gain_entry,      /* AGC gain level                                   */
+    *frame_icon,          /* Frame status indicator icon                      */
+    *status_icon,         /* Receiver status indicator icon                   */
+    *sig_quality_entry,   /* Signal quality as given by packet decoder        */
+    *packet_cnt_entry,    /* OK and total count of packets                    */
+    *ob_time_entry,       /* Onboard time indicator                           */
+    *sig_level_drawingarea, /* Signal level drawing area                      */
+    *sig_qual_drawingarea,  /* Signal quality drawing area                    */
+    *agc_gain_drawingarea,  /* AGC gain drawing area                          */
+    *pll_ave_drawingarea;   /* PLL average drawing area                       */
 
 extern GtkBuilder
-  *decode_timer_dialog_builder,
-  *auto_timer_dialog_builder,
-  *main_window_builder,
-  *popup_menu_builder;
+    *decode_timer_dialog_builder,
+    *auto_timer_dialog_builder,
+    *main_window_builder,
+    *popup_menu_builder;
 
-/* TODO check for locality */
 /* Text buffer for text view */
 extern GtkTextBuffer *text_buffer;
 
@@ -106,13 +104,13 @@ extern guchar *scaled_image_pixel_buf;
 
 /* Common between callbacks.c and callback_func.c */
 extern GtkWidget
-  *quit_dialog,
-  *error_dialog,
-  *popup_menu,
-  *decode_timer_dialog,
-  *auto_timer_dialog;
+    *quit_dialog,
+    *error_dialog,
+    *popup_menu,
+    *decode_timer_dialog,
+    *auto_timer_dialog;
 
-/* IFFT data buffer*/
+/* IFFT data buffer */
 extern int16_t *ifft_data;
 extern uint16_t ifft_data_length;
 
@@ -120,18 +118,18 @@ extern uint16_t ifft_data_length;
 extern filter_data_t filter_data_i;
 extern filter_data_t filter_data_q;
 
-/* Demodulation control semaphore */
+/* Demodulator control semaphore */
 extern sem_t demod_semaphore;
 
+/* Meteor decoder variables */
 extern ac_table_rec_t *ac_table;
 extern size_t ac_table_len;
+extern mtd_rec_t mtd_record;
 
 /* Channel images and sizes */
 extern uint8_t *channel_image[CHANNEL_IMAGE_NUM];
 extern size_t   channel_image_size;
 extern uint32_t channel_image_width, channel_image_height;
-
-extern mtd_rec_t mtd_record;
 
 /*****************************************************************************/
 

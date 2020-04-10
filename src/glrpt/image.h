@@ -26,16 +26,15 @@
 /* Normalized black value */
 #define NORM_BLACK  0
 
-/* Min and Max values required in Histogram Normalization
- * to leave behind occasional black bands in images */
+/* Min and max values required in histogram normalization to leave behind
+ * occasional black bands in images
+ */
 #define MIN_BLACK   2
 #define MAX_WHITE   255
 
+/* TODO seems like unused */
 /* Minimum black value in blue APID image */
 #define BLUE_MIN_BLACK  64
-
-#define BLACK_CUT_OFF   1 /* Black cut-off percentile for normalization */
-#define WHITE_CUT_OFF   1 /* White cut-off percentile for normalization */
 
 /*****************************************************************************/
 

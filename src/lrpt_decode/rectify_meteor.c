@@ -50,6 +50,12 @@
 
 /*****************************************************************************/
 
+#define	PHI_MAX   	    0.9425 /* Half the max scan angle, in radians */
+#define	SAT_ALTITUDE    830.0  /* Satellite's average altitude in km */
+#define EARTH_RADIUS    6370.0 /* Earth's average radius in km */
+
+/*****************************************************************************/
+
 static double Calculate_beta(double phi);
 static void Rectify_Grayscale_1(
         uint8_t *in_buff,

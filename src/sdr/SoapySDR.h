@@ -25,21 +25,6 @@
 
 /*****************************************************************************/
 
-/* Range of Gain slider */
-#define GAIN_SCALE  100.0
-
-/* Range factors for level gauges */
-#define AGC_GAIN_RANGE1   1.0
-#define AGC_GAIN_RANGE2   0.01
-
-#define DATA_SCALE  10.0
-
-/* DSP Filter Parameters */
-#define FILTER_RIPPLE   5.0
-#define FILTER_POLES    6
-
-/*****************************************************************************/
-
 gboolean SoapySDR_Set_Center_Freq(uint32_t center_freq);
 void SoapySDR_Set_Tuner_Gain_Mode(void);
 void SoapySDR_Set_Tuner_Gain(double gain);

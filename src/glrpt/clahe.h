@@ -25,34 +25,19 @@
 
 /*****************************************************************************/
 
-/* TODO may be we should define it during configuration step */
-#define BYTE_IMAGE
-
-#ifdef BYTE_IMAGE /* for 8 bit-per-pixel images */
-typedef unsigned char kz_pixel_t;
-#define uiNR_OF_GREY ( 256 )
-
-#else /* for 12 bit-per-pixel images (default) */
-typedef unsigned short kz_pixel_t;
-#define uiNR_OF_GREY ( 4096 )
-
-#endif
-
-/* max. # contextual regions in x-direction */
-#define MAX_REG_X   16
-
-/* max. # contextual regions in y-direction */
-#define MAX_REG_Y   16
-
 /* Contextual regions actually used (image size is % 8) */
 #define REGIONS_X   8
 #define REGIONS_Y   8
 
 /* Number of greybins for histogram ("dynamic range"). This maximum */
-#define NUM_GREYBINS  256
+#define NUM_GREYBINS    256
 
 /* Normalized cliplimit (higher values give more contrast) */
-#define CLIP_LIMIT   3.0
+#define CLIP_LIMIT  3.0
+
+/*****************************************************************************/
+
+typedef unsigned char kz_pixel_t;
 
 /*****************************************************************************/
 

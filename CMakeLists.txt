@@ -11,13 +11,13 @@
 #
 #  http://www.gnu.org/copyleft/gpl.txt
 #
- 
+
+# global settings
 cmake_minimum_required(VERSION 3.12)
-
-
 project(glrpt VERSION 2.5.0 LANGUAGES C)
 
 
+# use FHS
 include(GNUInstallDirs)
 
 # default build type
@@ -30,9 +30,10 @@ endif()
 set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 
-
+# use specific modules
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
 
+# build project
 add_subdirectory(src)
 add_subdirectory(share)

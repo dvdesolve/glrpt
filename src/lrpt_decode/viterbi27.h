@@ -24,16 +24,6 @@
 
 /*****************************************************************************/
 
-#define VITERBI27_POLYA     79      // 1001111
-#define VITERBI27_POLYB     109     // 1101101
-#define SOFT_MAX            255
-#define DISTANCE_MAX        65535
-#define FRAME_BITS          8192    // 1024 * 8;
-#define HIGH_BIT            64
-#define ENCODE_LEN          16392   // 2 * (FRAME_BITS + 8);
-#define NUM_ITER            128     // HIGH_BIT << 1;
-#define RENORM_INTERVAL     128     // DISTANCE_MAX / (2 * SOFT_MAX);
-
 #define FRAME_BITS          8192
 #define NUM_STATES          128
 #define MIN_TRACEBACK       35      // 5*7
@@ -78,7 +68,7 @@ typedef struct viterbi27_rec_t {
 /*****************************************************************************/
 
 static inline double Vit_Get_Percent_BER(const viterbi27_rec_t *v) {
-  return( 100.0 * v->BER ) / (double)FRAME_BITS;
+    return (100.0 * v->BER) / (double)FRAME_BITS;
 }
 
 /*****************************************************************************/

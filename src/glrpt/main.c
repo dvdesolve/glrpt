@@ -32,11 +32,16 @@
 
 /*****************************************************************************/
 
+#define IFFT_DECIMATE   2
+
+/*****************************************************************************/
+
 static void sig_handler(int signal);
 
 /*****************************************************************************/
 
-/* main
+/* main()
+ *
  * Main program initialization and startup
  */
 int main(int argc, char *argv[]) {
@@ -57,7 +62,7 @@ int main(int argc, char *argv[]) {
     sigaction(SIGCONT, &sa_new, 0);
     sigaction(SIGALRM, &sa_new, 0);
 
-    /* Process command line options. Defaults below */
+    /* Process command line options */
     int option;
 
     while ((option = getopt(argc, argv, "hv")) != -1)
@@ -105,44 +110,62 @@ int main(int argc, char *argv[]) {
     gtk_widget_show(main_window);
 
     /* Create the text view scroller */
-    text_scroller = Builder_Get_Object(main_window_builder, "text_scrolledwindow");
+    text_scroller = Builder_Get_Object(main_window_builder,
+            "text_scrolledwindow");
 
     /* Get text buffer */
     text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(Builder_Get_Object(
                     main_window_builder, "message_textview")));
 
     /* Get waterfall and constellation widgets */
-    qpsk_drawingarea = Builder_Get_Object(main_window_builder, "qpsk_drawingarea");
-    ifft_drawingarea = Builder_Get_Object(main_window_builder, "ifft_drawingarea");
+    qpsk_drawingarea = Builder_Get_Object(main_window_builder,
+            "qpsk_drawingarea");
+    ifft_drawingarea = Builder_Get_Object(main_window_builder,
+            "ifft_drawingarea");
 
     /* Get "RX status" widgets */
-    start_togglebutton    = Builder_Get_Object(main_window_builder, "start_togglebutton");
-    pll_ave_entry         = Builder_Get_Object(main_window_builder, "pll_ave_entry");
-    pll_freq_entry        = Builder_Get_Object(main_window_builder, "pll_freq_entry");
-    pll_lock_icon         = Builder_Get_Object(main_window_builder, "pll_lock_icon");
-    agc_gain_entry        = Builder_Get_Object(main_window_builder, "agc_gain_entry");
-    sig_level_entry       = Builder_Get_Object(main_window_builder, "sig_level_entry");
-    frame_icon            = Builder_Get_Object(main_window_builder, "frame_icon");
-    status_icon           = Builder_Get_Object(main_window_builder, "status_icon");
-    sig_quality_entry     = Builder_Get_Object(main_window_builder, "sig_quality_entry");
-    packet_cnt_entry      = Builder_Get_Object(main_window_builder, "packet_cnt_entry");
-    ob_time_entry         = Builder_Get_Object(main_window_builder, "ob_time_entry");
-    sig_level_drawingarea = Builder_Get_Object(main_window_builder, "sig_level_drawingarea");
-    sig_qual_drawingarea  = Builder_Get_Object(main_window_builder, "sig_qual_drawingarea");
-    agc_gain_drawingarea  = Builder_Get_Object(main_window_builder, "agc_gain_drawingarea");
-    pll_ave_drawingarea   = Builder_Get_Object(main_window_builder, "pll_ave_drawingarea");
+    start_togglebutton    = Builder_Get_Object(main_window_builder,
+            "start_togglebutton");
+    pll_ave_entry         = Builder_Get_Object(main_window_builder,
+            "pll_ave_entry");
+    pll_freq_entry        = Builder_Get_Object(main_window_builder,
+            "pll_freq_entry");
+    pll_lock_icon         = Builder_Get_Object(main_window_builder,
+            "pll_lock_icon");
+    agc_gain_entry        = Builder_Get_Object(main_window_builder,
+            "agc_gain_entry");
+    sig_level_entry       = Builder_Get_Object(main_window_builder,
+            "sig_level_entry");
+    frame_icon            = Builder_Get_Object(main_window_builder,
+            "frame_icon");
+    status_icon           = Builder_Get_Object(main_window_builder,
+            "status_icon");
+    sig_quality_entry     = Builder_Get_Object(main_window_builder,
+            "sig_quality_entry");
+    packet_cnt_entry      = Builder_Get_Object(main_window_builder,
+            "packet_cnt_entry");
+    ob_time_entry         = Builder_Get_Object(main_window_builder,
+            "ob_time_entry");
+    sig_level_drawingarea = Builder_Get_Object(main_window_builder,
+            "sig_level_drawingarea");
+    sig_qual_drawingarea  = Builder_Get_Object(main_window_builder,
+            "sig_qual_drawingarea");
+    agc_gain_drawingarea  = Builder_Get_Object(main_window_builder,
+            "agc_gain_drawingarea");
+    pll_ave_drawingarea   = Builder_Get_Object(main_window_builder,
+            "pll_ave_drawingarea");
 
     /* Define some rendering tags */
-    gtk_text_buffer_create_tag(text_buffer, "black",
-            "foreground", "black", NULL);
-    gtk_text_buffer_create_tag(text_buffer, "red",
-            "foreground", "red", NULL);
-    gtk_text_buffer_create_tag(text_buffer, "orange",
-            "foreground", "orange", NULL);
-    gtk_text_buffer_create_tag(text_buffer, "green",
-            "foreground", "darkgreen", NULL);
-    gtk_text_buffer_create_tag(text_buffer, "bold",
-            "weight", PANGO_WEIGHT_BOLD, NULL);
+    gtk_text_buffer_create_tag(text_buffer, "black", "foreground",
+            "black", NULL);
+    gtk_text_buffer_create_tag(text_buffer, "red", "foreground",
+            "red", NULL);
+    gtk_text_buffer_create_tag(text_buffer, "orange", "foreground",
+            "orange", NULL);
+    gtk_text_buffer_create_tag(text_buffer, "green", "foreground",
+            "darkgreen", NULL);
+    gtk_text_buffer_create_tag(text_buffer, "bold", "weight",
+            PANGO_WEIGHT_BOLD, NULL);
 
     /* Get sizes of displays and initialize */
     GtkAllocation alloc;
@@ -167,7 +190,7 @@ int main(int argc, char *argv[]) {
 
 /*****************************************************************************/
 
-/* sig_handler
+/* sig_handler()
  *
  * Signal action handler function
  */

@@ -26,6 +26,20 @@
 #include <strings.h>
 
 /*****************************************************************************/
+
+#define VITERBI27_POLYA     79      // 1001111
+#define VITERBI27_POLYB     109     // 1101101
+#define SOFT_MAX            255
+#define DISTANCE_MAX        65535
+#define HIGH_BIT            64
+/* TODO seems like unused and should be (2 * FRAME_BITS + 8) */
+#define ENCODE_LEN          16392   // 2 * (FRAME_BITS + 8);
+#define NUM_ITER            128     // HIGH_BIT << 1;
+/* TODO rounded down? */
+#define RENORM_INTERVAL     128     // DISTANCE_MAX / (2 * SOFT_MAX);
+
+/*****************************************************************************/
+
 static uint16_t Metric_Soft_Distance(
         uint8_t hard,
         uint8_t soft_y0,

@@ -12,8 +12,7 @@
  * multiple of the X- and Y sizes of the contextual regions. A check on various
  * other error conditions is performed.
  *
- * #define the symbol BYTE_IMAGE to make this implementation suitable for
- * 8-bit images. The maximum number of contextual regions can be redefined
+ * The maximum number of contextual regions can be redefined
  * by changing MAX_REG_X and/or MAX_REG_Y; the use of more than 256
  * contextual regions is not recommended.
  *
@@ -33,6 +32,14 @@
 
 #include <stddef.h>
 #include <stdint.h>
+
+/*****************************************************************************/
+
+#define uiNR_OF_GREY    256
+
+/* Max number of contextual regions in x and y directions */
+#define MAX_REG_X   16
+#define MAX_REG_Y   16
 
 /*****************************************************************************/
 
@@ -388,9 +395,7 @@ gboolean CLAHE(
   error |= (Min >= Max);                /* minimum equal or larger than maximum */
   error |= ((uiNrX < 2) || (uiNrY < 2));/* at least 4 contextual regions required */
   error |= (fCliplimit == 1.0);         /* is OK, immediately returns original image. */
-#ifndef BYTE_IMAGE
-  error |= (Max >= uiNR_OF_GREY);       /* maximum too large */
-#endif
+  
   if( error ) return( FALSE );
 
   if( uiNrBins == 0 ) uiNrBins = 128;   /* default value when not specified */

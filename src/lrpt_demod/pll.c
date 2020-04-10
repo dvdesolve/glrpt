@@ -28,6 +28,22 @@
 
 /*****************************************************************************/
 
+/* Costas loop default parameters */
+#define FREQ_MAX            0.8     /* Maximum frequency range of locked PLL */
+#define COSTAS_DAMP         0.7071  /* 1/M_SQRT2 */
+#define COSTAS_INIT_FREQ    0.001
+#define AVG_WINSIZE         20000.0 /* My mod, now interp. factor taken into account */
+#define DELTA_WINSIZE       100.0   /* Moving Average window for pahase errors */
+#define DELTA_WINSIZE_1     99.0    /* Above -1 */
+#define LOCKED_WINSIZEX     10.0    /* Error Average window size multiplier (in lock) */
+#define ERR_SCALE_QPSK      43.0    /* Scale factors to control magnitude of phase error */
+#define ERR_SCALE_DOQPSK    80.0
+#define ERR_SCALE_IDOQPSK   80.0
+#define LOCKED_BW_REDUCE    4.0     /* PLL Bandwidth reduction (in lock) */
+#define LOCKED_ERR_SCALE    10.0    /* Phase error scale on lock */
+
+/*****************************************************************************/
+
 static inline double Clamp_Double(double x, double max_abs);
 static void Costas_Recompute_Coeffs(Costas_t *self, double damping, double bw);
 static double Lut_Tanh(double val);

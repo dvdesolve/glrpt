@@ -22,6 +22,10 @@
 
 /*****************************************************************************/
 
+#define CORR_LIMIT  55
+
+/*****************************************************************************/
+
 static uint8_t Rotate_IQ(uint8_t data, int shift);
 static uint64_t Rotate_IQ_QW(uint64_t data, int shift);
 static uint64_t Flip_IQ_QW(uint64_t data);

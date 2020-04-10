@@ -30,6 +30,11 @@
 
 /*****************************************************************************/
 
+#define BLACK_CUT_OFF   1 /* Black cut-off percentile for normalization */
+#define WHITE_CUT_OFF   1 /* White cut-off percentile for normalization */
+
+/*****************************************************************************/
+
 /*  Normalize_Image()
  *
  *  Does histogram (linear) normalization of a pgm (P5) image file

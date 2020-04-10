@@ -25,10 +25,6 @@
 
 /*****************************************************************************/
 
-#define CORR_LIMIT          55
-
-/*****************************************************************************/
-
 int Hard_Correlate(const uint8_t d, const uint8_t w);
 void Init_Correlator_Tables(void);
 void Fix_Packet(void *data, int len, int shift);

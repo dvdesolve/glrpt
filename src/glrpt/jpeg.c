@@ -28,6 +28,91 @@
 
 /*****************************************************************************/
 
+#define JPEG_MAX(a,b)   (((a)>(b))?(a):(b))
+#define JPEG_MIN(a,b)   (((a)<(b))?(a):(b))
+
+#define RGBA    TRUE  /* Signal image source to be rgba type */
+#define RGB     FALSE /* Signal image source to be rgb type */
+
+/*****************************************************************************/
+
+enum {
+    M_SOF0 = 0xC0,
+    M_DHT  = 0xC4,
+    M_SOI  = 0xD8,
+    M_EOI  = 0xD9,
+    M_SOS  = 0xDA,
+    M_DQT  = 0xDB,
+    M_APP0 = 0xE0
+};
+
+enum {
+    DC_LUM_CODES    = 12,
+    AC_LUM_CODES    = 256,
+    DC_CHROMA_CODES = 12,
+    AC_CHROMA_CODES = 256,
+    MAX_HUFF_SYMBOLS    = 257,
+    MAX_HUFF_CODESIZE   = 32
+};
+
+/*****************************************************************************/
+
+typedef double dct_t;
+typedef int16_t dctq_t; /* quantized */
+
+/*****************************************************************************/
+
+struct component {
+    uint8_t m_h_samp, m_v_samp;
+    int m_last_dc_val;
+};
+
+struct image {
+    int m_x, m_y;
+
+    float *m_pixels;
+    dctq_t *m_dctqs; /* quantized dcts */
+};
+
+struct sym_freq {
+    uint32_t m_key;
+    uint32_t m_sym_index;
+};
+
+struct huffman_table {
+    uint32_t m_codes[256];
+    uint8_t  m_code_sizes[256];
+    uint8_t  m_bits[17];
+    uint8_t  m_val[256];
+    uint32_t m_count[256];
+};
+
+struct huffman_dcac {
+    int32_t m_quantization_table[64];
+    struct huffman_table dc, ac;
+};
+
+/* JPEG encoder data structure */
+struct jpeg_encoder {
+    FILE *m_pStream;
+    compression_params_t m_params;
+    uint8_t m_num_components;
+    struct component m_comp[3];
+    struct huffman_dcac m_huff[2];
+    enum { JPEG_OUT_BUF_SIZE = 2048 } buff;
+    uint8_t m_out_buf[JPEG_OUT_BUF_SIZE];
+    uint8_t *m_pOut_buf;
+    uint32_t m_out_buf_left;
+    uint32_t m_bit_buffer;
+    uint32_t m_bits_in;
+    gboolean m_all_stream_writes_succeeded;
+    int m_mcu_w, m_mcu_h;
+    int m_x, m_y;
+    struct image m_image[3];
+};
+
+/*****************************************************************************/
+
 static void image_init(struct image *img);
 static void image_deinit(struct image *img);
 static inline void image_set_px(struct image *img, float px, int x, int y);

@@ -23,24 +23,6 @@
 
 /*****************************************************************************/
 
-/* The Interleaver parameters */
-/* The Interleaver branch delay INTLV_DELAY: 2048 */
-#define INTLV_BRANCHES      36      // Interleaver number of branches
-#define INTLV_BASE_LEN      73728   // INTLV_BRANCHES * INTLV_DELAY
-#define INTLV_MESG_LEN      2654208 // INTLV_BRANCHES * INTLV_BASE_LEN
-#define INTLV_DATA_LEN      72      // Number of actual interleaved symbols
-#define INTLV_SYNCDATA      80      // Number of interleaved symbols + sync
-
-#define SYNC_DET_DEPTH      8       // How many consecutive sync words to search for
-#define SYNCD_BUF_MARGIN    640     // (SYNCD_DEPTH - 1) * INTLV_SYNCDATA
-#define SYNCD_BLOCK_SIZ     720     // (SYNCD_DEPTH + 1) * INTLV_SYNCDATA
-#define SYNCD_BUF_STEP      560     // SYNCD_DEPTH * INTLV_SYNCDATA
-
-#define RAW_BUF_SIZE        3000000 // Raw symbols buffer size
-#define DEINT_RESYNC_LEN    345792  // RAW_BUF_SIZ - INTLV_MESG_LEN
-
-/*****************************************************************************/
-
 void De_Interleave(uint8_t *raw, int raw_siz, uint8_t **resync, int *resync_siz);
 void Make_Isqrt_Table(void);
 void De_Diffcode(int8_t *buff, uint32_t length);

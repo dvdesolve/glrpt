@@ -23,10 +23,6 @@
 
 /*****************************************************************************/
 
-#define SIG_QUAL_RANGE  100.0
-
-/*****************************************************************************/
-
 void Medet_Init(void);
 void Medet_Deinit(void);
 void Decode_Image(uint8_t *in_buffer, int buf_len);

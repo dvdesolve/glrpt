@@ -28,7 +28,6 @@
 #include <gtk/gtk.h>
 
 #include <errno.h>
-#include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -108,7 +107,7 @@ gboolean PrepareDirectories(void) {
  */
 static gboolean MkdirRecurse(const char *path) {
     const size_t len = strlen(path);
-    char _path[PATH_MAX];
+    char _path[MAX_FILE_NAME];
     char *p;
 
     /* save directory path in a mutable var */
@@ -165,6 +164,7 @@ void File_Name(char *file_name, uint32_t chn, const char *ext) {
     utc = *gmtime( &tp );
     strftime( tim, sizeof(tim), "%d%b%Y-%H%M", &utc );
 
+    /* TODO possibly dangerous */
     /* Combination pseudo-color image */
     if( chn == 3 )
       snprintf( file_name, MAX_FILE_NAME-1,

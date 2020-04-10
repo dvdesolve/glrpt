@@ -29,17 +29,6 @@
 
 /*****************************************************************************/
 
-/* IFFT Signal Amplitude averaging window */
-#define AMPL_AVE_WIN   4
-#define AMPL_AVE_MUL   3
-
-/* Parameters used in coloring level bars */
-#define TRANSITION_BAND   0.2
-#define RED_THRESHOLD     4.0
-#define GREEN_THRESHOLD   1.5
-
-/*****************************************************************************/
-
 void Display_Waterfall(void);
 void Display_QPSK_Const(int8_t *buffer);
 void Display_Icon(GtkWidget *img, const gchar *name);

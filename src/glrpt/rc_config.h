@@ -27,16 +27,6 @@
 
 /*****************************************************************************/
 
-/* Special characters */
-#define LF   0x0A /* Line Feed */
-#define CR   0x0D /* Carriage Return */
-#define HT   0x09 /* Horizontal Tab  */
-
-/* Max length of lines in config file */
-#define LINE_LEN   81
-
-/*****************************************************************************/
-
 /* Runtime config data storage type */
 typedef struct rc_data_t {
     /* glrpt config directory, pictures directory and glade UI file */

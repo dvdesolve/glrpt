@@ -25,16 +25,6 @@
 
 /*****************************************************************************/
 
-/* AGC default parameters */
-#define AGC_WINSIZE         65536.0  // 1024*64
-#define AGC_WINSIZE_1       65535.0  // 1024*64
-#define AGC_TARGET          180.0
-#define AGC_MAX_GAIN        20.0
-#define AGC_BIAS_WINSIZE    262144.0 // 256*1024
-#define AGC_BIAS_WINSIZE_1  262143.0 // 256*1024 - 1
-
-/*****************************************************************************/
-
 Agc_t *Agc_Init(void);
 complex double Agc_Apply(Agc_t *self, complex double sample);
 void Agc_Free(Agc_t *self);

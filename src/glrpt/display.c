@@ -31,6 +31,20 @@
 
 /*****************************************************************************/
 
+/* Number of QPSK constellation points to plot. Must be <= SYM_CHUNKSIZE / 2 */
+#define QPSK_CONST_POINTS   512
+
+/* IFFT signal amplitude averaging window */
+#define AMPL_AVE_WIN    4
+#define AMPL_AVE_MUL    3
+
+/* Parameters used in level bars coloring */
+#define TRANSITION_BAND 0.2
+#define RED_THRESHOLD   4.0
+#define GREEN_THRESHOLD 1.5
+
+/*****************************************************************************/
+
 static int IFFT_Bin_Value(int sum_i, int sum_q, gboolean reset);
 static void Colorize(guchar *pix, int pixel_val);
 
