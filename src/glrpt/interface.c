@@ -33,11 +33,10 @@
 
 /*****************************************************************************/
 
-/* TODO recheck correctness */
 /* Number of Meteor-M LRPT image lines per second.
  * Actual value is ~6.5 but we want it as int
  */
-#define IMAGE_LINES_PERSEC  (13 / 2)
+#define IMAGE_LINES_PERSEC  13 / 2
 
 /* Gtk Builder object ids */
 #define ERROR_DIALOG_IDS \

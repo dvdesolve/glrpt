@@ -164,7 +164,7 @@ void File_Name(char *file_name, uint32_t chn, const char *ext) {
     utc = *gmtime( &tp );
     strftime( tim, sizeof(tim), "%d%b%Y-%H%M", &utc );
 
-    /* TODO possibly dangerous */
+    /* TODO possibly dangerous because of system string length limits */
     /* Combination pseudo-color image */
     if( chn == 3 )
       snprintf( file_name, MAX_FILE_NAME-1,
@@ -454,13 +454,6 @@ void ClearFlag(int flag) {
 
 /*****************************************************************************/
 
-/* TODO may be remove */
-void ToggleFlag(int flag) {
-  Flags ^= flag;
-}
-
-/*****************************************************************************/
-
 /* Strlcpy()
  *
  * Copies n-1 chars from src string into dest string. Unlike other
@@ -487,45 +480,4 @@ void Strlcpy(char *dest, const char *src, size_t n) {
 
   /* Terminate dest string */
   dest[idx] = '\0';
-}
-
-/*****************************************************************************/
-
-/* Strlcat()
- *
- * Concatenates at most n-1 chars from src string into dest string.
- * Unlike other such library fuctions, this makes sure that the dest
- * string is null terminated by copying only n-1 chars to leave room
- * for the terminating char. n would normally be the sizeof(dest)
- * string but copying will not go beyond the terminating null of src
-
- */
-/* TODO may be remove */
-void Strlcat(char *dest, const char *src, size_t n) {
-  char ch = dest[0];
-  int idd = 0; /* dest index */
-  int ids = 0; /* src  index */
-
-  /* Find terminating null of dest */
-  while( (n > 0) && (ch != '\0') )
-  {
-    idd++;
-    ch = dest[idd];
-    n--; /* Count remaining char's in dest */
-  }
-
-  /* Copy n-1 chars to leave room for terminating null */
-  n--;
-  ch = src[ids];
-  while( (n > 0) && (ch != '\0') )
-  {
-    dest[idd] = src[ids];
-    ids++;
-    ch = src[ids];
-    idd++;
-    n--;
-  }
-
-  /* Terminate dest string */
-  dest[idd] = '\0';
 }

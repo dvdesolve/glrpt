@@ -32,11 +32,8 @@
 #define SOFT_MAX            255
 #define DISTANCE_MAX        65535
 #define HIGH_BIT            64
-/* TODO seems like unused and should be (2 * FRAME_BITS + 8) */
-#define ENCODE_LEN          16392   // 2 * (FRAME_BITS + 8);
-#define NUM_ITER            128     // HIGH_BIT << 1;
-/* TODO rounded down? */
-#define RENORM_INTERVAL     128     // DISTANCE_MAX / (2 * SOFT_MAX);
+#define NUM_ITER            128     // HIGH_BIT << 1
+#define RENORM_INTERVAL     128     // DISTANCE_MAX / (2 * SOFT_MAX) (rounded?)
 
 /*****************************************************************************/
 

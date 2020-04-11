@@ -41,11 +41,6 @@
 /* Range of gain slider */
 #define GAIN_SCALE  100.0
 
-/* Range factors for level gauges */
-/* TODO seems like unused */
-#define AGC_GAIN_RANGE1   1.0
-#define AGC_GAIN_RANGE2   0.01
-
 #define DATA_SCALE  10.0
 
 /* DSP filter parameters */

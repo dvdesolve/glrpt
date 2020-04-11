@@ -40,10 +40,6 @@
 #define SYNCD_BLOCK_SIZ     720     // (SYNCD_DEPTH + 1) * INTLV_SYNCDATA
 #define SYNCD_BUF_STEP      560     // SYNCD_DEPTH * INTLV_SYNCDATA
 
-/* TODO seems like unused */
-#define RAW_BUF_SIZE        3000000 // Raw symbols buffer size
-#define DEINT_RESYNC_LEN    345792  // RAW_BUF_SIZ - INTLV_MESG_LEN
-
 /*****************************************************************************/
 
 static uint8_t Byte_at_Offset(uint8_t *data);

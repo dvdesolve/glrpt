@@ -75,7 +75,7 @@
  */
 #define METEOR_IMAGE_WIDTH  1568
 
-/* TODO recheck */
+/* TODO use booleans */
 /* Return values */
 #define ERROR       1
 #define SUCCESS     0
