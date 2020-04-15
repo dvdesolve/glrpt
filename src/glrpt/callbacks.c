@@ -26,7 +26,7 @@
 #include "interface.h"
 #include "utils.h"
 
-#include <cairo/cairo.h>
+#include <cairo.h>
 #include <gdk/gdk.h>
 #include <glib.h>
 #include <glib-object.h>

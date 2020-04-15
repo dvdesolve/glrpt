@@ -21,7 +21,7 @@
 
 #include "../lrpt_demod/demod.h"
 
-#include <cairo/cairo.h>
+#include <cairo.h>
 #include <glib.h>
 #include <gtk/gtk.h>
 

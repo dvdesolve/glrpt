@@ -27,7 +27,7 @@
 #include "interface.h"
 #include "utils.h"
 
-#include <cairo/cairo.h>
+#include <cairo.h>
 #include <gdk/gdk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib.h>

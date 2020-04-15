@@ -19,7 +19,7 @@
 
 /*****************************************************************************/
 
-#include <cairo/cairo.h>
+#include <cairo.h>
 #include <glib.h>
 #include <gtk/gtk.h>
 

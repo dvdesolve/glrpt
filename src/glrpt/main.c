@@ -45,6 +45,7 @@ static void sig_handler(int signal);
  * Main program initialization and startup
  */
 int main(int argc, char *argv[]) {
+    /* TODO should implement GtkApplication */
     /* New and old actions for sigaction routine */
     struct sigaction sa_new, sa_old;
 
