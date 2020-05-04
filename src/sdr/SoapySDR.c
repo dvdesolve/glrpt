@@ -347,7 +347,7 @@ void SoapySDR_Set_Tuner_Gain(double gain) {
   /* Scale gain request to range of available gains */
   gain *= range.maximum - range.minimum;
   gain /= GAIN_SCALE;
-  gain -= range.minimum;
+  gain += range.minimum;
 
   /* Set device receiver gain */
   int ret = SoapySDRDevice_setGain( sdr, SOAPY_SDR_RX, 0, gain );
