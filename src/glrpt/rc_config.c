@@ -366,6 +366,7 @@ gboolean Load_Config(gpointer data) {
   }
 
   /* Read JPEG Quality Factor, abort if EOF */
+  /* TODO seems like mess-up with type casting */
   if( Load_Line(line, glrptrc, "JPEG Quality Factor") != SUCCESS )
     return( FALSE );
   rc_data.jpeg_quality = (float)atof( line );

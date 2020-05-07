@@ -14,22 +14,12 @@
 
 /*****************************************************************************/
 
-#ifndef LRPT_DECODE_CORRELATOR_H
-#define LRPT_DECODE_CORRELATOR_H
+#ifndef DECODER_DCT_H
+#define DECODER_DCT_H
 
 /*****************************************************************************/
 
-#include "met_to_data.h"
-
-#include <stdint.h>
-
-/*****************************************************************************/
-
-int Hard_Correlate(const uint8_t d, const uint8_t w);
-void Init_Correlator_Tables(void);
-void Fix_Packet(void *data, int len, int shift);
-void Correlator_Init(corr_rec_t *c, uint64_t q);
-int Corr_Correlate(corr_rec_t *c, uint8_t *data, uint32_t len);
+void Flt_Idct_8x8(double *res, const double *inpt);
 
 /*****************************************************************************/
 

@@ -14,21 +14,22 @@
 
 /*****************************************************************************/
 
-#ifndef LRPT_DEMOD_FILTERS_H
-#define LRPT_DEMOD_FILTERS_H
+#ifndef DECODER_CORRELATOR_H
+#define DECODER_CORRELATOR_H
 
 /*****************************************************************************/
 
-#include "demod.h"
+#include "met_to_data.h"
 
-#include <complex.h>
 #include <stdint.h>
 
 /*****************************************************************************/
 
-Filter_t *Filter_RRC(uint32_t order, uint32_t factor, double osf, double alpha);
-complex double Filter_Fwd(Filter_t *const self, complex double in);
-void Filter_Free(Filter_t *self);
+int Hard_Correlate(const uint8_t d, const uint8_t w);
+void Init_Correlator_Tables(void);
+void Fix_Packet(void *data, int len, int shift);
+void Correlator_Init(corr_rec_t *c, uint64_t q);
+int Corr_Correlate(corr_rec_t *c, uint8_t *data, uint32_t len);
 
 /*****************************************************************************/
 

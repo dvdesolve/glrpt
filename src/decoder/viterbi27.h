@@ -14,8 +14,8 @@
 
 /*****************************************************************************/
 
-#ifndef LRPT_DECODE_VITERBI27_H
-#define LRPT_DECODE_VITERBI27_H
+#ifndef DECODER_VITERBI27_H
+#define DECODER_VITERBI27_H
 
 /*****************************************************************************/
 

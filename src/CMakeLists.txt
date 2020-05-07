@@ -10,7 +10,21 @@ pkg_check_modules(SOAPYSDR REQUIRED SoapySDR)
 # sources
 set(glrpt_SOURCES
     common/shared.c
-    glrpt/main.c
+    decoder/alib.c
+    decoder/correlator.c
+    decoder/dct.c
+    decoder/huffman.c
+    decoder/medet.c
+    decoder/met_jpg.c
+    decoder/met_packet.c
+    decoder/met_to_data.c
+    decoder/rectify_meteor.c
+    decoder/viterbi27.c
+    demodulator/agc.c
+    demodulator/demod.c
+    demodulator/doqpsk.c
+    demodulator/filters.c
+    demodulator/pll.c
     glrpt/callbacks.c
     glrpt/clahe.c
     glrpt/callback_func.c
@@ -18,30 +32,31 @@ set(glrpt_SOURCES
     glrpt/image.c
     glrpt/interface.c
     glrpt/jpeg.c
+    glrpt/main.c
     glrpt/rc_config.c
     glrpt/utils.c
     sdr/filters.c
     sdr/ifft.c
-    sdr/SoapySDR.c
-    lrpt_demod/agc.c
-    lrpt_demod/demod.c
-    lrpt_demod/doqpsk.c
-    lrpt_demod/filters.c
-    lrpt_demod/pll.c
-    lrpt_decode/alib.c
-    lrpt_decode/correlator.c
-    lrpt_decode/dct.c
-    lrpt_decode/huffman.c
-    lrpt_decode/medet.c
-    lrpt_decode/met_jpg.c
-    lrpt_decode/met_packet.c
-    lrpt_decode/met_to_data.c
-    lrpt_decode/rectify_meteor.c
-    lrpt_decode/viterbi27.c)
+    sdr/SoapySDR.c)
 
 set(glrpt_HEADERS
     common/common.h
     common/shared.h
+    decoder/alib.h
+    decoder/correlator.h
+    decoder/dct.h
+    decoder/huffman.h
+    decoder/medet.h
+    decoder/met_jpg.h
+    decoder/met_packet.h
+    decoder/met_to_data.h
+    decoder/rectify_meteor.h
+    decoder/viterbi27.h
+    demodulator/agc.h
+    demodulator/demod.h
+    demodulator/doqpsk.h
+    demodulator/filters.h
+    demodulator/pll.h
     glrpt/callbacks.h
     glrpt/clahe.h
     glrpt/callback_func.h
@@ -53,22 +68,7 @@ set(glrpt_HEADERS
     glrpt/utils.h
     sdr/filters.h
     sdr/ifft.h
-    sdr/SoapySDR.h
-    lrpt_demod/agc.h
-    lrpt_demod/demod.h
-    lrpt_demod/doqpsk.h
-    lrpt_demod/filters.h
-    lrpt_demod/pll.h
-    lrpt_decode/alib.h
-    lrpt_decode/correlator.h
-    lrpt_decode/dct.h
-    lrpt_decode/huffman.h
-    lrpt_decode/medet.h
-    lrpt_decode/met_jpg.h
-    lrpt_decode/met_packet.h
-    lrpt_decode/met_to_data.h
-    lrpt_decode/rectify_meteor.h
-    lrpt_decode/viterbi27.h)
+    sdr/SoapySDR.h)
 
 
 # primary and the only target

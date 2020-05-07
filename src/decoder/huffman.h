@@ -14,22 +14,27 @@
 
 /*****************************************************************************/
 
-#ifndef LRPT_DEMOD_PLL_H
-#define LRPT_DEMOD_PLL_H
+#ifndef DECODER_HUFFMAN_H
+#define DECODER_HUFFMAN_H
 
 /*****************************************************************************/
 
-#include "demod.h"
-
-#include <complex.h>
+#include <stdint.h>
 
 /*****************************************************************************/
 
-Costas_t *Costas_Init(double bw, ModScheme mode);
-complex double Costas_Mix(Costas_t *self, complex double samp);
-void Costas_Correct_Phase(Costas_t *self, double error);
-void Costas_Free(Costas_t *self);
-double Costas_Delta(complex double sample, complex double cosample);
+/* Decoder AC table data */
+typedef struct ac_table_rec_t {
+  int run, size, len;
+  uint32_t mask, code;
+} ac_table_rec_t;
+
+/*****************************************************************************/
+
+int Get_AC(const uint16_t w);
+int Get_DC(const uint16_t w);
+int Map_Range(const int cat, const int vl);
+void Default_Huffman_Table(void);
 
 /*****************************************************************************/
 

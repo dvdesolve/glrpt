@@ -14,18 +14,21 @@
 
 /*****************************************************************************/
 
-#ifndef LRPT_DECODE_MET_JPG_H
-#define LRPT_DECODE_MET_JPG_H
+#ifndef DEMODULATOR_FILTERS_H
+#define DEMODULATOR_FILTERS_H
 
 /*****************************************************************************/
 
+#include "demod.h"
+
+#include <complex.h>
 #include <stdint.h>
 
 /*****************************************************************************/
 
-void Mj_Dump_Image(void);
-void Mj_Dec_Mcus(uint8_t *p, uint32_t apid, int pck_cnt, int mcu_id, uint8_t q);
-void Mj_Init(void);
+Filter_t *Filter_RRC(uint32_t order, uint32_t factor, double osf, double alpha);
+complex double Filter_Fwd(Filter_t *const self, complex double in);
+void Filter_Free(Filter_t *self);
 
 /*****************************************************************************/
 

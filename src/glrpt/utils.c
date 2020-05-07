@@ -18,7 +18,7 @@
 
 #include "../common/common.h"
 #include "../common/shared.h"
-#include "../lrpt_demod/demod.h"
+#include "../demodulator/demod.h"
 #include "../sdr/filters.h"
 #include "../sdr/ifft.h"
 #include "callback_func.h"

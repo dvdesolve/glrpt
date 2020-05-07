@@ -14,31 +14,55 @@
 
 /*****************************************************************************/
 
-#ifndef LRPT_DECODE_ALIB_H
-#define LRPT_DECODE_ALIB_H
+#ifndef DECODER_MET_TO_DATA_H
+#define DECODER_MET_TO_DATA_H
 
 /*****************************************************************************/
 
 #include "viterbi27.h"
 
+#include <glib.h>
+
 #include <stdint.h>
 
 /*****************************************************************************/
 
-static inline void Bio_Advance_n_Bits(bit_io_rec_t *b, const int n) {
-    b->pos += n;
-}
+/* LRPT decoder data */
+#define PATTERN_SIZE        64
+#define PATTERN_CNT         8
+#define MIN_CORRELATION     45
+#define SOFT_FRAME_LEN      16384
+#define HARD_FRAME_LEN      1024
 
 /*****************************************************************************/
 
-int Count_Bits(uint32_t n);
-uint32_t Bio_Peek_n_Bits(bit_io_rec_t *b, const int n);
-uint32_t Bio_Fetch_n_Bits(bit_io_rec_t *b, const int n);
-void Bit_Writer_Create(bit_io_rec_t *w, uint8_t *bytes, int len);
-void Bio_Write_Bitlist_Reversed(bit_io_rec_t *w, uint8_t *l, int len);
-int Ecc_Decode(uint8_t *idata, int pad);
-void Ecc_Deinterleave(uint8_t *data, uint8_t *output, int pos, int n);
-void Ecc_Interleave(uint8_t *data, uint8_t *output, int pos, int n);
+/* Decoder correlator data */
+typedef struct corr_rec_t {
+    uint8_t patts[PATTERN_SIZE][PATTERN_SIZE];
+
+    int
+        correlation[PATTERN_CNT],
+        tmp_corr[PATTERN_CNT],
+        position[PATTERN_CNT];
+} corr_rec_t;
+
+/* Decoder MTD data */
+typedef struct mtd_rec_t {
+    corr_rec_t c;
+    viterbi27_rec_t v;
+
+    int pos, prev_pos;
+    uint8_t ecced_data[HARD_FRAME_LEN];
+
+    uint32_t word, cpos, corr, last_sync;
+    int r[4], sig_q;
+} mtd_rec_t;
+
+/*****************************************************************************/
+
+void Mtd_Init(mtd_rec_t *mtd);
+uint8_t **ret_decoded(void);
+gboolean Mtd_One_Frame(mtd_rec_t *mtd, uint8_t *raw);
 
 /*****************************************************************************/
 

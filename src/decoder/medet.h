@@ -14,8 +14,8 @@
 
 /*****************************************************************************/
 
-#ifndef LRPT_DECODE_MET_PACKET_H
-#define LRPT_DECODE_MET_PACKET_H
+#ifndef DECODER_MEDET_H
+#define DECODER_MEDET_H
 
 /*****************************************************************************/
 
@@ -23,7 +23,10 @@
 
 /*****************************************************************************/
 
-void Parse_Cvcdu(uint8_t *p, int len);
+void Medet_Init(void);
+void Medet_Deinit(void);
+void Decode_Image(uint8_t *in_buffer, int buf_len);
+double Sig_Quality(void);
 
 /*****************************************************************************/
 

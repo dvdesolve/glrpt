@@ -14,8 +14,8 @@
 
 /*****************************************************************************/
 
-#ifndef LRPT_DEMOD_DEMOD_H
-#define LRPT_DEMOD_DEMOD_H
+#ifndef DEMODULATOR_DEMOD_H
+#define DEMODULATOR_DEMOD_H
 
 /*****************************************************************************/
 

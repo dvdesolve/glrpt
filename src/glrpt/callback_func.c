@@ -18,8 +18,8 @@
 
 #include "../common/common.h"
 #include "../common/shared.h"
-#include "../lrpt_decode/medet.h"
-#include "../lrpt_demod/demod.h"
+#include "../decoder/medet.h"
+#include "../demodulator/demod.h"
 #include "../sdr/ifft.h"
 #include "../sdr/SoapySDR.h"
 #include "display.h"

@@ -14,8 +14,8 @@
 
 /*****************************************************************************/
 
-#ifndef LRPT_DEMOD_DOQPSK_H
-#define LRPT_DEMOD_DOQPSK_H
+#ifndef DECODER_MET_JPG_H
+#define DECODER_MET_JPG_H
 
 /*****************************************************************************/
 
@@ -23,10 +23,9 @@
 
 /*****************************************************************************/
 
-void De_Interleave(uint8_t *raw, int raw_siz, uint8_t **resync, int *resync_siz);
-void Make_Isqrt_Table(void);
-void De_Diffcode(int8_t *buff, uint32_t length);
-void Free_Isqrt_Table(void);
+void Mj_Dump_Image(void);
+void Mj_Dec_Mcus(uint8_t *p, uint32_t apid, int pck_cnt, int mcu_id, uint8_t q);
+void Mj_Init(void);
 
 /*****************************************************************************/
 

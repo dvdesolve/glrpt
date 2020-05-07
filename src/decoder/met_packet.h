@@ -1,7 +1,7 @@
 /*
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License as
- *  published by the Free Software Foundation; either version 2 of
+ *  published by the Free Software Foundation; either version 3 of
  *  the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
@@ -14,12 +14,16 @@
 
 /*****************************************************************************/
 
-#ifndef LRPT_DECODE_RECTIFY_METEOR_H
-#define LRPT_DECODE_RECTIFY_METEOR_H
+#ifndef DECODER_MET_PACKET_H
+#define DECODER_MET_PACKET_H
 
 /*****************************************************************************/
 
-void Rectify_Images(void);
+#include <stdint.h>
+
+/*****************************************************************************/
+
+void Parse_Cvcdu(uint8_t *p, int len);
 
 /*****************************************************************************/
 

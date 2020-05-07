@@ -19,7 +19,7 @@
 
 /*****************************************************************************/
 
-#include "../lrpt_demod/demod.h"
+#include "../demodulator/demod.h"
 
 #include <cairo.h>
 #include <glib.h>

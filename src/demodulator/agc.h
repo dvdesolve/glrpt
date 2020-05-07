@@ -14,19 +14,20 @@
 
 /*****************************************************************************/
 
-#ifndef LRPT_DECODE_MEDET_H
-#define LRPT_DECODE_MEDET_H
+#ifndef DEMODULATOR_AGC_H
+#define DEMODULATOR_AGC_H
 
 /*****************************************************************************/
 
-#include <stdint.h>
+#include "demod.h"
+
+#include <complex.h>
 
 /*****************************************************************************/
 
-void Medet_Init(void);
-void Medet_Deinit(void);
-void Decode_Image(uint8_t *in_buffer, int buf_len);
-double Sig_Quality(void);
+Agc_t *Agc_Init(void);
+complex double Agc_Apply(Agc_t *self, complex double sample);
+void Agc_Free(Agc_t *self);
 
 /*****************************************************************************/
 

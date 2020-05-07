@@ -17,7 +17,7 @@
 #include "display.h"
 
 #include "../common/shared.h"
-#include "../lrpt_demod/demod.h"
+#include "../demodulator/demod.h"
 #include "../sdr/ifft.h"
 #include "utils.h"
 

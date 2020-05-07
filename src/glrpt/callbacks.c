@@ -17,9 +17,9 @@
 #include "callbacks.h"
 
 #include "../common/shared.h"
-#include "../lrpt_decode/medet.h"
-#include "../lrpt_decode/met_jpg.h"
-#include "../lrpt_demod/demod.h"
+#include "../decoder/medet.h"
+#include "../decoder/met_jpg.h"
+#include "../demodulator/demod.h"
 #include "../sdr/SoapySDR.h"
 #include "callback_func.h"
 #include "display.h"

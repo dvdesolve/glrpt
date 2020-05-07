@@ -20,8 +20,8 @@
 /*****************************************************************************/
 
 #include "../glrpt/rc_config.h"
-#include "../lrpt_decode/huffman.h"
-#include "../lrpt_decode/met_to_data.h"
+#include "../decoder/huffman.h"
+#include "../decoder/met_to_data.h"
 #include "../sdr/filters.h"
 
 #include <gdk-pixbuf/gdk-pixbuf.h>

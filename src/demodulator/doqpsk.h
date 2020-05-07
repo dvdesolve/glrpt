@@ -14,20 +14,19 @@
 
 /*****************************************************************************/
 
-#ifndef LRPT_DEMOD_AGC_H
-#define LRPT_DEMOD_AGC_H
+#ifndef DEMODULATOR_DOQPSK_H
+#define DEMODULATOR_DOQPSK_H
 
 /*****************************************************************************/
 
-#include "demod.h"
-
-#include <complex.h>
+#include <stdint.h>
 
 /*****************************************************************************/
 
-Agc_t *Agc_Init(void);
-complex double Agc_Apply(Agc_t *self, complex double sample);
-void Agc_Free(Agc_t *self);
+void De_Interleave(uint8_t *raw, int raw_siz, uint8_t **resync, int *resync_siz);
+void Make_Isqrt_Table(void);
+void De_Diffcode(int8_t *buff, uint32_t length);
+void Free_Isqrt_Table(void);
 
 /*****************************************************************************/
 
