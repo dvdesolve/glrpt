@@ -526,7 +526,7 @@ gboolean SoapySDR_Init(void) {
   for( idx = 0; idx < length; idx++ )
   {
     snprintf( mesg, sizeof(mesg),
-        "Max: %dS/  Min: %dS/s",
+        "Max: %dS/s  Min: %dS/s",
         (int)range[idx].maximum, (int)range[idx].minimum );
     Show_Message( mesg, "black" );
 
