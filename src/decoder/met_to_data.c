@@ -17,22 +17,26 @@
 #include "met_to_data.h"
 
 #include "../glrpt/utils.h"
-#include "alib.h"
+#include "bitop.h"
 #include "correlator.h"
+#include "ecc.h"
 #include "viterbi27.h"
 
-#include <glib.h>
-
 #include <math.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
 
 /*****************************************************************************/
 
+#define MIN_CORRELATION 45
+
+/*****************************************************************************/
+
 static void Do_Full_Correlate(mtd_rec_t *mtd, uint8_t *raw, uint8_t *aligned);
 static void Do_Next_Correlate(mtd_rec_t *mtd, uint8_t *raw, uint8_t *aligned);
-static gboolean Try_Frame(mtd_rec_t *mtd, uint8_t *aligned);
+static bool Try_Frame(mtd_rec_t *mtd, uint8_t *aligned);
 
 /*****************************************************************************/
 
@@ -130,13 +134,7 @@ static void Do_Next_Correlate(mtd_rec_t *mtd, uint8_t *raw, uint8_t *aligned) {
 
 /*****************************************************************************/
 
-uint8_t ** ret_decoded(void) {
-  return( &decoded );
-}
-
-/*****************************************************************************/
-
-static gboolean Try_Frame(mtd_rec_t *mtd, uint8_t *aligned) {
+static bool Try_Frame(mtd_rec_t *mtd, uint8_t *aligned) {
   int j;
   uint8_t ecc_buf[256];
   uint32_t temp;
@@ -150,14 +148,14 @@ static gboolean Try_Frame(mtd_rec_t *mtd, uint8_t *aligned) {
     ((uint32_t)decoded[3] << 24) +
     ((uint32_t)decoded[2] << 16) +
     ((uint32_t)decoded[1] <<  8) +
-     (uint32_t)decoded[0];
+    (uint32_t)decoded[0];
   mtd->last_sync = temp;
   mtd->sig_q = (int)( round(100.0 - (Vit_Get_Percent_BER(&(mtd->v)) * 10.0)) );
 
   //Curiously enough, you can flip all bits in a packet
   //and get a correct ECC anyway. Check for that case
-  if( Count_Bits(mtd->last_sync ^ 0xE20330E5) <
-      Count_Bits(mtd->last_sync ^ 0x1DFCCF1A) )
+  if( Bitop_CountBits(mtd->last_sync ^ 0xE20330E5) <
+      Bitop_CountBits(mtd->last_sync ^ 0x1DFCCF1A) )
   {
     for( j = 0; j < HARD_FRAME_LEN; j++ )
       decoded[j] ^= 0xFF;
@@ -165,7 +163,7 @@ static gboolean Try_Frame(mtd_rec_t *mtd, uint8_t *aligned) {
       ((uint32_t)decoded[3] << 24) +
       ((uint32_t)decoded[2] << 16) +
       ((uint32_t)decoded[1] <<  8) +
-       (uint32_t)decoded[0];
+      (uint32_t)decoded[0];
     mtd->last_sync = temp;
   }
 
@@ -179,31 +177,33 @@ static gboolean Try_Frame(mtd_rec_t *mtd, uint8_t *aligned) {
     Ecc_Interleave( ecc_buf, mtd->ecced_data, j, 4 );
   }
 
-  return(
-      (mtd->r[0] != -1) &&
-      (mtd->r[1] != -1) &&
-      (mtd->r[2] != -1) &&
-      (mtd->r[3] != -1) );
+  return (mtd->r[0] && mtd->r[1] && mtd->r[2] && mtd->r[3]);
 }
 
 /*****************************************************************************/
 
-gboolean Mtd_One_Frame(mtd_rec_t *mtd, uint8_t *raw) {
-  uint8_t aligned[SOFT_FRAME_LEN];
-  gboolean result = FALSE;
+bool Mtd_One_Frame(mtd_rec_t *mtd, uint8_t *raw) {
+    uint8_t aligned[SOFT_FRAME_LEN];
+    bool result = false;
 
-  if( mtd->cpos == 0 )
-  {
-    Do_Next_Correlate( mtd, raw, aligned );
-    result = Try_Frame( mtd, aligned );
-    if( !result ) mtd->pos -= SOFT_FRAME_LEN;
-  }
+    if (mtd->cpos == 0) {
+        Do_Next_Correlate(mtd, raw, aligned);
+        result = Try_Frame(mtd, aligned);
 
-  if( !result )
-  {
-    Do_Full_Correlate( mtd, raw, aligned );
-    result = Try_Frame( mtd, aligned );
-  }
+        if (!result)
+            mtd->pos -= SOFT_FRAME_LEN;
+    }
 
-  return( result );
+    if (!result) {
+        Do_Full_Correlate(mtd, raw, aligned);
+        result = Try_Frame(mtd, aligned);
+    }
+
+    return result;
+}
+
+/*****************************************************************************/
+
+uint8_t ** ret_decoded(void) {
+  return( &decoded );
 }

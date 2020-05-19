@@ -22,6 +22,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -40,7 +41,7 @@ static int Parse_Partial(uint8_t *p, int len);
 
 /*****************************************************************************/
 
-static gboolean partial_packet = FALSE;
+static bool partial_packet = false;
 static int last_frame = 0;
 
 /*****************************************************************************/
@@ -100,20 +101,20 @@ static int Parse_Partial(uint8_t *p, int len) {
 
   if( len < 6 )
   {
-    partial_packet = TRUE;
+    partial_packet = true;
     return( 0 );
   }
 
   len_pck = ( p[4] << 8 ) | p[5];
   if( len_pck >= len - 6 )
   {
-    partial_packet = TRUE;
+    partial_packet = true;
     return( 0 );
   }
 
   Parse_Apd( p );
 
-  partial_packet = FALSE;
+  partial_packet = false;
   return( len_pck + 6 + 1 );
 }
 
@@ -162,7 +163,7 @@ void Parse_Cvcdu(uint8_t *p, int len) {
   {
     if( hdr_off == PACKET_FULL_MARK ) //Packet could be larger than one frame
       return;
-    partial_packet = FALSE;
+    partial_packet = false;
     packet_off = 0;
   }
   last_frame = frame_cnt;

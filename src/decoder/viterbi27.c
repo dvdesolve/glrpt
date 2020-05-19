@@ -17,7 +17,7 @@
 #include "viterbi27.h"
 
 #include "../glrpt/utils.h"
-#include "alib.h"
+#include "bitop.h"
 #include "correlator.h"
 
 #include <stddef.h>
@@ -33,7 +33,7 @@
 #define DISTANCE_MAX        65535
 #define HIGH_BIT            64
 #define NUM_ITER            128     // HIGH_BIT << 1
-#define RENORM_INTERVAL     128     // DISTANCE_MAX / (2 * SOFT_MAX) (rounded?)
+#define RENORM_INTERVAL     128     // DISTANCE_MAX / (2 * SOFT_MAX) (TODO: rounded?)
 
 /*****************************************************************************/
 
@@ -243,7 +243,7 @@ static void History_Buffer_Traceback(
     fetched_index++;
   }
 
-  Bio_Write_Bitlist_Reversed(
+  Bitop_WriteBitlistReversed(
       &(v->bit_writer), v->fetched, (int)fetched_index );
   v->len -= fetched_index;
 }
@@ -460,7 +460,7 @@ static void Vit_Conv_Decode(
         viterbi27_rec_t *v,
         uint8_t *msg,
         uint8_t *soft_encoded) {
-  Bit_Writer_Create( &(v->bit_writer), msg, (FRAME_BITS * 2) / 8 );
+  Bitop_WriterCreate( &(v->bit_writer), msg, (FRAME_BITS * 2) / 8 );
 
   //history_buffer
   v->len = 0;
@@ -495,7 +495,7 @@ static void Vit_Conv_Encode(
   sh = 0;
   for( i = 0; i < FRAME_BITS; i++ )
   {
-    sh = ( (sh << 1) | Bio_Fetch_n_Bits(&b, 1) ) & 0x7F;
+    sh = ( (sh << 1) | Bitop_FetchNBits(&b, 1) ) & 0x7F;
 
     if( (v->table[sh] & 1) != 0 ) output[i * 2 + 0] = 0;
     else output[i * 2 + 0] = 255;
@@ -541,9 +541,9 @@ void Mk_Viterbi27(viterbi27_rec_t *v) {
   for( i = 0; i <= 127; i++ )
   {
     v->table[i] = 0;
-    if( (Count_Bits(i & VITERBI27_POLYA) % 2) != 0  )
+    if( (Bitop_CountBits(i & VITERBI27_POLYA) % 2) != 0  )
       v->table[i] = v->table[i] | 1;
-    if( (Count_Bits(i & VITERBI27_POLYB) % 2) != 0  )
+    if( (Bitop_CountBits(i & VITERBI27_POLYB) % 2) != 0  )
       v->table[i] = v->table[i] | 2;
   }
 

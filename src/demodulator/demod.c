@@ -30,11 +30,10 @@
 #include "filters.h"
 #include "pll.h"
 
-#include <glib.h>
-
 #include <complex.h>
 #include <math.h>
 #include <semaphore.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -63,14 +62,14 @@
 /*****************************************************************************/
 
 static inline int8_t Clamp_Int8(double x);
-static gboolean Demod_QPSK(complex double fdata, int8_t *buffer);
-static gboolean Demod_DOQPSK(complex double fdata, int8_t *buffer);
-static gboolean Demod_IDOQPSK(complex double fdata, int8_t *demod_buf);
+static bool Demod_QPSK(complex double fdata, int8_t *buffer);
+static bool Demod_DOQPSK(complex double fdata, int8_t *buffer);
+static bool Demod_IDOQPSK(complex double fdata, int8_t *demod_buf);
 
 /*****************************************************************************/
 
 static Demod_t *demodulator = NULL;
-static gboolean (*Demod_PSK)(complex double, int8_t *);
+static bool (*Demod_PSK)(complex double, int8_t *);
 
 /*****************************************************************************/
 
@@ -97,7 +96,7 @@ static inline int8_t Clamp_Int8(double x) {
  *
  * Demodulate QPSK signal from Meteor
  */
-static gboolean Demod_QPSK(complex double fdata, int8_t *buffer) {
+static bool Demod_QPSK(complex double fdata, int8_t *buffer) {
   static complex double
     before  = 0.0,
     middle  = 0.0,
@@ -155,14 +154,14 @@ static gboolean Demod_QPSK(complex double fdata, int8_t *buffer) {
       /* Move the 2 lower parts of Demodulator buffer to the top */
       memmove( buffer, buf_midl, DEMOD_BUF_LOWR );
       buf_idx = 0;
-      return( TRUE );
+      return true;
     }
 
-    return( FALSE );
+    return false;
   } /* else if( resync_offset >= sym_period ) */
 
   resync_offset += 1.0;
-  return( FALSE );
+  return false;
 }
 
 /*****************************************************************************/
@@ -171,7 +170,7 @@ static gboolean Demod_QPSK(complex double fdata, int8_t *buffer) {
  *
  * Demodulate DOQPSK signal from Meteor
  */
-static gboolean Demod_DOQPSK(complex double fdata, int8_t *buffer) {
+static bool Demod_DOQPSK(complex double fdata, int8_t *buffer) {
   complex double quad, agc;
 
   static complex double
@@ -240,14 +239,14 @@ static gboolean Demod_DOQPSK(complex double fdata, int8_t *buffer) {
       De_Diffcode( buf_lowr, SOFT_FRAME_LEN );
       memmove( buffer, buf_midl, DEMOD_BUF_LOWR );
       buf_idx = 0;
-      return( TRUE );
+      return true;
     }
 
-    return( FALSE );
+    return false;
   } /* else if( resync_offset >= sym_period ) */
 
   resync_offset += 1.0;
-  return( FALSE );
+  return false;
 }
 
 /*****************************************************************************/
@@ -256,7 +255,7 @@ static gboolean Demod_DOQPSK(complex double fdata, int8_t *buffer) {
  *
  * Demodulate Interleaved DOQPSK signal from Meteor
  */
-static gboolean Demod_IDOQPSK(complex double fdata, int8_t *demod_buf) {
+static bool Demod_IDOQPSK(complex double fdata, int8_t *demod_buf) {
   complex double quad, agc;
 
   static complex double
@@ -283,7 +282,7 @@ static gboolean Demod_IDOQPSK(complex double fdata, int8_t *demod_buf) {
   int8_t *demod_buf_midl = demod_buf + DEMOD_BUF_MIDL;
   static int demod_buf_idx = 0;
 
-  static gboolean deint_done = FALSE;
+  static bool deint_done = false;
 
 
   /* Static values initialization */
@@ -335,20 +334,19 @@ static gboolean Demod_IDOQPSK(complex double fdata, int8_t *demod_buf) {
       }
 
       resync_offset += 1.0;
-      return( FALSE );
-    } /* else if( deint_offset >= sym_period ) */
+      return false;
+    }
 
     resync_offset += 1.0;
-    return( FALSE );
-  } /* if( isFlagClear(STATUS_IDOQPSK_STOP) ) */
+    return false;
+  }
 
   /* De-interleave raw symbols buffer */
-  if( !deint_done )
-  {
+  if (!deint_done) {
     De_Interleave( raw_buf, raw_buf_size, &resync_buf, &resync_siz );
     raw_buf_idx = 0;
     resync_idx  = 0;
-    deint_done  = TRUE;
+    deint_done  = true;
   }
 
   /* Incrementally transfer data to the demod buffer */
@@ -375,13 +373,14 @@ static gboolean Demod_IDOQPSK(complex double fdata, int8_t *demod_buf) {
     /* Move the 2 lower parts of Demodulator buffer to the top */
     memmove( demod_buf, demod_buf_midl, DEMOD_BUF_LOWR );
     demod_buf_idx = 0;
-    return( TRUE );
+    return true;
   }
 
-  deint_done = FALSE;
+  /* TODO mlrpt doesn't contain such a line */
+  deint_done = false;
   ClearFlag( STATUS_RECEIVING );
   ClearFlag( STATUS_IDOQPSK_STOP );
-  return( FALSE );
+  return false;
 }
 
 /*****************************************************************************/
@@ -511,7 +510,7 @@ double Pll_Average(void) {
  * Runs the Demodulator functions and supplies
  * soft symbols to the LRPT decoder functions
  */
-gboolean Demodulator_Run(gpointer data) {
+bool Demodulator_Run(void) {
   uint32_t count, done, idx, buf_idx;
   complex double  cdata, fdata;
   static int8_t  *out_buffer = NULL;
@@ -533,8 +532,8 @@ gboolean Demodulator_Run(gpointer data) {
     ClearFlag( FRAME_OK_ICON );
     Display_Icon( pll_lock_icon, "gtk-no" );
     Show_Message( "Receiving & Decoding Ended", "green" );
-    Set_Check_Menu_Item( "decode_images_menuitem",  FALSE );
-    return( FALSE );
+    Set_Check_Menu_Item( "decode_images_menuitem",  false );
+    return false;
   }
 
   /* Allocate output buffer on first call. It is 3 sections
@@ -623,5 +622,5 @@ gboolean Demodulator_Run(gpointer data) {
     Display_Demod_Params( demodulator );
   }
 
-  return( TRUE );
+  return true;
 }

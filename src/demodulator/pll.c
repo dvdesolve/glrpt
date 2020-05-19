@@ -91,10 +91,14 @@ static void Costas_Recompute_Coeffs(Costas_t *self, double damping, double bw) {
  * Reads the tanh table for a given input
  */
 static double Lut_Tanh(double val) {
-  int ival = (int)val;
-  if( ival >  127 ) return(  1.0 );
-  if( ival < -128 ) return( -1.0 );
-  return( lut_tanh[ival + 128] );
+    int ival = (int)val;
+
+    if (ival > 127)
+        return 1.0;
+    else if (ival < -128)
+        return -1.0;
+    else
+        return lut_tanh[ival + 128];
 }
 
 /*****************************************************************************/
@@ -159,7 +163,7 @@ complex double Costas_Mix(Costas_t *self, complex double samp) {
   complex double retval;
 
   nco_out = cexp( -(complex double)I * self->nco_phase );
-  retval  = samp * nco_out;
+  retval = samp * nco_out;
   self->nco_phase += self->nco_freq;
   self->nco_phase  = fmod( self->nco_phase, M_2PI );
 

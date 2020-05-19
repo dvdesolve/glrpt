@@ -14,37 +14,19 @@
 
 /*****************************************************************************/
 
-#ifndef DEMODULATOR_DEMOD_H
-#define DEMODULATOR_DEMOD_H
+#ifndef DECODER_ECC_H
+#define DECODER_ECC_H
 
 /*****************************************************************************/
-
-#include "agc.h"
-#include "filters.h"
-#include "pll.h"
 
 #include <stdbool.h>
 #include <stdint.h>
 
 /*****************************************************************************/
 
-typedef struct Demod_t {
-    Agc_t    *agc;
-    Costas_t *costas;
-    double    sym_period;
-    uint32_t  sym_rate;
-    ModScheme mode;
-    Filter_t *rrc;
-} Demod_t;
-
-/*****************************************************************************/
-
-void Demod_Init(void);
-void Demod_Deinit(void);
-double Agc_Gain(double *gain);
-double Signal_Level(uint32_t *level);
-double Pll_Average(void);
-bool Demodulator_Run(void);
+bool Ecc_Decode(uint8_t *idata, int pad);
+void Ecc_Deinterleave(uint8_t *data, uint8_t *output, int pos, int n);
+void Ecc_Interleave(uint8_t *data, uint8_t *output, int pos, int n);
 
 /*****************************************************************************/
 

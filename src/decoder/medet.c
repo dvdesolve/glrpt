@@ -28,6 +28,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -53,7 +54,7 @@ void Medet_Init(void) {
    * already allocated, otherwise it is only set to NULL */
   for( idx = 0; idx < CHANNEL_IMAGE_NUM; idx++ )
     free_ptr( (void **)&channel_image[idx] );
-  channel_image_size  = 0;
+  channel_image_size = 0;
   channel_image_width = METEOR_IMAGE_WIDTH;
 
   ok_cnt    = 0;
@@ -80,14 +81,13 @@ void Medet_Deinit(void) {
  * Decodes images from soft symbols supplied by the demodulator
  */
 void Decode_Image(uint8_t *in_buffer, int buf_len) {
-  gboolean ok;
+  bool ok;
   gchar txt[16];
 
   while( mtd_record.pos < buf_len )
   {
     ok = Mtd_One_Frame( &mtd_record, in_buffer );
-    if( ok )
-    {
+    if (ok) {
       Parse_Cvcdu( mtd_record.ecced_data, HARD_FRAME_LEN - 132 );
       ok_cnt++;
 
@@ -97,8 +97,7 @@ void Decode_Image(uint8_t *in_buffer, int buf_len) {
         SetFlag( FRAME_OK_ICON );
       }
     }
-    else
-    {
+    else {
       if( isFlagSet(FRAME_OK_ICON) )
       {
         Display_Icon( frame_icon, "gtk-no" );
@@ -107,7 +106,7 @@ void Decode_Image(uint8_t *in_buffer, int buf_len) {
     }
 
     total_cnt++;
-  } /* while( mtd_rec.pos < len ) */
+  }
 
   /* Print decoder status data */
   snprintf( txt, sizeof(txt), "%d", mtd_record.sig_q );
@@ -115,17 +114,16 @@ void Decode_Image(uint8_t *in_buffer, int buf_len) {
   int percent = ( 100 * ok_cnt ) / total_cnt;
   snprintf( txt, sizeof(txt), "%d:%d%%", ok_cnt, percent );
   gtk_entry_set_text( GTK_ENTRY(packet_cnt_entry), txt );
-
 }
 
 /*****************************************************************************/
 
 /* Sig_Quality()
  *
- * Returns the signal quality in the range 0.0-1.0 for the gauge
+ * Returns the signal quality in the range 0.0--1.0
  */
 double Sig_Quality(void) {
-  double ret = (double)mtd_record.sig_q / SIG_QUAL_RANGE;
-  ret = dClamp( ret, 0.0, 1.0 );
-  return( ret );
+    double ret = (double)mtd_record.sig_q / SIG_QUAL_RANGE;
+
+    return dClamp(ret, 0.0, 1.0);
 }

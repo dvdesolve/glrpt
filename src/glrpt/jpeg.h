@@ -20,8 +20,7 @@
 
 /*****************************************************************************/
 
-#include <glib.h>
-
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -55,17 +54,17 @@ typedef struct compression_params_t {
     /* Disables CbCr discrimination - only intended for testing.
      * If true, the Y quantization table is also used for the CbCr channels
      */
-    gboolean m_no_chroma_discrim_flag;
+    bool m_no_chroma_discrim_flag;
 } compression_params_t;
 
 /*****************************************************************************/
 
-gboolean jpeg_encoder_compression_parameters(
+bool jpeg_encoder_compression_parameters(
         compression_params_t *comp_params,
         float m_quality,
         enum subsampling_t m_subsampling,
-        gboolean m_no_chroma_discrim_flag);
-gboolean jpeg_encoder_compress_image_to_file(
+        bool m_no_chroma_discrim_flag);
+bool jpeg_encoder_compress_image_to_file(
         char *file_name,
         int width,
         int height,

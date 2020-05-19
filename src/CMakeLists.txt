@@ -10,9 +10,10 @@ pkg_check_modules(SOAPYSDR REQUIRED SoapySDR)
 # sources
 set(glrpt_SOURCES
     common/shared.c
-    decoder/alib.c
+    decoder/bitop.c
     decoder/correlator.c
     decoder/dct.c
+    decoder/ecc.c
     decoder/huffman.c
     decoder/medet.c
     decoder/met_jpg.c
@@ -42,9 +43,10 @@ set(glrpt_SOURCES
 set(glrpt_HEADERS
     common/common.h
     common/shared.h
-    decoder/alib.h
+    decoder/bitop.h
     decoder/correlator.h
     decoder/dct.h
+    decoder/ecc.h
     decoder/huffman.h
     decoder/medet.h
     decoder/met_jpg.h

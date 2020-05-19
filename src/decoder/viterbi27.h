@@ -19,6 +19,8 @@
 
 /*****************************************************************************/
 
+#include "bitop.h"
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -30,14 +32,6 @@
 #define TRACEBACK_LENGTH    105     // 15*7
 
 /*****************************************************************************/
-
-/* Bit input-output data */
-typedef struct bit_io_rec_t {
-  uint8_t *p;
-  int pos, len;
-  uint8_t cur;
-  int cur_len;
-} bit_io_rec_t;
 
 /* Viterbi decoder data */
 typedef struct viterbi27_rec_t {

@@ -18,8 +18,7 @@
 
 #include "utils.h"
 
-#include <glib.h>
-
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -31,8 +30,8 @@
 #define JPEG_MAX(a,b)   (((a)>(b))?(a):(b))
 #define JPEG_MIN(a,b)   (((a)<(b))?(a):(b))
 
-#define RGBA    TRUE  /* Signal image source to be rgba type */
-#define RGB     FALSE /* Signal image source to be rgb type */
+#define RGBA    true  /* Signal image source to be rgba type */
+#define RGB     false /* Signal image source to be rgb type */
 
 /*****************************************************************************/
 
@@ -47,10 +46,10 @@ enum {
 };
 
 enum {
-    DC_LUM_CODES    = 12,
-    AC_LUM_CODES    = 256,
-    DC_CHROMA_CODES = 12,
-    AC_CHROMA_CODES = 256,
+    DC_LUM_CODES        = 12,
+    AC_LUM_CODES        = 256,
+    DC_CHROMA_CODES     = 12,
+    AC_CHROMA_CODES     = 256,
     MAX_HUFF_SYMBOLS    = 257,
     MAX_HUFF_CODESIZE   = 32
 };
@@ -105,7 +104,7 @@ struct jpeg_encoder {
     uint32_t m_out_buf_left;
     uint32_t m_bit_buffer;
     uint32_t m_bits_in;
-    gboolean m_all_stream_writes_succeeded;
+    bool m_all_stream_writes_succeeded;
     int m_mcu_w, m_mcu_h;
     int m_x, m_y;
     struct image m_image[3];
@@ -133,13 +132,13 @@ static void image_subsample(struct image *img, struct image *luma, int v_samp);
 static void RGB_to_YCC(
         struct image *img,
         const uint8_t *pSrc,
-        gboolean ch_a, // If source is rgba
+        bool ch_a, // If source is rgba
         int width,
         int y);
 static void RGB_to_Y(
         struct image *img,
         const uint8_t *pSrc,
-        gboolean ch_a, // If source is rgba
+        bool ch_a, // If source is rgba
         int width,
         int y);
 static void Y_to_YCC(
@@ -159,7 +158,7 @@ static void huffman_enforce_max_code_size(
         int max_code_size);
 static void huffman_table_optimize(struct huffman_table *table, int table_len);
 static void huffman_table_compute(struct huffman_table *table);
-static gboolean jpeg_encoder_put_buf(const void *pBuf, int len, FILE *stream);
+static bool jpeg_encoder_put_buf(const void *pBuf, int len, FILE *stream);
 static void jpeg_encoder_emit_byte(struct jpeg_encoder *enc, uint8_t c);
 static void jpeg_encoder_emit_word(struct jpeg_encoder *enc, uint32_t i);
 static void jpeg_encoder_emit_marker(struct jpeg_encoder *enc, int marker);
@@ -171,7 +170,7 @@ static void jpeg_encoder_emit_dht(
         uint8_t *bits,
         uint8_t *val,
         int index,
-        gboolean ac_flag);
+        bool ac_flag);
 static void jpeg_encoder_emit_dhts(struct jpeg_encoder *enc);
 static void jpeg_encoder_emit_sos(struct jpeg_encoder *enc);
 static void jpeg_encoder_emit_start_markers(struct jpeg_encoder *enc);
@@ -181,7 +180,7 @@ static void jpeg_encoder_compute_quant_table(
         int16_t *pSrc);
 static void jpeg_encoder_reset_last_dc(struct jpeg_encoder *enc);
 static void jpeg_encoder_compute_huffman_tables(struct jpeg_encoder *enc);
-static gboolean jpeg_encoder_jpg_open(
+static bool jpeg_encoder_jpg_open(
         struct jpeg_encoder *enc,
         int p_x_res,
         int p_y_res);
@@ -206,13 +205,13 @@ static void jpeg_encoder_code_block(
         dctq_t *src,
         struct huffman_dcac *huff,
         struct component *comp,
-        gboolean write);
+        bool write);
 static void jpeg_encoder_code_mcu_row(
         struct jpeg_encoder *enc,
         int y,
-        gboolean write);
-static gboolean jpeg_encoder_emit_end_markers(struct jpeg_encoder *enc);
-static gboolean jpeg_encoder_compress_image(struct jpeg_encoder *enc);
+        bool write);
+static bool jpeg_encoder_emit_end_markers(struct jpeg_encoder *enc);
+static bool jpeg_encoder_compress_image(struct jpeg_encoder *enc);
 static void jpeg_encoder_load_mcu_Y(
         struct jpeg_encoder *enc,
         const uint8_t *pSrc,
@@ -227,14 +226,14 @@ static void jpeg_encoder_load_mcu_YCC(
         int y);
 static void jpeg_encoder_clear(struct jpeg_encoder *enc);
 static void jpeg_encoder_deinit(struct jpeg_encoder *enc);
-static inline gboolean params_check(compression_params_t *parm);
-static gboolean jpeg_encoder_init(
+static inline bool params_check(compression_params_t *parm);
+static bool jpeg_encoder_init(
         struct jpeg_encoder *enc,
         FILE *pStream,
         int width,
         int height,
         compression_params_t *comp_params);
-static gboolean jpeg_encoder_read_image(
+static bool jpeg_encoder_read_image(
         struct jpeg_encoder *enc,
         const uint8_t *image_data,
         int width,
@@ -244,21 +243,21 @@ static gboolean jpeg_encoder_read_image(
 /*****************************************************************************/
 
 static int16_t s_std_croma_quant[64] = {
-  17,18,18,24,21,24,47,26,26,47,99,66,56,66,99,99,99,99,99,99,99,
-  99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,
-  99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99
+    17,18,18,24,21,24,47,26,26,47,99,66,56,66,99,99,99,99,99,99,99,
+    99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,
+    99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99
 };
 
 static int16_t s_std_lum_quant[64] = {
-  16,11,12,14,12,10,16,14,13,14,18,17,16,19,24,40,26,24,22,22,24,49,35,
-  37,29,40,58,51,61,60,57,51,56,55,64,72,92,78,64,68,87,69,55,56,80,
-  109,81,87,95,98,103,104,103,62,77,113,121,112,100,120,92,101,103,99
+    16,11,12,14,12,10,16,14,13,14,18,17,16,19,24,40,26,24,22,22,24,49,35,
+    37,29,40,58,51,61,60,57,51,56,55,64,72,92,78,64,68,87,69,55,56,80,
+    109,81,87,95,98,103,104,103,62,77,113,121,112,100,120,92,101,103,99
 };
 
 static uint8_t s_zag[64] = {
-  0,1,8,16,9,2,3,10,17,24,32,25,18,11,4,5,12,19,26,33,40,48,
-  41,34,27,20,13,6,7,14,21,28,35,42,49,56,57,50,43,36,29,22,15,
-  23,30,37,44,51,58,59,52,45,38,31,39,46,53,60,61,54,47,55,62,63
+    0,1,8,16,9,2,3,10,17,24,32,25,18,11,4,5,12,19,26,33,40,48,
+    41,34,27,20,13,6,7,14,21,28,35,42,49,56,57,50,43,36,29,22,15,
+    23,30,37,44,51,58,59,52,45,38,31,39,46,53,60,61,54,47,55,62,63
 };
 
 /*****************************************************************************/
@@ -404,7 +403,7 @@ static void image_subsample(struct image *img, struct image *luma, int v_samp) {
 static void RGB_to_YCC(
         struct image *img,
         const uint8_t *pSrc,
-        gboolean ch_a, // If source is rgba
+        bool ch_a, // If source is rgba
         int width,
         int y) {
   int r, g, b;
@@ -416,7 +415,8 @@ static void RGB_to_YCC(
     r = pSrc[idx++];
     g = pSrc[idx++];
     b = pSrc[idx++];
-    if( ch_a ) idx++; // Dump channel a
+    if (ch_a)
+        idx++; // Dump channel a
 
     px = (float)( (0.299 * r) + (0.587 * g) + (0.114 * b) - 128.0 );
     image_set_px( &img[0], px, x, y );
@@ -432,7 +432,7 @@ static void RGB_to_YCC(
 static void RGB_to_Y(
         struct image *img,
         const uint8_t *pSrc,
-        gboolean ch_a, // If source is rgba
+        bool ch_a, // If source is rgba
         int width,
         int y) {
   float r, g, b, px;
@@ -443,7 +443,8 @@ static void RGB_to_Y(
     r = (float)pSrc[idx++];
     g = (float)pSrc[idx++];
     b = (float)pSrc[idx++];
-    if( ch_a ) idx++; // Dump channel a
+    if (ch_a)
+        idx++; // Dump channel a
 
     px = (r * 0.299f) + (g * 0.587f) + (b * 0.114f) - 128.0f;
     image_set_px( img, px, x, y );
@@ -844,16 +845,15 @@ static void huffman_table_compute(struct huffman_table *table) {
 
 /*****************************************************************************/
 
-static gboolean jpeg_encoder_put_buf(const void *pBuf, int len, FILE *stream) {
-  gboolean status = ( fwrite(pBuf, (size_t)len, 1, stream) == 1 );
-  return( status );
+static bool jpeg_encoder_put_buf(const void *pBuf, int len, FILE *stream) {
+  return (fwrite(pBuf, (size_t)len, 1, stream) == 1);
 }
 
 /*****************************************************************************/
 
 // JPEG marker generation.
 static void jpeg_encoder_emit_byte(struct jpeg_encoder *enc, uint8_t c) {
-  gboolean ret = jpeg_encoder_put_buf(
+  bool ret = jpeg_encoder_put_buf(
       (void *)&c, sizeof(c), enc->m_pStream );
 
   enc->m_all_stream_writes_succeeded =
@@ -945,7 +945,7 @@ static void jpeg_encoder_emit_dht(
         uint8_t *bits,
         uint8_t *val,
         int index,
-        gboolean ac_flag) {
+        bool ac_flag) {
   jpeg_encoder_emit_marker( enc, M_DHT );
 
   int length = 0;
@@ -973,16 +973,16 @@ static void jpeg_encoder_emit_dht(
 // Emit all Huffman tables.
 static void jpeg_encoder_emit_dhts(struct jpeg_encoder *enc) {
   jpeg_encoder_emit_dht(
-      enc, enc->m_huff[0].dc.m_bits, enc->m_huff[0].dc.m_val, 0, FALSE );
+      enc, enc->m_huff[0].dc.m_bits, enc->m_huff[0].dc.m_val, 0, false );
   jpeg_encoder_emit_dht(
-      enc, enc->m_huff[0].ac.m_bits, enc->m_huff[0].ac.m_val, 0, TRUE );
+      enc, enc->m_huff[0].ac.m_bits, enc->m_huff[0].ac.m_val, 0, true );
 
   if( enc->m_num_components == 3 )
   {
     jpeg_encoder_emit_dht(
-        enc, enc->m_huff[1].dc.m_bits, enc->m_huff[1].dc.m_val, 1, FALSE );
+        enc, enc->m_huff[1].dc.m_bits, enc->m_huff[1].dc.m_val, 1, false );
     jpeg_encoder_emit_dht(
-        enc, enc->m_huff[1].ac.m_bits, enc->m_huff[1].ac.m_val, 1, TRUE );
+        enc, enc->m_huff[1].ac.m_bits, enc->m_huff[1].ac.m_val, 1, true );
   }
 }
 
@@ -1082,7 +1082,7 @@ static void jpeg_encoder_compute_huffman_tables(struct jpeg_encoder *enc) {
 
 /*****************************************************************************/
 
-static gboolean jpeg_encoder_jpg_open(
+static bool jpeg_encoder_jpg_open(
         struct jpeg_encoder *enc,
         int p_x_res,
         int p_y_res) {
@@ -1198,7 +1198,7 @@ static void jpeg_encoder_flush_output_buffer(struct jpeg_encoder *enc) {
   if( enc->m_out_buf_left != JPEG_OUT_BUF_SIZE )
   {
     int len = JPEG_OUT_BUF_SIZE - (int)enc->m_out_buf_left;
-    gboolean status =
+    bool status =
       jpeg_encoder_put_buf( enc->m_out_buf, len, enc->m_pStream );
     enc->m_all_stream_writes_succeeded =
       enc->m_all_stream_writes_succeeded && status;
@@ -1228,7 +1228,6 @@ static inline uint32_t bit_count(int temp1) {
 
 /*****************************************************************************/
 
-/* TODO may be optimized */
 #define JPEG_PUT_BYTE(c) \
 { \
   *(enc->m_pOut_buf)++ = (c); \
@@ -1248,10 +1247,10 @@ static void jpeg_encoder_put_bits(
   {
     c = (uint8_t)( (enc->m_bit_buffer >> 16) & 0xFF );
     JPEG_PUT_BYTE( c )
-      if( c == 0xFF )
-      {
-        JPEG_PUT_BYTE( 0 )
-      }
+    if( c == 0xFF )
+    {
+      JPEG_PUT_BYTE( 0 )
+    }
 
     enc->m_bit_buffer <<= 8;
     enc->m_bits_in -= 8;
@@ -1278,7 +1277,7 @@ static void jpeg_encoder_code_block(
         dctq_t *src,
         struct huffman_dcac *huff,
         struct component *comp,
-        gboolean write) {
+        bool write) {
   const int dc_delta  = src[0] - comp->m_last_dc_val;
   comp->m_last_dc_val = src[0];
 
@@ -1358,7 +1357,7 @@ static void jpeg_encoder_code_block(
 static void jpeg_encoder_code_mcu_row(
         struct jpeg_encoder *enc,
         int y,
-        gboolean write) {
+        bool write) {
   dctq_t *dctq;
   if( enc->m_num_components == 1 )
   {
@@ -1436,7 +1435,7 @@ static void jpeg_encoder_code_mcu_row(
 
 /*****************************************************************************/
 
-static gboolean jpeg_encoder_emit_end_markers(struct jpeg_encoder *enc) {
+static bool jpeg_encoder_emit_end_markers(struct jpeg_encoder *enc) {
   jpeg_encoder_put_bits( enc, 0x7F, 7 );
   jpeg_encoder_flush_output_buffer( enc );
   jpeg_encoder_emit_marker( enc, M_EOI );
@@ -1445,7 +1444,7 @@ static gboolean jpeg_encoder_emit_end_markers(struct jpeg_encoder *enc) {
 
 /*****************************************************************************/
 
-static gboolean jpeg_encoder_compress_image(struct jpeg_encoder *enc) {
+static bool jpeg_encoder_compress_image(struct jpeg_encoder *enc) {
   for( int c = 0; c < enc->m_num_components; c++ )
   {
     for( int y = 0; y < enc->m_image[c].m_y; y+= 8 )
@@ -1463,7 +1462,7 @@ static gboolean jpeg_encoder_compress_image(struct jpeg_encoder *enc) {
 
   for( int y = 0; y < enc->m_y; y += enc->m_mcu_h )
   {
-    jpeg_encoder_code_mcu_row( enc, y, FALSE );
+    jpeg_encoder_code_mcu_row( enc, y, false );
   }
   jpeg_encoder_compute_huffman_tables( enc );
   jpeg_encoder_reset_last_dc( enc );
@@ -1473,9 +1472,9 @@ static gboolean jpeg_encoder_compress_image(struct jpeg_encoder *enc) {
   {
     if( !enc->m_all_stream_writes_succeeded )
     {
-      return( FALSE );
+      return false;
     }
-    jpeg_encoder_code_mcu_row( enc, y, TRUE );
+    jpeg_encoder_code_mcu_row( enc, y, true );
   }
 
   return( jpeg_encoder_emit_end_markers(enc) );
@@ -1551,7 +1550,7 @@ static void jpeg_encoder_load_mcu_YCC(
 
 static void jpeg_encoder_clear(struct jpeg_encoder *enc) {
   enc->m_num_components = 0;
-  enc->m_all_stream_writes_succeeded = TRUE;
+  enc->m_all_stream_writes_succeeded = true;
 }
 
 /*****************************************************************************/
@@ -1566,21 +1565,21 @@ static void jpeg_encoder_deinit(struct jpeg_encoder *enc) {
 
 /*****************************************************************************/
 
-static inline gboolean params_check(compression_params_t *parm) {
+static inline bool params_check(compression_params_t *parm) {
   if( (parm->m_quality < 1) || (parm->m_quality > 100) )
   {
-    return( FALSE );
+    return false;
   }
   if( (uint32_t)parm->m_subsampling > (uint32_t)H2V2 )
   {
-    return( FALSE );
+    return false;
   }
-  return( TRUE );
+  return true;
 }
 
 /*****************************************************************************/
 
-static gboolean jpeg_encoder_init(
+static bool jpeg_encoder_init(
         struct jpeg_encoder *enc,
         FILE *pStream,
         int width,
@@ -1594,7 +1593,7 @@ static gboolean jpeg_encoder_init(
       height < 1 ||
       !params_check(comp_params) )
   {
-    return( FALSE );
+    return false;
   }
 
   enc->m_pStream = pStream;
@@ -1605,7 +1604,7 @@ static gboolean jpeg_encoder_init(
 
 /*****************************************************************************/
 
-static gboolean jpeg_encoder_read_image(
+static bool jpeg_encoder_read_image(
         struct jpeg_encoder *enc,
         const uint8_t *image_data,
         int width,
@@ -1613,7 +1612,7 @@ static gboolean jpeg_encoder_read_image(
         int bpp) {
   if( (bpp != 1) && (bpp != 3) && (bpp != 4) )
   {
-    return( FALSE );
+    return false;
   }
 
   for( int y = 0; y < height; y++ )
@@ -1676,7 +1675,7 @@ static gboolean jpeg_encoder_read_image(
     }
   }
 
-  return( TRUE );
+  return true;
 }
 
 /*****************************************************************************/
@@ -1688,11 +1687,11 @@ static gboolean jpeg_encoder_read_image(
  * Sets the JPEG compression parameters
  * to a compression_params_t struct
  */
-gboolean jpeg_encoder_compression_parameters(
+bool jpeg_encoder_compression_parameters(
         compression_params_t *comp_params,
         float m_quality,
         enum subsampling_t m_subsampling,
-        gboolean m_no_chroma_discrim_flag) {
+        bool m_no_chroma_discrim_flag) {
   comp_params->m_quality = m_quality;
   comp_params->m_subsampling = m_subsampling;
   comp_params->m_no_chroma_discrim_flag = m_no_chroma_discrim_flag;
@@ -1705,7 +1704,7 @@ gboolean jpeg_encoder_compression_parameters(
  *
  * Saves an image buffer to a JPEG-compressed file
  */
-gboolean jpeg_encoder_compress_image_to_file(
+bool jpeg_encoder_compress_image_to_file(
         char *file_name,
         int width,
         int height,
@@ -1714,12 +1713,12 @@ gboolean jpeg_encoder_compress_image_to_file(
         compression_params_t *comp_params) {
   struct jpeg_encoder encoder;
   FILE *pFile = NULL;
-  gboolean ret;
+  bool ret;
 
   ret = Open_File( &pFile, file_name, "w" );
   if( !ret )
   {
-    return( FALSE );
+    return false;
   }
 
   ret = jpeg_encoder_init(
@@ -1727,7 +1726,7 @@ gboolean jpeg_encoder_compress_image_to_file(
   if( !ret )
   {
     Show_Message( "Error: jpeg_encoder_init() failed", "red" );
-    return( FALSE );
+    return false;
   }
 
   ret = jpeg_encoder_read_image(
@@ -1735,18 +1734,18 @@ gboolean jpeg_encoder_compress_image_to_file(
   if( !ret )
   {
     Show_Message( "Error: jpeg_encoder_read_image() failed", "red" );
-    return( FALSE );
+    return false;
   }
 
   ret = jpeg_encoder_compress_image( &encoder );
   if( !ret )
   {
     Show_Message( "Error: jpeg_encoder_compress_image() failed", "red" );
-    return( FALSE );
+    return false;
   }
 
   jpeg_encoder_deinit( &encoder );
   fclose( pFile );
 
-  return( TRUE );
+  return true;
 }

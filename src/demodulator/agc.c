@@ -25,7 +25,6 @@
 
 /*****************************************************************************/
 
-/* AGC default parameters */
 #define AGC_WINSIZE         65536.0  // 1024*64
 #define AGC_WINSIZE_1       65535.0  // 1024*64
 #define AGC_TARGET          180.0

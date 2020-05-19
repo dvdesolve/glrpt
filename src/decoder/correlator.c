@@ -16,9 +16,8 @@
 
 #include "correlator.h"
 
-#include "met_to_data.h"
-
 #include <stdint.h>
+#include <strings.h>
 
 /*****************************************************************************/
 
@@ -41,7 +40,7 @@ static int corr_tab[256][256];
 /*****************************************************************************/
 
 int Hard_Correlate(const uint8_t d, const uint8_t w) {
-  return( corr_tab[d][w] );
+    return corr_tab[d][w];
 }
 
 /*****************************************************************************/

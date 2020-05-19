@@ -22,15 +22,13 @@
 #include "../glrpt/image.h"
 #include "../glrpt/jpeg.h"
 #include "../glrpt/utils.h"
-#include "alib.h"
+#include "bitop.h"
 #include "dct.h"
 #include "huffman.h"
 #include "rectify_meteor.h"
-#include "viterbi27.h"
-
-#include <glib.h>
 
 #include <math.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -50,7 +48,7 @@ enum {
 static void Save_Images(int type);
 static void Fill_Dqt_by_Q(int *dqt, int q);
 static void Fill_Pix(double *img_dct, uint32_t apid, int mcu_id, int m);
-static gboolean Progress_Image(uint32_t apid, int mcu_id, int pck_cnt);
+static bool Progress_Image(uint32_t apid, int mcu_id, int pck_cnt);
 
 /*****************************************************************************/
 
@@ -119,9 +117,9 @@ static void Save_Images(int type) {
       {
         /* Set compression parameters */
         compression_params_t comp_params;
-        gboolean ret = jpeg_encoder_compression_parameters(
-            &comp_params, rc_data.jpeg_quality, Y_ONLY, TRUE );
-        if( !ret )
+        bool ret = jpeg_encoder_compression_parameters(
+            &comp_params, rc_data.jpeg_quality, Y_ONLY, true );
+        if (!ret)
           Show_Message( "Bad compression parameters", "red" );
 
         /* Save unprocessed image */
@@ -168,9 +166,10 @@ static void Save_Images(int type) {
     {
       /* Set compression parameters */
       compression_params_t comp_params;
-      gboolean ret = jpeg_encoder_compression_parameters(
-          &comp_params, rc_data.jpeg_quality, H2V2, FALSE );
-      if( !ret ) Show_Message( "Bad compression parameters", "red" );
+      bool ret = jpeg_encoder_compression_parameters(
+          &comp_params, rc_data.jpeg_quality, H2V2, false );
+      if (!ret)
+          Show_Message( "Bad compression parameters", "red" );
 
       /* Save unprocessed image */
       fname[0] = '\0';
@@ -187,7 +186,6 @@ static void Save_Images(int type) {
 
     free_ptr( (void **)&combo_image );
   } /* if( isFlagSet(IMAGE_OUT_COMBO) ) */
-
 }
 
 /*****************************************************************************/
@@ -196,58 +194,52 @@ void Mj_Dump_Image(void) {
   uint32_t idx;
 
   /* Abort if no images successfully decoded */
-  if( channel_image_size == 0 )
+  if (channel_image_size == 0)
     return;
 
   /* My addition, process images when reception finished */
-  if( isFlagClear(STATUS_RECEIVING) )
-  {
+  if (isFlagClear(STATUS_RECEIVING)) {
     /* Save images in Raw state first, if enabled */
-    if( isFlagSet(IMAGE_RAW) ) Save_Images( IMAGE_RAW );
+    if (isFlagSet(IMAGE_RAW))
+        Save_Images(IMAGE_RAW);
 
     /* Process images if not already done */
-    if( isFlagClear(IMAGES_PROCESSED) )
-    {
+    if (isFlagClear(IMAGES_PROCESSED)) {
       /* My addition, invert image (flip vertically) */
-      if( isFlagSet(IMAGE_INVERT) )
-      {
-        for( idx = 0; idx < CHANNEL_IMAGE_NUM; idx++ )
-          Flip_Image( channel_image[idx], (uint32_t)channel_image_size );
+      if (isFlagSet(IMAGE_INVERT)) {
+        for (idx = 0; idx < CHANNEL_IMAGE_NUM; idx++)
+          Flip_Image(channel_image[idx], (uint32_t)channel_image_size);
       }
 
       /* Rectify (stretch) images to correct scan distortion */
-      if( isFlagSet(IMAGE_RECTIFY) && isFlagClear(IMAGES_RECTIFIED) )
+      if (isFlagSet(IMAGE_RECTIFY) && isFlagClear(IMAGES_RECTIFIED))
         Rectify_Images();
 
       /* Normalize images if enabled */
-      if( isFlagSet(IMAGE_NORMALIZE) )
-      {
-        for( idx = 0; idx < CHANNEL_IMAGE_NUM; idx++ )
-        {
+      if (isFlagSet(IMAGE_NORMALIZE)) {
+        for (idx = 0; idx < CHANNEL_IMAGE_NUM; idx++) {
           /* Normalize (Equalize) histogram to cover full pixel value range */
-          Normalize_Image( channel_image[idx],
-              (uint32_t)channel_image_size, NORM_BLACK, MAX_WHITE );
+          Normalize_Image(channel_image[idx],
+              (uint32_t)channel_image_size, NORM_BLACK, MAX_WHITE);
 
           /* C.L.A.H.E. Normalization, see ../glrpt/clahe.c */
-          if( isFlagSet(IMAGE_CLAHE) )
-          {
-            if( !CLAHE( channel_image[idx],
+          if (isFlagSet(IMAGE_CLAHE)) {
+            if (!CLAHE(channel_image[idx],
                   channel_image_width,
                   channel_image_height,
                   NORM_BLACK, MAX_WHITE,
                   REGIONS_X, REGIONS_Y,
-                  NUM_GREYBINS, CLIP_LIMIT ) )
-            {
+                  NUM_GREYBINS, CLIP_LIMIT)) {
               Show_Message(
                   "Failed to perform C.L.A.H.E.\n"\
-                    "Image Contrast Enhancement", "red" );
+                    "Image Contrast Enhancement", "red");
             }
-          } /* if( isFlagSet(IMAGE_CLAHE) ) */
-        } /* for( idx = 0; idx < CHANNEL_IMAGE_NUM; idx++ ) */
-      } /* if( isFlagSet(IMAGE_NORMALIZE) ) */
+          }
+        }
+      }
 
-      SetFlag( IMAGES_PROCESSED );
-    } /* if( isFlagClear(IMAGES_PROCESSED) ) */
+      SetFlag(IMAGES_PROCESSED);
+    }
 
     /* My addition, reset and display LRPT images when finished */
     if( isFlagClear(STATUS_RECEIVING) )
@@ -260,11 +252,9 @@ void Mj_Dump_Image(void) {
     }
 
     /* Save processed images if enabled */
-    if( isFlagSet(IMAGES_PROCESSED) )
-      Save_Images( !IMAGE_RAW );
-
-  } /* if( isFlagClear(STATUS_RECEIVING) ) */
-
+    if (isFlagSet(IMAGES_PROCESSED))
+        Save_Images(!IMAGE_RAW);
+  }
 }
 
 /*****************************************************************************/
@@ -325,17 +315,18 @@ static void Fill_Pix(double *img_dct, uint32_t apid, int mcu_id, int m) {
 
 /*****************************************************************************/
 
-static gboolean Progress_Image(uint32_t apid, int mcu_id, int pck_cnt) {
+static bool Progress_Image(uint32_t apid, int mcu_id, int pck_cnt) {
   static size_t prev_len = 0;
   size_t delta_len = 0, i, s;
   int j;
 
   if( (apid == 0) || (apid == 70) )
-    return( FALSE );
+    return false;
 
   if( last_mcu == -1 )
   {
-    if( mcu_id != 0 ) return( FALSE );
+    if (mcu_id != 0)
+        return false;
     prev_pck  = pck_cnt;
     first_pck = pck_cnt;
     if(  apid == 65 ) first_pck -= 14;
@@ -353,7 +344,7 @@ static gboolean Progress_Image(uint32_t apid, int mcu_id, int pck_cnt) {
   if( cur_y > last_y )
   {
     channel_image_height = (uint32_t)( cur_y + 8 );
-    channel_image_size   = (size_t)
+    channel_image_size = (size_t)
       ( channel_image_width * channel_image_height );
     for( i = 0; i < CHANNEL_IMAGE_NUM; i++ )
       mem_realloc( (void **)&channel_image[i], channel_image_size );
@@ -371,7 +362,7 @@ static gboolean Progress_Image(uint32_t apid, int mcu_id, int pck_cnt) {
   }
   last_y = cur_y;
 
-  return( TRUE );
+  return true;
 }
 
 /*****************************************************************************/
@@ -405,14 +396,14 @@ void Mj_Dec_Mcus(
   m = 0;
   while( m < MCU_PER_PACKET )
   {
-    dc_cat = Get_DC( (uint16_t)(Bio_Peek_n_Bits(&b, 16)) );
+    dc_cat = Get_DC( (uint16_t)(Bitop_PeekNBits(&b, 16)) );
     if( dc_cat == -1 )
     {
       Show_Message( "Bad DC huffman code!", "red" );
       return;
     }
-    Bio_Advance_n_Bits( &b, dc_cat_off[dc_cat] );
-    n = (uint16_t)(Bio_Fetch_n_Bits( &b, dc_cat ));
+    Bitop_AdvanceNBits( &b, dc_cat_off[dc_cat] );
+    n = (uint16_t)(Bitop_FetchNBits( &b, dc_cat ));
 
     zdct[0] = Map_Range( dc_cat, n ) + prev_dc;
     prev_dc = zdct[0];
@@ -420,7 +411,7 @@ void Mj_Dec_Mcus(
     k = 1;
     while( k < 64 )
     {
-      ac = Get_AC( (uint16_t)(Bio_Peek_n_Bits(&b, 16)) );
+      ac = Get_AC( (uint16_t)(Bitop_PeekNBits(&b, 16)) );
       if( ac == -1 )
       {
         Show_Message( "Bad DC huffman code!", "red" );
@@ -429,7 +420,7 @@ void Mj_Dec_Mcus(
       ac_len  = ac_table[ac].len;
       ac_size = ac_table[ac].size;
       ac_run  = ac_table[ac].run;
-      Bio_Advance_n_Bits( &b, ac_len );
+      Bitop_AdvanceNBits(&b, ac_len);
 
       if( (ac_run == 0) && (ac_size == 0) )
       {
@@ -445,7 +436,7 @@ void Mj_Dec_Mcus(
 
       if( ac_size != 0 )
       {
-        n = (uint16_t)(Bio_Fetch_n_Bits( &b, ac_size ));
+        n = (uint16_t)(Bitop_FetchNBits( &b, ac_size ));
         zdct[k] = Map_Range( ac_size, n );
         k++;
       }

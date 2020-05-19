@@ -21,8 +21,7 @@
 
 #include "../common/common.h"
 
-#include <glib.h>
-
+#include <stdbool.h>
 #include <stdint.h>
 
 /*****************************************************************************/
@@ -30,7 +29,7 @@
 /* Runtime config data storage type */
 typedef struct rc_data_t {
     /* glrpt config directory, pictures directory and glade UI file */
-    char glrpt_cfgs[64], glrpt_pics[64], glrpt_glade[64];
+    char glrpt_cfgs[64], glrpt_imgs[64], glrpt_glade[64];
 
     /* Timers: time duration (sec) for image decoding,
      * default timer duration value
@@ -76,7 +75,7 @@ typedef struct rc_data_t {
     /* Demodulator interpolation multiplier */
     uint32_t interp_factor;
 
-    /* Channels apid */
+    /* Channels APID */
     uint8_t apid[CHANNEL_IMAGE_NUM];
 
     /* Channels to combine to produce color image */
@@ -106,8 +105,8 @@ typedef struct rc_data_t {
 
 /*****************************************************************************/
 
-gboolean Load_Config(gpointer data);
-gboolean Find_Config_Files(gpointer data);
+bool Load_Config(void);
+bool Find_Config_Files(void);
 
 /*****************************************************************************/
 

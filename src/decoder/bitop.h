@@ -14,31 +14,36 @@
 
 /*****************************************************************************/
 
-#ifndef DECODER_ALIB_H
-#define DECODER_ALIB_H
+#ifndef DECODER_BITOP_H
+#define DECODER_BITOP_H
 
 /*****************************************************************************/
-
-#include "viterbi27.h"
 
 #include <stdint.h>
 
 /*****************************************************************************/
 
-static inline void Bio_Advance_n_Bits(bit_io_rec_t *b, const int n) {
+/* Bit input-output data */
+typedef struct bit_io_rec_t {
+    uint8_t *p;
+    int pos, len;
+    uint8_t cur;
+    int cur_len;
+} bit_io_rec_t;
+
+/*****************************************************************************/
+
+static inline void Bitop_AdvanceNBits(bit_io_rec_t *b, const int n) {
     b->pos += n;
 }
 
 /*****************************************************************************/
 
-int Count_Bits(uint32_t n);
-uint32_t Bio_Peek_n_Bits(bit_io_rec_t *b, const int n);
-uint32_t Bio_Fetch_n_Bits(bit_io_rec_t *b, const int n);
-void Bit_Writer_Create(bit_io_rec_t *w, uint8_t *bytes, int len);
-void Bio_Write_Bitlist_Reversed(bit_io_rec_t *w, uint8_t *l, int len);
-int Ecc_Decode(uint8_t *idata, int pad);
-void Ecc_Deinterleave(uint8_t *data, uint8_t *output, int pos, int n);
-void Ecc_Interleave(uint8_t *data, uint8_t *output, int pos, int n);
+void Bitop_WriterCreate(bit_io_rec_t *w, uint8_t *bytes, int len);
+void Bitop_WriteBitlistReversed(bit_io_rec_t *w, uint8_t *l, int len);
+int Bitop_CountBits(uint32_t n);
+uint32_t Bitop_PeekNBits(bit_io_rec_t *b, const int n);
+uint32_t Bitop_FetchNBits(bit_io_rec_t *b, const int n);
 
 /*****************************************************************************/
 

@@ -178,7 +178,7 @@ void on_satellite_menuitem_activate(GtkMenuItem *menuitem, gpointer data) {
   Strlcpy( rc_data.satellite_name, label, sizeof(rc_data.satellite_name) );
 
   /* Init and enter center freq to relevant entry widget */
-  g_idle_add( Load_Config, NULL );
+  g_idle_add(G_SOURCE_FUNC(Load_Config), NULL );
 }
 
 /*****************************************************************************/

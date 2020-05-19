@@ -1,7 +1,7 @@
 /*
  * ANSI C code from the article
  * "Contrast Limited Adaptive Histogram Equalization"
- * * by Karel Zuiderveld, karel@cv.ruu.nl
+ * by Karel Zuiderveld, karel@cv.ruu.nl
  * in "Graphics Gems IV", Academic Press, 1994
  *
  * These functions implement Contrast Limited Adaptive Histogram Equalization.
@@ -28,8 +28,7 @@
 
 #include "utils.h"
 
-#include <glib.h>
-
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -182,7 +181,7 @@ static void MakeHistogram(
         unsigned long *pulHistogram,
         uint32_t uiNrGreylevels,
         kz_pixel_t *pLookupTable) {
-  kz_pixel_t* pImagePointer;
+  kz_pixel_t *pImagePointer;
   uint32_t i;
 
   /* clear histogram */
@@ -352,7 +351,7 @@ static void Interpolate(
  *   uiNrBins - Number of greybins for histogram ("dynamic range")
  *   double fCliplimit - Normalized cliplimit (higher values give more contrast)
  */
-gboolean CLAHE(
+bool CLAHE(
         kz_pixel_t *pImage,
         uint32_t uiXRes,
         uint32_t uiYRes,
@@ -387,7 +386,7 @@ gboolean CLAHE(
   unsigned long* pulLU, *pulLB, *pulRU, *pulRB;
 
   /* Check for error conditions */
-  gboolean error = 0;
+  bool error = 0;
   error |= (uiNrX > MAX_REG_X);         /* # of regions x-direction too large */
   error |= (uiNrY > MAX_REG_Y);         /* # of regions y-direction too large */
   error |= (uiXRes % uiNrX);            /* x-resolution no multiple of uiNrX */
@@ -396,7 +395,8 @@ gboolean CLAHE(
   error |= ((uiNrX < 2) || (uiNrY < 2));/* at least 4 contextual regions required */
   error |= (fCliplimit == 1.0);         /* is OK, immediately returns original image. */
   
-  if( error ) return( FALSE );
+  if (error)
+      return false;
 
   if( uiNrBins == 0 ) uiNrBins = 128;   /* default value when not specified */
 
@@ -511,5 +511,5 @@ gboolean CLAHE(
   free_ptr( (void **)&pulMapArray );
 
   /* return status OK */
-  return( TRUE );
+  return true;
 }

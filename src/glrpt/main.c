@@ -180,8 +180,8 @@ int main(int argc, char *argv[]) {
     Show_Message(ver, "bold");
 
     /* Find configuration files and open the first as default */
-    g_idle_add(Find_Config_Files, NULL);
-    g_idle_add(Load_Config, NULL);
+    g_idle_add(G_SOURCE_FUNC(Find_Config_Files), NULL);
+    g_idle_add(G_SOURCE_FUNC(Load_Config), NULL);
 
     /* Main loop */
     gtk_main();

@@ -19,17 +19,16 @@
 
 /*****************************************************************************/
 
-#include <glib.h>
-
+#include <stdbool.h>
 #include <stdint.h>
 
 /*****************************************************************************/
 
-gboolean SoapySDR_Set_Center_Freq(uint32_t center_freq);
+bool SoapySDR_Set_Center_Freq(uint32_t center_freq);
 void SoapySDR_Set_Tuner_Gain_Mode(void);
 void SoapySDR_Set_Tuner_Gain(double gain);
-gboolean SoapySDR_Init(void);
-gboolean SoapySDR_Activate_Stream(void);
+bool SoapySDR_Init(void);
+bool SoapySDR_Activate_Stream(void);
 
 /*****************************************************************************/
 

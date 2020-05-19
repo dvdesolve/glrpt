@@ -289,7 +289,7 @@ void Start_Receiver_Menuitem_Toggled(GtkCheckMenuItem *menuitem) {
 
     /* Start demodulator by idle callback */
     ClearFlag(STATUS_PENDING);
-    g_idle_add( Demodulator_Run, NULL );
+    g_idle_add(G_SOURCE_FUNC(Demodulator_Run), NULL );
 
     /* Display Device Driver in use */
     char mesg[MESG_SIZE];
@@ -409,7 +409,7 @@ void Alarm_Action(void) {
 
     /* Start demodulator by idle callback */
     ClearFlag(STATUS_PENDING);
-    g_idle_add( Demodulator_Run, NULL );
+    g_idle_add(G_SOURCE_FUNC(Demodulator_Run), NULL );
 
     return;
   } /* if( isFlagSet(ALARM_ACTION_START) ) */

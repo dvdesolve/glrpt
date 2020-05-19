@@ -24,10 +24,10 @@
 #include "callback_func.h"
 #include "jpeg.h"
 
-#include <glib.h>
 #include <gtk/gtk.h>
 
 #include <errno.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -35,15 +35,15 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <unistd.h>
 
 /*****************************************************************************/
 
-static gboolean MkdirRecurse(const char *path);
+static bool MkdirRecurse(const char *path);
 static char *Filename(char *fpath);
 
 /*****************************************************************************/
 
-/* TODO may be move to another place */
 /* An int variable holding the single-bit flags */
 static int Flags = 0;
 
@@ -55,7 +55,7 @@ static int Flags = 0;
  * XDG specs are supported:
  * https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
  */
-gboolean PrepareDirectories(void) {
+bool PrepareDirectories(void) {
     char *var_ptr;
 
     /* system-wide configs are mandatory */
@@ -81,20 +81,20 @@ gboolean PrepareDirectories(void) {
     /* cache for image storage is mandatory */
     /* TODO allow user to select his own directory */
     if ((var_ptr = getenv("XDG_CACHE_HOME")))
-        snprintf(rc_data.glrpt_pics, sizeof(rc_data.glrpt_pics),
+        snprintf(rc_data.glrpt_imgs, sizeof(rc_data.glrpt_imgs),
                 "%s/%s", var_ptr, PACKAGE_NAME);
     else
-        snprintf(rc_data.glrpt_pics, sizeof(rc_data.glrpt_pics),
+        snprintf(rc_data.glrpt_imgs, sizeof(rc_data.glrpt_imgs),
                 "%s/.cache/%s", getenv("HOME"), PACKAGE_NAME);
 
-    if (!MkdirRecurse(rc_data.glrpt_pics)) {
+    if (!MkdirRecurse(rc_data.glrpt_imgs)) {
         fprintf(stderr, "glrpt: %s\n",
                 "can't access/create images cache directory");
 
-        return FALSE;
+        return false;
     }
 
-    return TRUE;
+    return true;
 }
 
 /*****************************************************************************/
@@ -105,7 +105,7 @@ gboolean PrepareDirectories(void) {
  * Adapted from:
  * https://gist.github.com/JonathonReinhart/8c0d90191c38af2dcadb102c4e202950
  */
-static gboolean MkdirRecurse(const char *path) {
+static bool MkdirRecurse(const char *path) {
     const size_t len = strlen(path);
     char _path[MAX_FILE_NAME];
     char *p;
@@ -113,7 +113,7 @@ static gboolean MkdirRecurse(const char *path) {
     /* save directory path in a mutable var */
     if (len > sizeof(_path) - 1) {
         errno = ENAMETOOLONG;
-        return FALSE;
+        return false;
     }
 
     strcpy(_path, path);
@@ -126,7 +126,7 @@ static gboolean MkdirRecurse(const char *path) {
 
             if (mkdir(_path, S_IRWXU) != 0) {
                 if (errno != EEXIST)
-                    return FALSE;
+                    return false;
             }
 
             /* restore path */
@@ -136,17 +136,17 @@ static gboolean MkdirRecurse(const char *path) {
 
     if (mkdir(_path, S_IRWXU) != 0) {
         if (errno != EEXIST)
-            return FALSE;
+            return false;
     }
 
-    return TRUE;
+    return true;
 }
 
 /*****************************************************************************/
 
-/*  File_Name()
+/* File_Name()
  *
- *  Prepare a file name, use date and time if null argument
+ * Prepare a file name, use date and time if null argument
  */
 void File_Name(char *file_name, uint32_t chn, const char *ext) {
   int len; /* String length of file_name */
@@ -168,10 +168,10 @@ void File_Name(char *file_name, uint32_t chn, const char *ext) {
     /* Combination pseudo-color image */
     if( chn == 3 )
       snprintf( file_name, MAX_FILE_NAME-1,
-          "%s/%s-Combo%s", rc_data.glrpt_pics, tim, ext );
+        "%s/%s-Combo%s", rc_data.glrpt_imgs, tim, ext );
     else /* Channel image */
       snprintf( file_name, MAX_FILE_NAME-1,
-          "%s/%s-Ch%u%s", rc_data.glrpt_pics, tim, chn, ext );
+        "%s/%s-Ch%u%s", rc_data.glrpt_imgs, tim, chn, ext );
   }
   else /* Remove leading spaces from file_name */
   {
@@ -202,9 +202,9 @@ static char *Filename(char *fpath) {
 
 /*****************************************************************************/
 
-/*  Usage()
+/* Usage()
  *
- *  Prints usage information
+ * Prints usage information
  */
 void Usage(void) {
   fprintf( stderr, "%s\n",
@@ -219,20 +219,20 @@ void Usage(void) {
 
 /*****************************************************************************/
 
-/*  Show_Message()
+/* Show_Message()
  *
- *  Prints a message string in the Text View scroller
+ * Prints a message string in the Text View scroller
  */
 void Show_Message(const char *mesg, const char *attr) {
   GtkAdjustment *adjustment;
 
   static GtkTextIter iter;
-  static gboolean first_call = TRUE;
+  static bool first_call = true;
 
   /* Initialize */
   if( first_call )
   {
-    first_call = FALSE;
+    first_call = false;
     gtk_text_buffer_get_iter_at_offset( text_buffer, &iter, 0 );
   }
 
@@ -249,12 +249,12 @@ void Show_Message(const char *mesg, const char *attr) {
       gtk_adjustment_get_page_size(adjustment) );
 
   /* Wait for GTK to complete its tasks */
-  while( g_main_context_iteration(NULL, FALSE) );
+  while( g_main_context_iteration(NULL, false) );
 }
 
 /*****************************************************************************/
 
-/***  Memory allocation/freeing utils ***/
+/*** Memory allocation/freeing utils ***/
 void mem_alloc(void **ptr, size_t req) {
   *ptr = malloc( req );
   if( *ptr == NULL )
@@ -289,7 +289,7 @@ void free_ptr(void **ptr) {
  *
  * Opens a file, aborts on error
  */
-gboolean Open_File(FILE **fp, char *fname, const char *mode) {
+bool Open_File(FILE **fp, char *fname, const char *mode) {
   /* Message buffer */
   char mesg[MESG_SIZE];
 
@@ -305,10 +305,10 @@ gboolean Open_File(FILE **fp, char *fname, const char *mode) {
         "Failed to open file\n%s", Filename(fname) );
     Show_Message( mesg, "red" );
     Error_Dialog();
-    return( FALSE );
+    return( false );
   }
 
-  return( TRUE );
+  return( true );
 }
 
 /*****************************************************************************/
@@ -325,7 +325,7 @@ void Save_Image_JPEG(
         const uint8_t *pImage_data,
         compression_params_t *comp_params) {
   char mesg[MESG_SIZE];
-  gboolean ret;
+  bool ret;
 
   /* Open image file, abort on error */
   snprintf( mesg, sizeof(mesg),
@@ -404,9 +404,9 @@ void Save_Image_Raw(
 
 /*****************************************************************************/
 
-/*  Cleanup()
+/* Cleanup()
  *
- *  Cleanup before quitting or stopping action
+ * Cleanup before quitting or stopping action
  */
 void Cleanup(void) {
   /* Deinitialize and free buffers when safe */
@@ -430,6 +430,7 @@ void Cleanup(void) {
 /*****************************************************************************/
 
 /* Functions for testing and setting/clearing flags */
+
 int isFlagSet(int flag) {
   return( Flags & flag );
 }

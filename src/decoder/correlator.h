@@ -19,9 +19,24 @@
 
 /*****************************************************************************/
 
-#include "met_to_data.h"
-
 #include <stdint.h>
+
+/*****************************************************************************/
+
+#define PATTERN_SIZE    64
+#define PATTERN_CNT     8
+
+/*****************************************************************************/
+
+/* Decoder correlator data */
+typedef struct corr_rec_t {
+    uint8_t patts[PATTERN_SIZE][PATTERN_SIZE];
+
+    int
+        correlation[PATTERN_CNT],
+        tmp_corr[PATTERN_CNT],
+        position[PATTERN_CNT];
+} corr_rec_t;
 
 /*****************************************************************************/
 

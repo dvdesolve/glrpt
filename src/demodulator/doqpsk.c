@@ -18,32 +18,31 @@
 
 #include "../glrpt/utils.h"
 
-#include <glib.h>
-
 #include <math.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
 
 /*****************************************************************************/
 
-/* The Interleaver parameters */
-/* The Interleaver branch delay INTLV_DELAY: 2048 */
-#define INTLV_BRANCHES      36      // Interleaver number of branches
-#define INTLV_BASE_LEN      73728   // INTLV_BRANCHES * INTLV_DELAY
-#define INTLV_MESG_LEN      2654208 // INTLV_BRANCHES * INTLV_BASE_LEN
-#define INTLV_DATA_LEN      72      // Number of actual interleaved symbols
-#define INTLV_SYNCDATA      80      // Number of interleaved symbols + sync
+#define INTLV_BRANCHES      36      /* Interleaver number of branches */
+#define INTLV_DELAY         2048
+#define INTLV_BASE_LEN      73728   /* INTLV_BRANCHES * INTLV_DELAY */
+#define INTLV_MESG_LEN      2654208 /* INTLV_BRANCHES * INTLV_BASE_LEN */
+#define INTLV_DATA_LEN      72      /* Number of actual interleaved symbols */
+#define INTLV_SYNCDATA      80      /* Number of interleaved symbols + sync */
 
-#define SYNC_DET_DEPTH      8       // How many consecutive sync words to search for
-#define SYNCD_BUF_MARGIN    640     // (SYNCD_DEPTH - 1) * INTLV_SYNCDATA
-#define SYNCD_BLOCK_SIZ     720     // (SYNCD_DEPTH + 1) * INTLV_SYNCDATA
-#define SYNCD_BUF_STEP      560     // SYNCD_DEPTH * INTLV_SYNCDATA
+/* TODO recheck why differs */
+#define SYNCD_DEPTH         8       /* How many consecutive sync words to search for */
+#define SYNCD_BUF_MARGIN    640     /* SYNCD_DEPTH * INTLV_SYNCDATA */
+#define SYNCD_BLOCK_SIZ     720     /* (SYNCD_DEPTH + 1) * INTLV_SYNCDATA */
+#define SYNCD_BUF_STEP      560     /* (SYNCD_DEPTH - 1) * INTLV_SYNCDATA */
 
 /*****************************************************************************/
 
 static uint8_t Byte_at_Offset(uint8_t *data);
-static gboolean Find_Sync(
+static bool Find_Sync(
         uint8_t *data,
         int block_siz,
         int step,
@@ -63,103 +62,106 @@ static uint8_t *isqrt_table = NULL;
  * byte at a given offset in the soft symbol stream, used
  * to find a sync word for the resynchronizing function */
 static uint8_t Byte_at_Offset(uint8_t *data) {
-  uint8_t result, tst, idx;
+    uint8_t result, test;
 
-  result = 0;
-  for( idx = 0; idx <= 7; idx++ )
-  {
-    if( data[idx] < 128 ) tst = 1;
-    else tst = 0;
-    result |= tst << idx;
-  }
+    result = 0;
 
-  return( result );
+    /* Do a thresholding of 8 consecutive symbols */
+    for (uint8_t i = 0; i < 8; i++) {
+        if (data[i] < 128)
+            test = 1;
+        else
+            test = 0;
+
+        /* Assemble a sync byte candidate */
+        result |= test << i;
+    }
+
+    return result;
 }
 
 /*****************************************************************************/
 
 /* The sync word could be in any of 8 different orientations, so we
  * will just look for a repeating bit pattern the right distance apart
- * to find the position of a sync word (8-bit byte, 00100111) */
-static gboolean Find_Sync(
+ * to find the position of a sync word (8-bit byte, 00100111,
+ * repeating every 80 symbols in stream) */
+static bool Find_Sync(
         uint8_t *data,
         int block_siz,
         int step,
         int depth,
         int *offset,
         uint8_t *sync) {
-  int idx, jdx, limit;
+  int limit;
   uint8_t test;
-  gboolean result;
+  bool result;
 
   *offset = 0;
-  result  = FALSE;
+  result  = false;
 
   /* Leave room in buffer for look-forward */
   limit = block_siz - step * depth;
-  for( idx = 0; idx < limit; idx++ )
-  {
+
+  /* Search for a sync byte at the beginning of block */
+  for (int i = 0; i < limit; i++) {
+    result = true;
+
     /* Assemble a sync byte candidate */
-    *sync  = Byte_at_Offset( &data[idx] );
-    result = TRUE;
+    *sync = Byte_at_Offset(&data[i]);
 
     /* Search ahead depth times in buffer to see if
      * there are exactly equal sync byte candidates
      * at intervals of (sync + data = 80 syms) blocks */
-    for( jdx = 1; jdx <= depth; jdx++ )
-    {
+    for (int j = 1; j <= depth; j++) {
       /* Break if there is a mismatch at any position */
-      test = Byte_at_Offset( &data[idx + jdx * step] );
-      if( *sync != test )
-      {
-        result = FALSE;
+      test = Byte_at_Offset(&data[i + j * step]);
+      if (*sync != test) {
+        result = false;
         break;
       }
-    } /* for( jdx = 1; jdx <= depth; jdx++ ) */
+    }
 
     /* If an unbroken series of matching sync
      * byte candidates located, record the buffer
      * offset and return success */
-    if( result )
-    {
-      *offset = idx;
+    if (result) {
+      *offset = i;
       break;
     }
-  } /* for( idx = 0; idx < limit; idx++ ) */
+  }
 
-  return( result );
+  return result;
 }
 
 /*****************************************************************************/
 
-/* 80k symbol rate stream: 00100111 36 bits 36 bits 00100111 36 bits 36 bits
- * The sync words must be removed and the stream "stitched" back together */
+/* 80k symbol rate stream: 00100111 36 bits 36 bits 00100111 36 bits 36 bits...
+ * The sync words must be removed and the stream stitched back together */
 static void Resync_Stream(uint8_t *raw_buf, int raw_siz, int *resync_siz) {
   uint8_t *src_buf = NULL;
 
-  int idx, tmp,
+  int tmp,
     posn   = 0,
     offset = 0,
     limit1 = raw_siz - SYNCD_BUF_MARGIN,
     limit2 = raw_siz - INTLV_SYNCDATA;
 
   uint8_t test = 0, sync = 0;
-  gboolean ok;
+  bool ok;
 
-  mem_alloc( (void **)&src_buf, (size_t)raw_siz );
-  memcpy( src_buf, raw_buf, (size_t)raw_siz );
+  mem_alloc((void **)&src_buf, (size_t)raw_siz);
+  memcpy(src_buf, raw_buf, (size_t)raw_siz);
 
   *resync_siz = 0;
 
   /* While there is room in the raw buffer for the
-   * Find_Sync() funtion to search for sync candidates */
-  while( posn < limit1 )
-  {
+   * Find_Sync() function to search for sync candidates */
+  while (posn < limit1) {
     /* Only search for sync if look-forward
      * below fails to find a sync train */
-    if( !Find_Sync( &src_buf[posn],
-          SYNCD_BLOCK_SIZ, INTLV_SYNCDATA, SYNC_DET_DEPTH, &offset, &sync ) )
-    {
+    if (!Find_Sync(&src_buf[posn], SYNCD_BLOCK_SIZ,
+                INTLV_SYNCDATA, SYNCD_DEPTH, &offset, &sync)) {
       posn += SYNCD_BUF_STEP;
       continue;
     }
@@ -167,24 +169,25 @@ static void Resync_Stream(uint8_t *raw_buf, int raw_siz, int *resync_siz) {
 
     /* While there is room in the raw buffer
      * to look forward for sync trains */
-    while( posn < limit2 )
-    {
+    while (posn < limit2) {
       /* Look ahead to prevent it losing sync on weak signal */
-      ok = FALSE;
-      for( idx = 0; idx < 128; idx++ )
-      {
-        tmp = posn + idx * INTLV_SYNCDATA;
-        if( tmp < limit2 )
-        {
-          test = Byte_at_Offset( &src_buf[tmp] );
-          if( sync == test )
-          {
-            ok = TRUE;
+      ok = false;
+
+      for (int i = 0; i < 128; i++) {
+        tmp = posn + i * INTLV_SYNCDATA;
+
+        if (tmp < limit2) {
+          test = Byte_at_Offset(&src_buf[tmp]);
+
+          if (sync == test) {
+            ok = true;
             break;
           }
-        } /* if( tmp < lim2 ) */
-      } /* for( idx = 0; idx < 128; idx++ ) */
-      if( !ok ) break;
+        }
+      }
+
+      if (!ok)
+          break;
 
       /* Copy the actual data after the sync
        * train and update the total copied */
@@ -193,11 +196,10 @@ static void Resync_Stream(uint8_t *raw_buf, int raw_siz, int *resync_siz) {
 
       /* Advance to next sync train position */
       posn += INTLV_SYNCDATA;
+    }
+  }
 
-    } /* while( pos < lim2 ) */
-  } /* while( pos < lim1 ) */
-
-  free_ptr( (void **)&src_buf );
+  free_ptr((void **)&src_buf);
 }
 
 /*****************************************************************************/

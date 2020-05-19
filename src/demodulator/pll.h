@@ -19,9 +19,25 @@
 
 /*****************************************************************************/
 
-#include "demod.h"
-
 #include <complex.h>
+#include <stdint.h>
+
+/*****************************************************************************/
+
+typedef enum ModScheme {
+    QPSK = 1, /* Standard QPSK as for Meteor M2 @72k sym rate */
+    DOQPSK,   /* Differential Offset QPSK as for Meteor M2-2 @72k sym rate */
+    IDOQPSK   /* Interleaved DOQPSK as for Meteor M2-2 @80k sym rate */
+} ModScheme;
+
+typedef struct Costas_t {
+    double  nco_phase, nco_freq;
+    double  alpha, beta;
+    double  damping, bandwidth;
+    uint8_t locked;
+    double  moving_average;
+    ModScheme mode;
+} Costas_t;
 
 /*****************************************************************************/
 

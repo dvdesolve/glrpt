@@ -55,8 +55,6 @@
 #include "../glrpt/display.h"
 #include "../glrpt/utils.h"
 
-#include <glib.h>
-
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -81,7 +79,7 @@ static char ifft_init = 0;
  * Initializes IFFT() by creating a dynamically allocated
  * Sinewave table and by calculating the FFT order (log2 N)
  */
-gboolean Initialize_IFFT(int16_t width) {
+bool Initialize_IFFT(int16_t width) {
   int16_t a, b;
   size_t mreq;
   double w, dw;
@@ -92,7 +90,7 @@ gboolean Initialize_IFFT(int16_t width) {
   {
     Show_Message( "FFT size is not a power of 2", "red" );
     Error_Dialog();
-    return( FALSE );
+    return false;
   }
 
   /* Calculate the order of fft */
@@ -129,7 +127,7 @@ gboolean Initialize_IFFT(int16_t width) {
   } /* if( ifft_width != width ) */
 
   ifft_init = 1;
-  return( TRUE );
+  return true;
 }
 
 /*****************************************************************************/

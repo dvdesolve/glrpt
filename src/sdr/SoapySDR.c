@@ -31,10 +31,12 @@
 
 #include <complex.h>
 #include <semaphore.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 /*****************************************************************************/
 
@@ -254,7 +256,7 @@ static void *SoapySDR_Stream(void *pid) {
  *
  * Sets the Center Frequency of the RTL-SDR Tuner
  */
-gboolean SoapySDR_Set_Center_Freq(uint32_t center_freq) {
+bool SoapySDR_Set_Center_Freq(uint32_t center_freq) {
   /* Set the Center Frequency of the Tuner */
   int ret = SoapySDRDevice_setFrequency(
       sdr, SOAPY_SDR_RX, 0, (double)center_freq, NULL );
@@ -264,7 +266,7 @@ gboolean SoapySDR_Set_Center_Freq(uint32_t center_freq) {
     Show_Message( SoapySDRDevice_lastError(), "red" );
     Error_Dialog();
     Display_Icon( status_icon, "gtk-no" );
-    return( FALSE );
+    return( false );
   }
 
   /* Display center frequency in messages */
@@ -275,7 +277,7 @@ gboolean SoapySDR_Set_Center_Freq(uint32_t center_freq) {
   Show_Message( mesg, "green" );
   Display_Icon( status_icon, "gtk-yes" );
 
-  return( TRUE );
+  return( true );
 }
 
 /*****************************************************************************/
@@ -300,7 +302,7 @@ void SoapySDR_Set_Tuner_Gain_Mode(void) {
 
     /* Set auto gain control */
     SoapySDR_Set_Tuner_Gain( 100.0 );
-    ret = SoapySDRDevice_setGainMode( sdr, SOAPY_SDR_RX, 0, TRUE );
+    ret = SoapySDRDevice_setGainMode( sdr, SOAPY_SDR_RX, 0, true );
     if( ret != SUCCESS )
     {
       Show_Message( "Failed to Set Auto Gain Control", "red" );
@@ -315,7 +317,7 @@ void SoapySDR_Set_Tuner_Gain_Mode(void) {
   else
   {
     /* Set manual gain control */
-    ret = SoapySDRDevice_setGainMode( sdr, SOAPY_SDR_RX, 0, FALSE );
+    ret = SoapySDRDevice_setGainMode( sdr, SOAPY_SDR_RX, 0, false );
     if( ret != SUCCESS )
     {
       Show_Message( "Failed to Set Manual Gain Control", "red" );
@@ -370,7 +372,7 @@ void SoapySDR_Set_Tuner_Gain(double gain) {
  *
  * Initialize SoapySDR by finding the specified SDR device,
  * instance it and setting up its working parameters */
-gboolean SoapySDR_Init(void) {
+bool SoapySDR_Init(void) {
   int ret = 0;
   size_t length, key, idx, mreq;
   gchar mesg[ MESG_SIZE ];
@@ -381,7 +383,7 @@ gboolean SoapySDR_Init(void) {
 
   /* Abort if already init */
   if( isFlagSet(STATUS_SOAPYSDR_INIT) )
-    return( TRUE );
+    return( true );
 
   /* Enumerate SDR devices, abort if no devices found */
   results = SoapySDRDevice_enumerate( NULL, &length );
@@ -390,7 +392,7 @@ gboolean SoapySDR_Init(void) {
     Show_Message( "No SoapySDR Device found", "red" );
     Error_Dialog();
     Display_Icon( status_icon, "gtk-no" );
-    return( FALSE );
+    return( false );
   }
 
   /* Use SDR device specified by index alone
@@ -435,7 +437,7 @@ gboolean SoapySDR_Init(void) {
       Show_Message( mesg, "red" );
       Display_Icon( status_icon, "gtk-no" );
       Error_Dialog();
-      return( FALSE );
+      return( false );
     }
   } /* if( strcmp(rc_data.device_driver, "auto") == 0 ) */
 
@@ -464,7 +466,7 @@ gboolean SoapySDR_Init(void) {
     Show_Message( SoapySDRDevice_lastError(), "red" );
     Display_Icon( status_icon, "gtk-no" );
     Error_Dialog();
-    return( FALSE );
+    return( false );
   }
   SoapySDRKwargsList_clear( results, length );
 
@@ -480,7 +482,7 @@ gboolean SoapySDR_Init(void) {
 
   /* Set the Center Frequency of the RTL_SDR Device */
   if( !SoapySDR_Set_Center_Freq( rc_data.sdr_center_freq ) )
-    return( FALSE );
+    return( false );
 
   /* Set the Frequency Correction factor for the device */
   if( SoapySDRDevice_hasFrequencyCorrection(sdr, SOAPY_SDR_RX, 0) )
@@ -495,7 +497,7 @@ gboolean SoapySDR_Init(void) {
         Show_Message( "Failed to set Frequency Correction", "red" );
         Error_Dialog();
         Display_Icon( status_icon, "gtk-no" );
-        return( FALSE );
+        return( false );
       }
 
       snprintf( mesg, sizeof(mesg),
@@ -547,7 +549,7 @@ gboolean SoapySDR_Init(void) {
     Show_Message( SoapySDRDevice_lastError(), "red" );
     Display_Icon( status_icon, "gtk-no" );
     Error_Dialog();
-    return( FALSE );
+    return( false );
   }
 
   /* Get actual sample rate and display */
@@ -598,7 +600,7 @@ gboolean SoapySDR_Init(void) {
     Show_Message( SoapySDRDevice_lastError(), "red" );
     Error_Dialog();
     Display_Icon( status_icon, "gtk-no" );
-    return( FALSE );
+    return( false );
   }
   Show_Message( "Receive Stream set up OK", "green" );
 
@@ -644,7 +646,7 @@ gboolean SoapySDR_Init(void) {
    * to provide a center line. IFFT requires a width
    * that is a power of 2 */
   if( !Initialize_IFFT((int16_t)wfall_width + 1) )
-    return( FALSE );
+    return( false );
 
   /* Wait a little for things to settle and set init OK flag */
   sleep( 1 );
@@ -652,7 +654,7 @@ gboolean SoapySDR_Init(void) {
   Show_Message( "SoapySDR Initialized OK", "green" );
   Display_Icon( status_icon, "gtk-yes" );
 
-  return( TRUE );
+  return( true );
 }
 
 /*****************************************************************************/
@@ -661,7 +663,7 @@ gboolean SoapySDR_Init(void) {
  *
  * Closes thr RTL-SDR device, if open
  */
-gboolean SoapySDR_Activate_Stream(void) {
+bool SoapySDR_Activate_Stream(void) {
   /* Thread ID for the newly created thread */
   pthread_t pthread_id;
 
@@ -674,7 +676,7 @@ gboolean SoapySDR_Activate_Stream(void) {
     ClearFlag( STATUS_SOAPYSDR_INIT );
     Error_Dialog();
     Display_Icon( status_icon, "gtk-no" );
-    return( FALSE );
+    return( false );
   }
 
   /* Activate receive stream */
@@ -685,11 +687,11 @@ gboolean SoapySDR_Activate_Stream(void) {
     Show_Message( SoapySDRDevice_lastError(), "red" );
     Error_Dialog();
     Display_Icon( status_icon, "gtk-no" );
-    return( FALSE );
+    return( false );
   }
   Show_Message( "Receive Stream activated OK", "green" );
   SetFlag( STATUS_STREAMING );
   Display_Icon( status_icon, "gtk-yes" );
 
-  return( TRUE );
+  return( true );
 }

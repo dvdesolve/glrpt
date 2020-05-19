@@ -21,10 +21,10 @@
 #include "../glrpt/interface.h"
 #include "../glrpt/utils.h"
 
-#include <glib.h>
 #include <gtk/gtk.h>
 
 #include <math.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -36,7 +36,7 @@
  * Calculates Chebyshev recursive filter coefficients.
  * The filter_data_t struct is defined in common.h.
  */
-gboolean Init_Chebyshev_Filter(
+bool Init_Chebyshev_Filter(
         filter_data_t *filter_data,
         uint32_t buf_len,
         uint32_t filter_bw,
@@ -50,7 +50,6 @@ gboolean Init_Chebyshev_Filter(
   double rp, ip, es, vx, kx, t, w, m;
   double d, xn0, xn1, xn2, yn1, yn2, k, tmp;
   size_t mreq;
-
 
   /* Initialize filter parameters */
   filter_data->cutoff   = (double)(filter_bw / 2);
@@ -200,7 +199,8 @@ gboolean Init_Chebyshev_Filter(
   /* Show Bandwidth to B/W entry */
   Enter_Filter_BW();
 
-  return( TRUE );
+  /* TODO no alternative way */
+  return true;
 }
 
 /*****************************************************************************/

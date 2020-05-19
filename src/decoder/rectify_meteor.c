@@ -99,8 +99,8 @@ static double *factors = NULL;
 static double Calculate_beta(double phi) {
   double
     beta_np1 = 0.0,  /* New beta value, beta_n+1 */
-             sin_b, cos_b,    /* sin and cos of current beta_n */
-             f_beta, df_beta; /* The function of beta and derivative */
+    sin_b, cos_b,    /* sin and cos of current beta_n */
+    f_beta, df_beta; /* The function of beta and derivative */
 
   static double beta_n = 0.1; /* Starting value of beta_n */
 
@@ -197,7 +197,7 @@ static void Rectify_Grayscale_1(
         case 0:
           break;
 
-          /* Pad the space */
+        /* Pad the space */
         case 1:
           *( rect_buff + rect_buff_right++ ) = ( byteA_right + byteB_right ) / 2;
           *( rect_buff + rect_buff_left-- )  = ( byteA_left  + byteB_left )  / 2;

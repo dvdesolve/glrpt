@@ -16,9 +16,9 @@
 
 #include "shared.h"
 
-#include "../glrpt/rc_config.h"
 #include "../decoder/huffman.h"
 #include "../decoder/met_to_data.h"
+#include "../glrpt/rc_config.h"
 #include "../sdr/filters.h"
 #include "common.h"
 

@@ -23,11 +23,12 @@
 #include "interface.h"
 #include "utils.h"
 
-#include <glib.h>
 #include <glib-object.h>
+#include <gtk/gtk.h>
 
 #include <dirent.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -42,7 +43,7 @@
 #define HT   0x09 /* Horizontal Tab  */
 
 /* Max length of lines in config file */
-#define LINE_LEN   81
+#define MAX_CONFIG_STRLEN   80
 
 /*****************************************************************************/
 
@@ -54,13 +55,12 @@ static int found_cfg = 0;
 
 /*****************************************************************************/
 
-/*  Load_Line()
+/* Load_Line()
  *
- *  Loads a line from a file, aborts on failure. Lines beginning
- *  with a '#' are ignored as comments. At the end of file EOF
- *  is returned. Lines assumed maximum 80 characters long.
+ * Loads a line from a file, aborts on failure. Lines beginning
+ * with a '#' are ignored as comments. At the end of file EOF
+ * is returned. Lines assumed maximum 80 characters long.
  */
-
 static int Load_Line(char *buff, FILE *pfile, const char *mesg) {
   int
     num_chr, /* Number of characters read, excluding lf/cr */
@@ -121,7 +121,7 @@ static int Load_Line(char *buff, FILE *pfile, const char *mesg) {
 
   /* Continue reading characters from file till
    * number of characters = 80 or EOF or CR/LF */
-  while( num_chr < 80 )
+  while( num_chr < MAX_CONFIG_STRLEN )
   {
     /* If LF/CR reached before filling buffer, return line */
     if( (chr == LF) || (chr == CR) ) break;
@@ -162,15 +162,14 @@ static int Load_Line(char *buff, FILE *pfile, const char *mesg) {
 
 /*****************************************************************************/
 
-/*  Load_Config()
+/* Load_Config()
  *
- *  Loads the glrptrc configuration file
+ * Loads the glrptrc configuration file
  */
-
-gboolean Load_Config(gpointer data) {
+bool Load_Config(void) {
   char
     rc_fpath[MESG_SIZE], /* File path to glrptrc */
-    line[LINE_LEN];      /* Buffer for Load_Line */
+    line[MAX_CONFIG_STRLEN + 1] = {0}; /* Buffer for Load_Line */
 
   /* Config file pointer */
   FILE *glrptrc;
@@ -187,22 +186,22 @@ gboolean Load_Config(gpointer data) {
   {
     Show_Message( "Failed to open configuration file", "red" );
     Error_Dialog();
-    return( FALSE );
+    return( false );
   }
 
   /*** Read runtime configuration data ***/
 
-  /*** SDR Receiver Configuration data ***/
+  /*** SDR Receiver configuration data ***/
   /* Read SDR Receiver SoapySDR Device Driver to use */
   if( Load_Line(line, glrptrc, "SoapySDR Device Driver") != SUCCESS )
-    return( FALSE );
+    return( false );
   Strlcpy( rc_data.device_driver, line, sizeof(rc_data.device_driver) );
   if( strcmp(rc_data.device_driver, "auto") == 0 )
     SetFlag( AUTO_DETECT_SDR );
 
   /* Read SoapySDR Device Index, abort if EOF */
   if( Load_Line(line, glrptrc, "SDR Device Index") != SUCCESS )
-    return( FALSE );
+    return( false );
   idx = atoi( line );
   if( (idx < 0) || (idx > 8) )
   {
@@ -210,19 +209,19 @@ gboolean Load_Config(gpointer data) {
         "Invalid SoapySDR Device Index\n"\
           "Quit and correct glrptrc", "red" );
     Error_Dialog();
-    return( FALSE );
+    return( false );
   }
   rc_data.device_index = (uint32_t)idx;
 
   /* Read Low Pass Filter Bandwidth, abort if EOF */
   if( Load_Line(line, glrptrc, "Roofing Filter Bandwidth") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.sdr_filter_bw = (uint32_t)( atoi(line) );
 
   /*** Read Device configuration data ***/
   /* Read Manual AGC Setting, abort if EOF */
   if( Load_Line(line, glrptrc, "Manual Gain Setting") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.tuner_gain = atof( line );
   if( rc_data.tuner_gain > 100.0 )
   {
@@ -231,12 +230,12 @@ gboolean Load_Config(gpointer data) {
         "Invalid Manual Gain Setting\n"\
           "Assuming a value of 100%", "red" );
     Error_Dialog();
-    return( FALSE );
+    return( false );
   }
 
   /* Read Frequency Correction Factor, abort if EOF */
   if( Load_Line(line, glrptrc, "Frequency Correction Factor") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.freq_correction = atoi( line );
   if( abs(rc_data.freq_correction) > 100 )
   {
@@ -244,18 +243,18 @@ gboolean Load_Config(gpointer data) {
         "Invalid Frequency Correction Factor\n"\
           "Quit and correct glrptrc", "red" );
     Error_Dialog();
-    return( FALSE );
+    return( false );
   }
 
   /*** Image Decoding configuration data ***/
   /* Read Satellite Frequency in kHz, abort if EOF */
   if( Load_Line(line, glrptrc, "Satellite Frequency kHz") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.sdr_center_freq = (uint32_t)atoi( line ) * 1000;
 
   /* Read default decode duration, abort if EOF */
   if( Load_Line(line, glrptrc, "Image Decoding Duration") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.default_timer = (uint32_t)( atoi(line) );
   if( !rc_data.decode_timer )
     rc_data.decode_timer = rc_data.default_timer;
@@ -273,49 +272,49 @@ gboolean Load_Config(gpointer data) {
 
   /* Read LRPT image scale factor, abort if EOF */
   if( Load_Line(line, glrptrc, "Image Scale Factor") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.image_scale = (uint32_t)( atoi(line) );
 
   /* LRPT Demodulator Parameters */
   /* Read RRC Filter Order, abort if EOF */
   if( Load_Line(line, glrptrc, "RRC Filter Order") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.rrc_order = (uint32_t)( atoi(line) );
 
   /* Read RRC Filter alpha factor, abort if EOF */
   if( Load_Line(line, glrptrc, "RRC Filter alpha factor") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.rrc_alpha = atof( line );
 
   /* Read Costas PLL Loop Bandwidth, abort if EOF */
   if( Load_Line(line, glrptrc, "Costas PLL Loop Bandwidth") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.costas_bandwidth = atof( line );
 
   /* Read Costas PLL Locked Threshold, abort if EOF */
   if( Load_Line(line, glrptrc, "Costas PLL Locked Threshold") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.pll_locked   = atof( line );
   rc_data.pll_unlocked = rc_data.pll_locked * 1.03;
 
   /* Read Transmitter Modulation Mode, abort if EOF */
   if( Load_Line(line, glrptrc, "Transmitter Modulation Mode") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.psk_mode = (uint8_t)( atoi(line) );
 
   /* Read Transmitter QPSK Symbol Rate, abort if EOF */
   if( Load_Line(line, glrptrc, "Transmitter QPSK Symbol Rate") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.symbol_rate = (uint32_t)( atoi(line) );
 
   /* Read Demodulator Interpolation Factor, abort if EOF */
   if( Load_Line(line, glrptrc, "Demodulator Interpolation Factor") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.interp_factor = (uint32_t)( atoi(line) );
 
   /* Read LRPT Decoder Output Mode, abort if EOF */
   if( Load_Line(line, glrptrc, "LRPT Decoder Output Mode") != SUCCESS )
-    return( FALSE );
+    return( false );
   switch( atoi(line) )
   {
     case OUT_COMBO:
@@ -341,7 +340,7 @@ gboolean Load_Config(gpointer data) {
 
   /* Read LRPT Image Save file type, abort if EOF */
   if( Load_Line(line, glrptrc, "Save As image file type") != SUCCESS )
-    return( FALSE );
+    return( false );
   switch( atoi(line) )
   {
     case SAVEAS_JPEG:
@@ -368,27 +367,27 @@ gboolean Load_Config(gpointer data) {
   /* Read JPEG Quality Factor, abort if EOF */
   /* TODO seems like mess-up with type casting */
   if( Load_Line(line, glrptrc, "JPEG Quality Factor") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.jpeg_quality = (float)atof( line );
 
   /* Read LRPT Decoder Image Raw flag, abort if EOF */
   if( Load_Line(line, glrptrc, "LRPT Decoder Image Raw flag") != SUCCESS )
-    return( FALSE );
+    return( false );
   if( atoi(line) ) SetFlag( IMAGE_RAW );
 
   /* Read LRPT Decoder Image Normalize flag, abort if EOF */
   if( Load_Line(line, glrptrc, "LRPT Decoder Image Normalize flag") != SUCCESS )
-    return( FALSE );
+    return( false );
   if( atoi(line) ) SetFlag( IMAGE_NORMALIZE );
 
   /* Read LRPT Decoder Image CLAHE flag, abort if EOF */
   if( Load_Line(line, glrptrc, "LRPT Decoder Image CLAHE flag") != SUCCESS )
-    return( FALSE );
+    return( false );
   if( atoi(line) ) SetFlag( IMAGE_CLAHE );
 
   /* Read LRPT Decoder Image Rectify flag, abort if EOF */
   if( Load_Line(line, glrptrc, "LRPT Decoder Image Rectify flag") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.rectify_function = (uint8_t)atoi( line );
   if( rc_data.rectify_function > 2 )
   {
@@ -400,28 +399,28 @@ gboolean Load_Config(gpointer data) {
 
   /* Read LRPT Decoder Image Colorize flag, abort if EOF */
   if( Load_Line(line, glrptrc, "LRPT Decoder Image Colorize flag") != SUCCESS )
-    return( FALSE );
+    return( false );
   if( atoi(line) ) SetFlag( IMAGE_COLORIZE );
 
   /* Read LRPT Decoder Channel 0 APID, abort if EOF */
   if( Load_Line(line, glrptrc, "LRPT Decoder Red APID") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.apid[0] = (uint8_t)( atoi(line) );
 
   /* Read LRPT Decoder Channel 1 APID, abort if EOF */
   if( Load_Line(line, glrptrc, "LRPT Decoder Green APID") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.apid[1] = (uint8_t)( atoi(line) );
 
   /* Read LRPT Decoder Channel 2 APID, abort if EOF */
   if( Load_Line(line, glrptrc, "LRPT Decoder Blue APID") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.apid[2] = (uint8_t)( atoi(line) );
 
   /* Read LRPT Decoder Channels to be used for the combined
    * color image's red, green and blue channels, abort if EOF */
   if( Load_Line(line, glrptrc, "Combined Color Image Channel Numbers") != SUCCESS )
-    return( FALSE );
+    return( false );
   for( idx = 0; idx < CHANNEL_IMAGE_NUM; idx++ )
   {
     rc_data.color_channel[idx] = (uint8_t)( atoi(line + 2 * idx) );
@@ -430,13 +429,13 @@ gboolean Load_Config(gpointer data) {
       Show_Message(
           "Channel Number for Combined\n"
           "Color Image out of Range", "red" );
-      return( FALSE );
+      return( false );
     }
   }
 
   /* Read image APIDs to invert palette, abort if EOF */
   if( Load_Line(line, glrptrc, "Invert Palette APIDs") != SUCCESS )
-    return( FALSE );
+    return( false );
   char *nptr = line, *endptr = NULL;
   for( idx = 0; idx < 3; idx++ )
   {
@@ -446,7 +445,7 @@ gboolean Load_Config(gpointer data) {
 
   /* Read Red Channel Normalization Range, abort if EOF */
   if( Load_Line(line, glrptrc, "Red Channel Normalization Range") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.norm_range[RED][NORM_RANGE_BLACK] = (uint8_t)( atoi(line) );
   idx = 0;
   while( line[idx++] != '-' );
@@ -454,7 +453,7 @@ gboolean Load_Config(gpointer data) {
 
   /* Read Green Channel Normalization Range, abort if EOF */
   if( Load_Line(line, glrptrc, "Green Channel Normalization Range") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.norm_range[GREEN][NORM_RANGE_BLACK] = (uint8_t)atoi( line );
   idx = 0;
   while( line[idx++] != '-' );
@@ -462,7 +461,7 @@ gboolean Load_Config(gpointer data) {
 
   /* Read Blue Channel Normalization Range, abort if EOF */
   if( Load_Line(line, glrptrc, "Blue Channel Normalization Range") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.norm_range[BLUE][NORM_RANGE_BLACK] = (uint8_t)( atoi(line) );
   idx = 0;
   while( line[idx++] != '-' );
@@ -471,19 +470,19 @@ gboolean Load_Config(gpointer data) {
   /* Read Blue Channel min pixel value in pseudo-color image */
   if( Load_Line(line, glrptrc,
         "Blue Channel min pixel value in pseudo-color image") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.colorize_blue_min = (uint8_t)( atoi(line) );
 
   /* Read Blue Channel max pixel value to enhance in pseudo-color image */
   if( Load_Line(line, glrptrc,
         "Blue Channel max pixel value in to enhance pseudo-color image") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.colorize_blue_max = (uint8_t)( atoi(line) );
 
   /* Read Blue Channel pixel value above which we assume it is a cloudy area */
   if( Load_Line(line, glrptrc,
         "Blue Channel cloud area pixel value threshold") != SUCCESS )
-    return( FALSE );
+    return( false );
   rc_data.clouds_threshold = (uint8_t)( atoi(line) );
 
   /* Check low pass filter bandwidth. It should be at
@@ -495,7 +494,7 @@ gboolean Load_Config(gpointer data) {
         "Invalid Roofing Filter Bandwidth\n"\
           "Quit and correct glrptrc", "red" );
     Error_Dialog();
-    return( FALSE );
+    return( false );
   }
 
   /* Set Gain control buttons and slider */
@@ -503,14 +502,14 @@ gboolean Load_Config(gpointer data) {
   {
     GtkWidget *radiobtn =
       Builder_Get_Object( main_window_builder, "manual_agc_radiobutton" );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(radiobtn), TRUE );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(radiobtn), true );
     ClearFlag( TUNER_GAIN_AUTO );
   }
   else
   {
     GtkWidget *radiobtn =
       Builder_Get_Object( main_window_builder, "auto_agc_radiobutton" );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(radiobtn), TRUE );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(radiobtn), true );
     SetFlag( TUNER_GAIN_AUTO );
   }
 
@@ -519,7 +518,7 @@ gboolean Load_Config(gpointer data) {
 
   fclose( glrptrc );
 
-  return( FALSE );
+  return( false );
 }
 
 /*****************************************************************************/
@@ -529,7 +528,7 @@ gboolean Load_Config(gpointer data) {
  * Searches glrpt's home directory for per-satellite configuration
  * files and sets up the "Select Satellite" menu item accordingly
  */
-gboolean Find_Config_Files(gpointer data) {
+bool Find_Config_Files(void) {
   char *ext;
   struct dirent **file_list;
   int num_files, idx;
@@ -575,8 +574,8 @@ gboolean Find_Config_Files(gpointer data) {
   {
     Show_Message( "No configuration file(s) found", "red" );
     Error_Dialog();
-    return( FALSE );
+    return( false );
   }
 
-  return( FALSE );
+  return true;
 }

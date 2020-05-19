@@ -21,8 +21,7 @@
 
 #include "jpeg.h"
 
-#include <glib.h>
-
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -53,7 +52,7 @@ static inline int iClamp(int i, int min, int max) {
 
 /*****************************************************************************/
 
-gboolean PrepareDirectories(void);
+bool PrepareDirectories(void);
 void File_Name(char *file_name, uint32_t chn, const char *ext);
 void Usage(void);
 void Show_Message(const char *mesg, const char *attr);
@@ -61,7 +60,7 @@ void Show_Message(const char *mesg, const char *attr);
 void mem_alloc(void **ptr, size_t req);
 void mem_realloc(void **ptr, size_t req);
 void free_ptr(void **ptr);
-gboolean Open_File(FILE **fp, char *fname, const char *mode);
+bool Open_File(FILE **fp, char *fname, const char *mode);
 void Save_Image_JPEG(
         char *file_name,
         int width,
@@ -82,8 +81,6 @@ int isFlagClear(int flag);
 void SetFlag(int flag);
 void ClearFlag(int flag);
 void Strlcpy(char *dest, const char *src, size_t n);
-double dClamp(double x, double min, double max);
-int iClamp(int i, int min, int max);
 
 /*****************************************************************************/
 

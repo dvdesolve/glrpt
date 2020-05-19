@@ -19,8 +19,7 @@
 
 /*****************************************************************************/
 
-#include <glib.h>
-
+#include <stdbool.h>
 #include <stdint.h>
 
 /*****************************************************************************/
@@ -55,7 +54,7 @@ typedef struct filter_data_t {
 
 /*****************************************************************************/
 
-gboolean Init_Chebyshev_Filter(
+bool Init_Chebyshev_Filter(
         filter_data_t *filter_data,
         uint32_t buf_len,
         uint32_t filter_bw,

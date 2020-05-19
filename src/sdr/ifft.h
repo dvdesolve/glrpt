@@ -19,13 +19,12 @@
 
 /*****************************************************************************/
 
-#include <glib.h>
-
+#include <stdbool.h>
 #include <stdint.h>
 
 /*****************************************************************************/
 
-gboolean Initialize_IFFT(int16_t width);
+bool Initialize_IFFT(int16_t width);
 void Deinit_Ifft(void);
 void IFFT(int16_t *data);
 

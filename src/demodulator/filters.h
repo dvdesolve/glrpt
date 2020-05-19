@@ -19,10 +19,17 @@
 
 /*****************************************************************************/
 
-#include "demod.h"
-
 #include <complex.h>
 #include <stdint.h>
+
+/*****************************************************************************/
+
+typedef struct Filter_t {
+    complex double *restrict memory;
+    uint32_t fwd_count;
+    uint32_t stage_no;
+    double  *restrict fwd_coeff;
+} Filter_t;
 
 /*****************************************************************************/
 
