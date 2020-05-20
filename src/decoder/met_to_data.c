@@ -151,6 +151,9 @@ static bool Try_Frame(mtd_rec_t *mtd, uint8_t *aligned) {
     (uint32_t)decoded[0];
   mtd->last_sync = temp;
   mtd->sig_q = (int)( round(100.0 - (Vit_Get_Percent_BER(&(mtd->v)) * 10.0)) );
+  
+  if (mtd->sig_q < 0)
+      mtd->sig_q = 0;
 
   //Curiously enough, you can flip all bits in a packet
   //and get a correct ECC anyway. Check for that case

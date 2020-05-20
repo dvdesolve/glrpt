@@ -577,5 +577,5 @@ bool Find_Config_Files(void) {
     return( false );
   }
 
-  return true;
+  return false;
 }
