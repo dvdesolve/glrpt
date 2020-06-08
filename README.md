@@ -14,6 +14,7 @@ In order to use `glrpt` one should have the following dependencies satisfied:
 - `glibc`
 - `glib2`
 - `SoapySDR` (install RTL-SDR and/or Airspy modules to have support for your hardware)
+- `libjpeg-turbo`
 
 Also if you want to compile `glrpt` by hand be sure to have the following installed:
 - `gcc` (4.8 or higher)
