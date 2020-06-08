@@ -22,9 +22,9 @@
 #include "../sdr/filters.h"
 #include "../sdr/ifft.h"
 #include "callback_func.h"
-#include "jpeg.h"
 
 #include <gtk/gtk.h>
+#include <turbojpeg.h>
 
 #include <errno.h>
 #include <stdbool.h>
@@ -40,7 +40,7 @@
 /*****************************************************************************/
 
 static bool MkdirRecurse(const char *path);
-static char *Filename(char *fpath);
+static const char *Filename(const char *fpath);
 
 /*****************************************************************************/
 
@@ -192,7 +192,7 @@ void File_Name(char *file_name, uint32_t chn, const char *ext) {
  * Finds file name in a file path
  * TODO may be it worth to use standard library routine
  */
-static char *Filename(char *fpath) {
+static const char *Filename(const char *fpath) {
   int idx;
 
   idx = (int)strlen( fpath );
@@ -289,26 +289,25 @@ void free_ptr(void **ptr) {
  *
  * Opens a file, aborts on error
  */
-bool Open_File(FILE **fp, char *fname, const char *mode) {
-  /* Message buffer */
-  char mesg[MESG_SIZE];
+bool Open_File(FILE **fp, const char *fname, const char *mode) {
+    /* Message buffer */
+    char mesg[MESG_SIZE];
 
-  /* Open Channel A image file */
-  *fp = fopen( fname, mode );
-  if( *fp == NULL )
-  {
-    snprintf( mesg, sizeof(mesg),
-        "glrpt: Failed to open file %s", fname );
-    perror( mesg );
+    *fp = fopen(fname, mode);
 
-    snprintf( mesg, sizeof(mesg),
-        "Failed to open file\n%s", Filename(fname) );
-    Show_Message( mesg, "red" );
-    Error_Dialog();
-    return( false );
-  }
+    if (*fp == NULL) {
+        snprintf(mesg, sizeof(mesg),
+                "glrpt: Failed to open file %s", fname);
+        perror(mesg);
 
-  return( true );
+        snprintf(mesg, sizeof(mesg),
+                "Failed to open file\n%s", Filename(fname));
+        Show_Message(mesg, "red");
+        Error_Dialog();
+        return false;
+    }
+
+    return true;
 }
 
 /*****************************************************************************/
@@ -318,31 +317,46 @@ bool Open_File(FILE **fp, char *fname, const char *mode) {
  * Write an image buffer to file
  */
 void Save_Image_JPEG(
-        char *file_name,
-        int width,
-        int height,
-        int num_channels,
-        const uint8_t *pImage_data,
-        compression_params_t *comp_params) {
-  char mesg[MESG_SIZE];
-  bool ret;
+        const char *file_name,
+        const int width,
+        const int height,
+        const bool grayscale,
+        const uint8_t *img) {
+    char mesg[MESG_SIZE];
 
-  /* Open image file, abort on error */
-  snprintf( mesg, sizeof(mesg),
-      "Saving Image: %s", Filename(file_name) );
-  Show_Message( mesg, "black" );
-
-  /* Compress image data to jpeg file, report failure */
-  ret = jpeg_encoder_compress_image_to_file(
-      file_name, width, height, num_channels, pImage_data, comp_params );
-  if( !ret )
-  {
+    /* Open image file, abort on error */
     snprintf( mesg, sizeof(mesg),
-        "Failed saving image: %s", Filename(file_name) );
-    Show_Message( mesg, "red" );
-  }
+            "Saving Image: %s", Filename(file_name) );
+    Show_Message( mesg, "black" );
 
-  return;
+    /* Compress image data to jpeg file, report failure */
+    const int jpeg_pf = (grayscale) ? TJPF_GRAY : TJPF_RGB;
+    const int jpeg_subsamp = (grayscale) ? TJSAMP_GRAY : TJSAMP_422;
+    const int flags = TJFLAG_ACCURATEDCT;
+
+    unsigned long jpeg_size = tjBufSize(width, height, jpeg_subsamp);
+    unsigned char *jpeg_buf = tjAlloc(jpeg_size);
+
+    tjhandle tj_instance = tjInitCompress();
+
+    tjCompress2(tj_instance, img, width, 0, height, jpeg_pf,
+            &jpeg_buf, &jpeg_size, jpeg_subsamp, rc_data.jpeg_quality, flags);
+
+    FILE *jpeg_file;
+
+    bool ret = Open_File(&jpeg_file, file_name, "wb");
+
+    if (!ret) {
+        snprintf( mesg, sizeof(mesg),
+                "Failed saving image: %s", Filename(file_name) );
+        Show_Message( mesg, "red" );
+    }
+
+    fwrite(jpeg_buf, jpeg_size, 1, jpeg_file);
+
+    fclose(jpeg_file);
+    tjFree(jpeg_buf);
+    tjDestroy(tj_instance);
 }
 
 /*****************************************************************************/

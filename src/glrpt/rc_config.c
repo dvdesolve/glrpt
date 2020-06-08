@@ -368,7 +368,7 @@ bool Load_Config(void) {
   /* TODO seems like mess-up with type casting */
   if( Load_Line(line, glrptrc, "JPEG Quality Factor") != SUCCESS )
     return( false );
-  rc_data.jpeg_quality = (float)atof( line );
+  rc_data.jpeg_quality = atoi(line);
 
   /* Read LRPT Decoder Image Raw flag, abort if EOF */
   if( Load_Line(line, glrptrc, "LRPT Decoder Image Raw flag") != SUCCESS )

@@ -19,8 +19,6 @@
 
 /*****************************************************************************/
 
-#include "jpeg.h"
-
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -60,14 +58,13 @@ void Show_Message(const char *mesg, const char *attr);
 void mem_alloc(void **ptr, size_t req);
 void mem_realloc(void **ptr, size_t req);
 void free_ptr(void **ptr);
-bool Open_File(FILE **fp, char *fname, const char *mode);
+bool Open_File(FILE **fp, const char *fname, const char *mode);
 void Save_Image_JPEG(
-        char *file_name,
-        int width,
-        int height,
-        int num_channels,
-        const uint8_t *pImage_data,
-        compression_params_t *comp_params);
+        const char *file_name,
+        const int width,
+        const int height,
+        const bool grayscale,
+        const uint8_t *img);
 void Save_Image_Raw(
         char *fname,
         const char *type,

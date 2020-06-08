@@ -100,7 +100,7 @@ typedef struct rc_data_t {
     uint8_t colorize_blue_max, colorize_blue_min;
 
     /* JPEG image quality */
-    float jpeg_quality;
+    int jpeg_quality;
 } rc_data_t;
 
 /*****************************************************************************/

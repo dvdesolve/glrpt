@@ -20,7 +20,6 @@
 #include "../common/shared.h"
 #include "../glrpt/clahe.h"
 #include "../glrpt/image.h"
-#include "../glrpt/jpeg.h"
 #include "../glrpt/utils.h"
 #include "bitop.h"
 #include "dct.h"
@@ -35,13 +34,6 @@
 /*****************************************************************************/
 
 #define MCU_PER_PACKET  14
-
-/*****************************************************************************/
-
-enum {
-    GREYSCALE_CHAN = 1,
-    COLORIZED_CHAN = 3
-};
 
 /*****************************************************************************/
 
@@ -115,25 +107,17 @@ static void Save_Images(int type) {
       /* Save channel images as JPEG */
       if( isFlagSet(IMAGE_SAVE_JPEG) )
       {
-        /* Set compression parameters */
-        compression_params_t comp_params;
-        bool ret = jpeg_encoder_compression_parameters(
-            &comp_params, rc_data.jpeg_quality, Y_ONLY, true );
-        if (!ret)
-          Show_Message( "Bad compression parameters", "red" );
-
         /* Save unprocessed image */
         fname[0] = '\0';
         if( type == IMAGE_RAW )
           File_Name( fname, idx, "-raw.jpg" );
         else
           File_Name( fname, idx, ".jpg" );
-        Save_Image_JPEG( fname,
+        Save_Image_JPEG(fname,
             (int)channel_image_width,
             (int)channel_image_height,
-            GREYSCALE_CHAN,
-            channel_image[idx],
-            &comp_params );
+            true,
+            channel_image[idx]);
       }
 
     } /* for( idx = 0; idx < CHANNEL_IMAGE_NUM; idx++ ) */
@@ -164,24 +148,17 @@ static void Save_Images(int type) {
     /* Save combo image as JPEG */
     if( isFlagSet(IMAGE_SAVE_JPEG) )
     {
-      /* Set compression parameters */
-      compression_params_t comp_params;
-      bool ret = jpeg_encoder_compression_parameters(
-          &comp_params, rc_data.jpeg_quality, H2V2, false );
-      if (!ret)
-          Show_Message( "Bad compression parameters", "red" );
-
       /* Save unprocessed image */
       fname[0] = '\0';
       if( type == IMAGE_RAW )
         File_Name( fname, COMBO, "-raw.jpg" );
       else
         File_Name( fname, COMBO, ".jpg" );
-      Save_Image_JPEG( fname,
+      Save_Image_JPEG(fname,
           (int)channel_image_width,
           (int)channel_image_height,
-          COLORIZED_CHAN, combo_image,
-          &comp_params );
+          false,
+          combo_image);
     }
 
     free_ptr( (void **)&combo_image );

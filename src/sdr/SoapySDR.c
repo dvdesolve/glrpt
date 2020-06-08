@@ -200,7 +200,7 @@ static void *SoapySDR_Stream(void *pid) {
     }*/
 
     // Reads IQ samples from file, for testing only
-    /* {
+     {
       static FILE *fdi = NULL, *fdq = NULL;
       if( fdi == NULL ) fdi = fopen( "i.s", "r" );
       if( fdq == NULL ) fdq = fopen( "q.s", "r" );
@@ -208,7 +208,7 @@ static void *SoapySDR_Stream(void *pid) {
           sizeof(double), (size_t)rc_data.sdr_buf_length, fdi );
       fread( data_buf_q[buf_cnt],
           sizeof(double), (size_t)rc_data.sdr_buf_length, fdq );
-    } */
+    } 
 
     /* // Writes the phase angle of samples, for testing only
        if( isFlagSet(STATUS_DECODING) )
