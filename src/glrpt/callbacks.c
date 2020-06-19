@@ -171,14 +171,7 @@ void on_cancel_timer_menuitem_activate(GtkMenuItem *menuitem, gpointer data) {
 /*****************************************************************************/
 
 void on_satellite_menuitem_activate(GtkMenuItem *menuitem, gpointer data) {
-  /* Get menu item label */
-  gchar *label = (gchar *)gtk_menu_item_get_label( menuitem );
-
-  /* Copy satellite name to rc_data */
-  Strlcpy( rc_data.satellite_name, label, sizeof(rc_data.satellite_name) );
-
-  /* Init and enter center freq to relevant entry widget */
-  g_idle_add(G_SOURCE_FUNC(Load_Config), NULL );
+    g_idle_add(G_SOURCE_FUNC(loadConfig), data);
 }
 
 /*****************************************************************************/

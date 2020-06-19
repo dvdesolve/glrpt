@@ -6,6 +6,7 @@ find_package(GLIB REQUIRED COMPONENTS gmodule)
 pkg_check_modules(GTK REQUIRED gtk+-3.0>=3.22.0)
 pkg_check_modules(SOAPYSDR REQUIRED SoapySDR)
 pkg_check_modules(TURBOJPEG REQUIRED libturbojpeg)
+pkg_check_modules(LIBCONFIG REQUIRED libconfig)
 
 
 # sources
@@ -100,12 +101,14 @@ target_compile_options(glrpt PRIVATE -fstack-protector-strong)
 target_include_directories(glrpt SYSTEM PRIVATE ${GTK_INCLUDE_DIRS})
 target_include_directories(glrpt SYSTEM PRIVATE ${SOAPYSDR_INCLUDE_DIRS})
 target_include_directories(glrpt SYSTEM PRIVATE ${TURBOJPEG_INCLUDE_DIRS})
+target_include_directories(glrpt SYSTEM PRIVATE ${LIBCONFIG_INCLUDE_DIRS})
 
 
 # where to find external libraries
 target_link_directories(glrpt PRIVATE ${GTK_LIBRARY_DIRS})
 target_link_directories(glrpt PRIVATE ${SOAPYSDR_LIBRARY_DIRS})
 target_link_directories(glrpt PRIVATE ${TURBOJPEG_LIBRARY_DIRS})
+target_link_directories(glrpt PRIVATE ${LIBCONFIG_LIBRARY_DIRS})
 
 
 # link libraries
@@ -115,6 +118,7 @@ target_link_libraries(glrpt PRIVATE ${GLIB_GMODULE_LIBRARIES})
 target_link_libraries(glrpt PRIVATE ${GTK_LIBRARIES})
 target_link_libraries(glrpt PRIVATE ${SOAPYSDR_LIBRARIES})
 target_link_libraries(glrpt PRIVATE ${TURBOJPEG_LIBRARIES})
+target_link_libraries(glrpt PRIVATE ${LIBCONFIG_LIBRARIES})
 
 
 # need that -Wl,--export-dynamic to open Glade UI file

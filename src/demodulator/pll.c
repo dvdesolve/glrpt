@@ -129,7 +129,7 @@ Costas_t *Costas_Init(double bw, ModScheme mode) {
   /* Huge but needed to stop stray locks at startup */
   costas->moving_average = 1000000.0;
 
-  /* Error sacling depends on modulation mode */
+  /* Error scaling depends on modulation mode */
   switch( mode )
   {
     case QPSK:

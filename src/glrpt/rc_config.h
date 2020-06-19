@@ -21,50 +21,50 @@
 
 #include "../common/common.h"
 
+#include <glib.h>
+
+#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 
 /*****************************************************************************/
 
+#define CFG_STRLEN_MAX  80
+
+/*****************************************************************************/
+
+/* Runtime config file entry */
+typedef struct rc_cfg_t {
+    char *name;
+    char *path;
+} rc_cfg_t;
+
 /* Runtime config data storage type */
 typedef struct rc_data_t {
-    /* glrpt config directory, pictures directory and glade UI file */
-    char glrpt_cfgs[64], glrpt_imgs[64], glrpt_glade[64];
+    /* Satellite name and optional comment in config file */
+    char sat_name[CFG_STRLEN_MAX + 1], comment[CFG_STRLEN_MAX + 1];
 
-    /* Timers: time duration (sec) for image decoding,
-     * default timer duration value
+    /* SoapySDR configuration: device driver and index */
+    char device_driver[CFG_STRLEN_MAX + 1];
+    uint8_t device_index;
+
+    /* SDR receiver configuration:
+     * RX frequency, low-pass filter bandwidth,
+     * gain, frequency correction factor (ppm)
      */
-    uint32_t decode_timer, default_timer;
+    uint32_t sdr_center_freq, sdr_filter_bw;
+    double tuner_gain, freq_correction;
 
-    /* Name of selected satellite */
-    char satellite_name[32];
-
-    /* SoapySDR configuration: device driver name and index */
-    char device_driver[32];
-    uint32_t device_index;
-
-    /* Frequency correction factor in ppm */
-    int freq_correction;
-
-    /* SDR receiver configuration: RX frequency, RX ADC sampling rate,
-     * RX ADC buffer size, low pass filter bandwidth and tuner gain
-     */
-    uint32_t sdr_center_freq, sdr_samplerate, sdr_buf_length, sdr_filter_bw;
-    double tuner_gain;
-
-    /* Integer FFT stride (decimation) */
-    uint32_t ifft_decimate;
-
-    /* I/Q sampling rate (sym/sec), QPSK symbol rate (sym/sec) */
-    double demod_samplerate;
-    uint32_t symbol_rate;
-
-    /* Demodulator type (QPSK/OQPSK) */
-    uint8_t psk_mode;
-
-    /* Raised root cosine settings: alpha factor, filter order */
-    double rrc_alpha;
+    /* Raised root cosine settings: filter order and alpha factor */
     uint32_t rrc_order;
+    double rrc_alpha;
+
+    /* Demodulator interpolation multiplier */
+    uint32_t interp_factor;
+
+    /* Demodulator type (QPSK/DOQPSK/IDOQPSK) and symbol rate (Sym/s) */
+    uint8_t psk_mode;
+    uint32_t symbol_rate;
 
     /* Costas PLL parameters: bandwidth,
      * lower phase error threshold, upper phase error threshold
@@ -72,41 +72,54 @@ typedef struct rc_data_t {
     double costas_bandwidth;
     double pll_locked, pll_unlocked;
 
-    /* Demodulator interpolation multiplier */
-    uint32_t interp_factor;
-
-    /* Channels APID */
+    /* Channels APIDs and APIDs for palette inversion */
     uint8_t apid[CHANNEL_IMAGE_NUM];
+    uint32_t invert_palette[3]; /* TODO why 3 and uint32_t? */
 
     /* Channels to combine to produce color image */
-    uint8_t color_channel[CHANNEL_IMAGE_NUM];
+    uint8_t color_channel[CHANNEL_IMAGE_NUM]; /* TODO should use exactly 3 */
+
+    /* Timers: time duration (sec) for image decoding,
+     * default timer duration value
+     */
+    /* TODO why do we need uint32_t? */
+    uint32_t decode_timer, default_timer;
 
     /* Image normalization pixel value ranges */
-    uint8_t norm_range[CHANNEL_IMAGE_NUM][2];
-
-    /* Image APIDs to invert palette (black <--> white) */
-    uint32_t invert_palette[3];
-
-    /* Scale factor to fit images in glrpt live display */
-    uint32_t image_scale;
-
-    /* Image rectification algorithm (W2RG/5B4AZ) */
-    uint8_t rectify_function;
-
-    /* Image pixel values above which we assume it is cloudy areas */
-    uint8_t clouds_threshold;
+    uint8_t norm_range[CHANNEL_IMAGE_NUM][2]; /* TODO should be exactly 3 */
 
     /* Max and min value of blue pixels during pseudo-colorization enhancement */
     uint8_t colorize_blue_max, colorize_blue_min;
 
+    /* Image pixel values above which we assume it is cloudy areas */
+    uint8_t clouds_threshold;
+
+    /* Image rectification algorithm (W2RG/5B4AZ) */
+    uint8_t rectify_function;
+
     /* JPEG image quality */
     int jpeg_quality;
+
+    /* Scale factor to fit images in glrpt live display */
+    /* TODO do we need uint32_t? */
+    uint32_t image_scale;
 } rc_data_t;
 
 /*****************************************************************************/
 
-bool Load_Config(void);
-bool Find_Config_Files(void);
+/* Accessible configs */
+extern rc_cfg_t *glrpt_cfg_list;
+
+/* Program-wide directories */
+extern char
+    glrpt_cfg_dir[PATH_MAX + 1],
+    glrpt_ucfg_dir[PATH_MAX + 1],
+    glrpt_img_dir[PATH_MAX + 1];
+
+/*****************************************************************************/
+
+gboolean loadConfig(gpointer f_path);
+bool findConfigFiles(void);
 
 /*****************************************************************************/
 

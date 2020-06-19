@@ -18,564 +18,688 @@
 
 #include "../common/common.h"
 #include "../common/shared.h"
+#include "../decoder/rectify_meteor.h"
+#include "../demodulator/pll.h"
 #include "callback_func.h"
 #include "callbacks.h"
 #include "interface.h"
 #include "utils.h"
 
+#include <glib.h>
 #include <glib-object.h>
 #include <gtk/gtk.h>
+#include <libconfig.h>
 
 #include <dirent.h>
-#include <errno.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 /*****************************************************************************/
 
-/* Special characters */
-#define LF   0x0A /* Line Feed */
-#define CR   0x0D /* Carriage Return */
-#define HT   0x09 /* Horizontal Tab  */
+/* Accessible configs */
+rc_cfg_t *glrpt_cfg_list;
 
-/* Max length of lines in config file */
-#define MAX_CONFIG_STRLEN   80
-
-/*****************************************************************************/
-
-static int Load_Line(char *buff, FILE *pfile, const char *mesg);
+/* Program-wide directories */
+char
+    glrpt_cfg_dir[PATH_MAX + 1],
+    glrpt_ucfg_dir[PATH_MAX + 1],
+    glrpt_img_dir[PATH_MAX + 1];
 
 /*****************************************************************************/
 
-static int found_cfg = 0;
+static int cfgNameFilter(const struct dirent *entry);
 
 /*****************************************************************************/
 
-/* Load_Line()
- *
- * Loads a line from a file, aborts on failure. Lines beginning
- * with a '#' are ignored as comments. At the end of file EOF
- * is returned. Lines assumed maximum 80 characters long.
- */
-static int Load_Line(char *buff, FILE *pfile, const char *mesg) {
-  int
-    num_chr, /* Number of characters read, excluding lf/cr */
-    chr;     /* Character read by getc() */
-  char error_mesg[MESG_SIZE];
+static int cfgNameFilter(const struct dirent *entry) {
+    uint8_t l = strlen(entry->d_name);
 
-  /* Prepare error message */
-  snprintf( error_mesg, MESG_SIZE,
-      "Error reading %s\n"\
-        "Premature EOF (End Of File)", mesg );
-
-  /* Clear buffer at start */
-  buff[0] = '\0';
-  num_chr = 0;
-
-  /* Get next character, return error if chr = EOF */
-  if( (chr = fgetc(pfile)) == EOF )
-  {
-    fprintf( stderr, "glrpt: %s\n", error_mesg );
-    fclose( pfile );
-    Show_Message( error_mesg, "red" );
-    Error_Dialog();
-    return( EOF );
-  }
-
-  /* Ignore commented lines and eol/cr and tab */
-  while(
-      (chr == '#') ||
-      (chr == HT ) ||
-      (chr == CR ) ||
-      (chr == LF ) )
-  {
-    /* Go to the end of line (look for LF or CR) */
-    while( (chr != CR) && (chr != LF) )
-      /* Get next character, return error if chr = EOF */
-      if( (chr = fgetc(pfile)) == EOF )
-      {
-        fprintf( stderr, "glrpt: %s\n", error_mesg );
-        fclose( pfile );
-        Show_Message( error_mesg, "red" );
-        Error_Dialog();
-        return( EOF );
-      }
-
-    /* Dump any CR/LF remaining */
-    while( (chr == CR) || (chr == LF) )
-      /* Get next character, return error if chr = EOF */
-      if( (chr = fgetc(pfile)) == EOF )
-      {
-        fprintf( stderr, "glrpt: %s\n", error_mesg );
-        fclose( pfile );
-        Show_Message( error_mesg, "red" );
-        Error_Dialog();
-        return( EOF );
-      }
-
-  } /* End of while( (chr == '#') || ... */
-
-  /* Continue reading characters from file till
-   * number of characters = 80 or EOF or CR/LF */
-  while( num_chr < MAX_CONFIG_STRLEN )
-  {
-    /* If LF/CR reached before filling buffer, return line */
-    if( (chr == LF) || (chr == CR) ) break;
-
-    /* Enter new character to line buffer */
-    buff[num_chr++] = (char)chr;
-
-    /* Get next character */
-    if( (chr = fgetc(pfile)) == EOF )
-    {
-      /* Terminate buffer as a string if chr = EOF */
-      buff[num_chr] = '\0';
-      return( SUCCESS );
-    }
-
-    /* Abort if end of line not reached at 80 char. */
-    if( (num_chr == 80) && (chr != LF) && (chr != CR) )
-    {
-      /* Terminate buffer as a string */
-      buff[num_chr] = '\0';
-      snprintf( error_mesg, MESG_SIZE,
-          "Error reading %s\n"\
-            "Line longer than 80 characters", mesg );
-      fprintf( stderr, "glrpt: %s\n%s\n", error_mesg, buff );
-      fclose( pfile );
-      Show_Message( error_mesg, "red" );
-      Error_Dialog();
-      return( ERROR );
-    }
-
-  } /* End of while( num_chr < max_chr ) */
-
-  /* Terminate buffer as a string */
-  buff[num_chr] = '\0';
-
-  return( SUCCESS );
+    if (strncmp(entry->d_name + l - 3, "cfg", 3) == 0)
+        return 1;
+    else
+        return 0;
 }
 
 /*****************************************************************************/
 
-/* Load_Config()
+/* loadConfig()
  *
  * Loads the glrptrc configuration file
+ * TODO more detailed error messages (using mesg)
+ * TODO use defined default values
  */
-bool Load_Config(void) {
-  char
-    rc_fpath[MESG_SIZE], /* File path to glrptrc */
-    line[MAX_CONFIG_STRLEN + 1] = {0}; /* Buffer for Load_Line */
-
-  /* Config file pointer */
-  FILE *glrptrc;
-
-  int idx;
-
-
-  /* Setup file path to glrptrc and working dir */
-  snprintf( rc_fpath, sizeof(rc_fpath),
-      "%s/%s.cfg", rc_data.glrpt_cfgs, rc_data.satellite_name );
-
-  /* Open glrptrc file */
-  if( !found_cfg || !Open_File(&glrptrc, rc_fpath, "r") )
-  {
-    Show_Message( "Failed to open configuration file", "red" );
-    Error_Dialog();
-    return( false );
-  }
-
-  /*** Read runtime configuration data ***/
-
-  /*** SDR Receiver configuration data ***/
-  /* Read SDR Receiver SoapySDR Device Driver to use */
-  if( Load_Line(line, glrptrc, "SoapySDR Device Driver") != SUCCESS )
-    return( false );
-  Strlcpy( rc_data.device_driver, line, sizeof(rc_data.device_driver) );
-  if( strcmp(rc_data.device_driver, "auto") == 0 )
-    SetFlag( AUTO_DETECT_SDR );
-
-  /* Read SoapySDR Device Index, abort if EOF */
-  if( Load_Line(line, glrptrc, "SDR Device Index") != SUCCESS )
-    return( false );
-  idx = atoi( line );
-  if( (idx < 0) || (idx > 8) )
-  {
-    Show_Message(
-        "Invalid SoapySDR Device Index\n"\
-          "Quit and correct glrptrc", "red" );
-    Error_Dialog();
-    return( false );
-  }
-  rc_data.device_index = (uint32_t)idx;
-
-  /* Read Low Pass Filter Bandwidth, abort if EOF */
-  if( Load_Line(line, glrptrc, "Roofing Filter Bandwidth") != SUCCESS )
-    return( false );
-  rc_data.sdr_filter_bw = (uint32_t)( atoi(line) );
-
-  /*** Read Device configuration data ***/
-  /* Read Manual AGC Setting, abort if EOF */
-  if( Load_Line(line, glrptrc, "Manual Gain Setting") != SUCCESS )
-    return( false );
-  rc_data.tuner_gain = atof( line );
-  if( rc_data.tuner_gain > 100.0 )
-  {
-    rc_data.tuner_gain = 100.0;
-    Show_Message(
-        "Invalid Manual Gain Setting\n"\
-          "Assuming a value of 100%", "red" );
-    Error_Dialog();
-    return( false );
-  }
-
-  /* Read Frequency Correction Factor, abort if EOF */
-  if( Load_Line(line, glrptrc, "Frequency Correction Factor") != SUCCESS )
-    return( false );
-  rc_data.freq_correction = atoi( line );
-  if( abs(rc_data.freq_correction) > 100 )
-  {
-    Show_Message(
-        "Invalid Frequency Correction Factor\n"\
-          "Quit and correct glrptrc", "red" );
-    Error_Dialog();
-    return( false );
-  }
-
-  /*** Image Decoding configuration data ***/
-  /* Read Satellite Frequency in kHz, abort if EOF */
-  if( Load_Line(line, glrptrc, "Satellite Frequency kHz") != SUCCESS )
-    return( false );
-  rc_data.sdr_center_freq = (uint32_t)atoi( line ) * 1000;
-
-  /* Read default decode duration, abort if EOF */
-  if( Load_Line(line, glrptrc, "Image Decoding Duration") != SUCCESS )
-    return( false );
-  rc_data.default_timer = (uint32_t)( atoi(line) );
-  if( !rc_data.decode_timer )
-    rc_data.decode_timer = rc_data.default_timer;
-
-  /* Warn if decoding duration is too long */
-  if( rc_data.decode_timer > MAX_OPERATION_TIME )
-  {
+gboolean loadConfig(gpointer f_path) {
     char mesg[MESG_SIZE];
-    snprintf( mesg, sizeof(mesg),
-        "Default decoding duration specified\n"\
-          "in glrptrc (%u sec) seems excessive\n",
-        rc_data.decode_timer );
-    Show_Message( mesg, "red" );
-  }
 
-  /* Read LRPT image scale factor, abort if EOF */
-  if( Load_Line(line, glrptrc, "Image Scale Factor") != SUCCESS )
-    return( false );
-  rc_data.image_scale = (uint32_t)( atoi(line) );
+    /* Initialize string config values */
+    memset(rc_data.sat_name, '\0', CFG_STRLEN_MAX);
+    memset(rc_data.comment, '\0', CFG_STRLEN_MAX);
+    memset(rc_data.device_driver, '\0', CFG_STRLEN_MAX);
 
-  /* LRPT Demodulator Parameters */
-  /* Read RRC Filter Order, abort if EOF */
-  if( Load_Line(line, glrptrc, "RRC Filter Order") != SUCCESS )
-    return( false );
-  rc_data.rrc_order = (uint32_t)( atoi(line) );
+    /* Initialize main config object and allow int <-> double convertion */
+    config_t cfg;
 
-  /* Read RRC Filter alpha factor, abort if EOF */
-  if( Load_Line(line, glrptrc, "RRC Filter alpha factor") != SUCCESS )
-    return( false );
-  rc_data.rrc_alpha = atof( line );
+    config_init(&cfg);
+    config_set_options(&cfg, CONFIG_OPTION_AUTOCONVERT);
 
-  /* Read Costas PLL Loop Bandwidth, abort if EOF */
-  if( Load_Line(line, glrptrc, "Costas PLL Loop Bandwidth") != SUCCESS )
-    return( false );
-  rc_data.costas_bandwidth = atof( line );
+    /* Try to parse config file */
+    if (!config_read_file(&cfg, (char *)f_path)) {
+        snprintf(mesg, sizeof(mesg),
+                "Failed to parse config file!\n%s:%d - %s\n",
+                config_error_file(&cfg), config_error_line(&cfg),
+                config_error_text(&cfg));
 
-  /* Read Costas PLL Locked Threshold, abort if EOF */
-  if( Load_Line(line, glrptrc, "Costas PLL Locked Threshold") != SUCCESS )
-    return( false );
-  rc_data.pll_locked   = atof( line );
-  rc_data.pll_unlocked = rc_data.pll_locked * 1.03;
+        Show_Message(mesg, "red");
+        Error_Dialog();
 
-  /* Read Transmitter Modulation Mode, abort if EOF */
-  if( Load_Line(line, glrptrc, "Transmitter Modulation Mode") != SUCCESS )
-    return( false );
-  rc_data.psk_mode = (uint8_t)( atoi(line) );
+        config_destroy(&cfg);
 
-  /* Read Transmitter QPSK Symbol Rate, abort if EOF */
-  if( Load_Line(line, glrptrc, "Transmitter QPSK Symbol Rate") != SUCCESS )
-    return( false );
-  rc_data.symbol_rate = (uint32_t)( atoi(line) );
-
-  /* Read Demodulator Interpolation Factor, abort if EOF */
-  if( Load_Line(line, glrptrc, "Demodulator Interpolation Factor") != SUCCESS )
-    return( false );
-  rc_data.interp_factor = (uint32_t)( atoi(line) );
-
-  /* Read LRPT Decoder Output Mode, abort if EOF */
-  if( Load_Line(line, glrptrc, "LRPT Decoder Output Mode") != SUCCESS )
-    return( false );
-  switch( atoi(line) )
-  {
-    case OUT_COMBO:
-      SetFlag( IMAGE_OUT_COMBO );
-      break;
-
-    case OUT_SPLIT:
-      SetFlag( IMAGE_OUT_SPLIT );
-      break;
-
-    case OUT_BOTH:
-      SetFlag( IMAGE_OUT_COMBO );
-      SetFlag( IMAGE_OUT_SPLIT );
-      break;
-
-    default:
-      SetFlag( IMAGE_OUT_COMBO );
-      SetFlag( IMAGE_OUT_SPLIT );
-      Show_Message(
-          "Image Output Mode option invalid\n"
-            "Assuming Both (Split and Combo)", "red" );
-  }
-
-  /* Read LRPT Image Save file type, abort if EOF */
-  if( Load_Line(line, glrptrc, "Save As image file type") != SUCCESS )
-    return( false );
-  switch( atoi(line) )
-  {
-    case SAVEAS_JPEG:
-      SetFlag( IMAGE_SAVE_JPEG );
-      break;
-
-    case SAVEAS_PGM:
-      SetFlag( IMAGE_SAVE_PPGM );
-      break;
-
-    case SAVEAS_BOTH:
-      SetFlag( IMAGE_SAVE_JPEG );
-      SetFlag( IMAGE_SAVE_PPGM );
-      break;
-
-    default:
-      SetFlag( IMAGE_SAVE_PPGM );
-      SetFlag( IMAGE_SAVE_PPGM );
-      Show_Message(
-          "Image Save As option invalid\n"
-            "Assuming Both (JPEG and PGM)", "red" );
-  }
-
-  /* Read JPEG Quality Factor, abort if EOF */
-  /* TODO seems like mess-up with type casting */
-  if( Load_Line(line, glrptrc, "JPEG Quality Factor") != SUCCESS )
-    return( false );
-  rc_data.jpeg_quality = atoi(line);
-
-  /* Read LRPT Decoder Image Raw flag, abort if EOF */
-  if( Load_Line(line, glrptrc, "LRPT Decoder Image Raw flag") != SUCCESS )
-    return( false );
-  if( atoi(line) ) SetFlag( IMAGE_RAW );
-
-  /* Read LRPT Decoder Image Normalize flag, abort if EOF */
-  if( Load_Line(line, glrptrc, "LRPT Decoder Image Normalize flag") != SUCCESS )
-    return( false );
-  if( atoi(line) ) SetFlag( IMAGE_NORMALIZE );
-
-  /* Read LRPT Decoder Image CLAHE flag, abort if EOF */
-  if( Load_Line(line, glrptrc, "LRPT Decoder Image CLAHE flag") != SUCCESS )
-    return( false );
-  if( atoi(line) ) SetFlag( IMAGE_CLAHE );
-
-  /* Read LRPT Decoder Image Rectify flag, abort if EOF */
-  if( Load_Line(line, glrptrc, "LRPT Decoder Image Rectify flag") != SUCCESS )
-    return( false );
-  rc_data.rectify_function = (uint8_t)atoi( line );
-  if( rc_data.rectify_function > 2 )
-  {
-    Show_Message( "Invalid Rectify Function. Assuming 1", "red" );
-    rc_data.rectify_function = 1;
-  }
-  if( rc_data.rectify_function )
-    SetFlag( IMAGE_RECTIFY );
-
-  /* Read LRPT Decoder Image Colorize flag, abort if EOF */
-  if( Load_Line(line, glrptrc, "LRPT Decoder Image Colorize flag") != SUCCESS )
-    return( false );
-  if( atoi(line) ) SetFlag( IMAGE_COLORIZE );
-
-  /* Read LRPT Decoder Channel 0 APID, abort if EOF */
-  if( Load_Line(line, glrptrc, "LRPT Decoder Red APID") != SUCCESS )
-    return( false );
-  rc_data.apid[0] = (uint8_t)( atoi(line) );
-
-  /* Read LRPT Decoder Channel 1 APID, abort if EOF */
-  if( Load_Line(line, glrptrc, "LRPT Decoder Green APID") != SUCCESS )
-    return( false );
-  rc_data.apid[1] = (uint8_t)( atoi(line) );
-
-  /* Read LRPT Decoder Channel 2 APID, abort if EOF */
-  if( Load_Line(line, glrptrc, "LRPT Decoder Blue APID") != SUCCESS )
-    return( false );
-  rc_data.apid[2] = (uint8_t)( atoi(line) );
-
-  /* Read LRPT Decoder Channels to be used for the combined
-   * color image's red, green and blue channels, abort if EOF */
-  if( Load_Line(line, glrptrc, "Combined Color Image Channel Numbers") != SUCCESS )
-    return( false );
-  for( idx = 0; idx < CHANNEL_IMAGE_NUM; idx++ )
-  {
-    rc_data.color_channel[idx] = (uint8_t)( atoi(line + 2 * idx) );
-    if( rc_data.color_channel[idx] >= CHANNEL_IMAGE_NUM )
-    {
-      Show_Message(
-          "Channel Number for Combined\n"
-          "Color Image out of Range", "red" );
-      return( false );
+        return FALSE;
     }
-  }
 
-  /* Read image APIDs to invert palette, abort if EOF */
-  if( Load_Line(line, glrptrc, "Invert Palette APIDs") != SUCCESS )
-    return( false );
-  char *nptr = line, *endptr = NULL;
-  for( idx = 0; idx < 3; idx++ )
-  {
-    rc_data.invert_palette[idx] = (uint32_t)( strtol(nptr, &endptr, 10) );
-    nptr = ++endptr;
-  }
+    /* Begin settings readout. Raw values are checked against valid ranges.
+     * Default values are substitued right here if no others provided */
+    config_setting_t *set_v;
+    config_setting_t *arr_v;
+    const char *str_v;
+    int int_v;
+    double flt_v;
 
-  /* Read Red Channel Normalization Range, abort if EOF */
-  if( Load_Line(line, glrptrc, "Red Channel Normalization Range") != SUCCESS )
-    return( false );
-  rc_data.norm_range[RED][NORM_RANGE_BLACK] = (uint8_t)( atoi(line) );
-  idx = 0;
-  while( line[idx++] != '-' );
-  rc_data.norm_range[RED][NORM_RANGE_WHITE] = (uint8_t)( atoi(&line[idx]) );
+    /* Common settings */
+    if (config_lookup_string(&cfg, "sat_name", &str_v))
+        strncpy(rc_data.sat_name, str_v, CFG_STRLEN_MAX);
 
-  /* Read Green Channel Normalization Range, abort if EOF */
-  if( Load_Line(line, glrptrc, "Green Channel Normalization Range") != SUCCESS )
-    return( false );
-  rc_data.norm_range[GREEN][NORM_RANGE_BLACK] = (uint8_t)atoi( line );
-  idx = 0;
-  while( line[idx++] != '-' );
-  rc_data.norm_range[GREEN][NORM_RANGE_WHITE] = (uint8_t)( atoi(&line[idx]) );
+    if (config_lookup_string(&cfg, "comment", &str_v))
+        strncpy(rc_data.comment, str_v, CFG_STRLEN_MAX);
 
-  /* Read Blue Channel Normalization Range, abort if EOF */
-  if( Load_Line(line, glrptrc, "Blue Channel Normalization Range") != SUCCESS )
-    return( false );
-  rc_data.norm_range[BLUE][NORM_RANGE_BLACK] = (uint8_t)( atoi(line) );
-  idx = 0;
-  while( line[idx++] != '-' );
-  rc_data.norm_range[BLUE][NORM_RANGE_WHITE] = (uint8_t)( atoi(&line[idx]) );
+    /* SDR device settings */
+    set_v = config_lookup(&cfg, "device");
 
-  /* Read Blue Channel min pixel value in pseudo-color image */
-  if( Load_Line(line, glrptrc,
-        "Blue Channel min pixel value in pseudo-color image") != SUCCESS )
-    return( false );
-  rc_data.colorize_blue_min = (uint8_t)( atoi(line) );
+    if (set_v && config_setting_is_group(set_v)) {
+        /* TODO re-check behavior in SoapySDR.c and fix docs accordingly */
+        if (config_setting_lookup_string(set_v, "driver", &str_v))
+            strncpy(rc_data.device_driver, str_v, CFG_STRLEN_MAX);
+        else
+            strncpy(rc_data.device_driver, "auto", CFG_STRLEN_MAX);
 
-  /* Read Blue Channel max pixel value to enhance in pseudo-color image */
-  if( Load_Line(line, glrptrc,
-        "Blue Channel max pixel value in to enhance pseudo-color image") != SUCCESS )
-    return( false );
-  rc_data.colorize_blue_max = (uint8_t)( atoi(line) );
+        if (strncasecmp(rc_data.device_driver, "auto", 4) == 0)
+            SetFlag(AUTO_DETECT_SDR);
+        else
+            ClearFlag(AUTO_DETECT_SDR);
 
-  /* Read Blue Channel pixel value above which we assume it is a cloudy area */
-  if( Load_Line(line, glrptrc,
-        "Blue Channel cloud area pixel value threshold") != SUCCESS )
-    return( false );
-  rc_data.clouds_threshold = (uint8_t)( atoi(line) );
+        if (config_setting_lookup_int(set_v, "index", &int_v) &&
+                (int_v >= 0) && (int_v <= 255))
+            rc_data.device_index = (uint8_t)int_v;
+        else
+            rc_data.device_index = 0;
+    }
+    else {
+        strncpy(rc_data.device_driver, "auto", CFG_STRLEN_MAX);
+        SetFlag(AUTO_DETECT_SDR);
 
-  /* Check low pass filter bandwidth. It should be at
-   * least 100kHz and no more than about 200kHz */
-  if( (rc_data.sdr_filter_bw < MIN_BANDWIDTH) ||
-      (rc_data.sdr_filter_bw > MAX_BANDWIDTH) )
-  {
-    Show_Message(
-        "Invalid Roofing Filter Bandwidth\n"\
-          "Quit and correct glrptrc", "red" );
-    Error_Dialog();
-    return( false );
-  }
+        rc_data.device_index = 0;
+    }
 
-  /* Set Gain control buttons and slider */
-  if( rc_data.tuner_gain > 0.0 )
-  {
-    GtkWidget *radiobtn =
-      Builder_Get_Object( main_window_builder, "manual_agc_radiobutton" );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(radiobtn), true );
-    ClearFlag( TUNER_GAIN_AUTO );
-  }
-  else
-  {
-    GtkWidget *radiobtn =
-      Builder_Get_Object( main_window_builder, "auto_agc_radiobutton" );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(radiobtn), true );
-    SetFlag( TUNER_GAIN_AUTO );
-  }
+    /* SDR receiver settings */
+    set_v = config_lookup(&cfg, "receiver");
 
-  /* Initialize top window etc */
-  Initialize_Top_Window();
+    if (set_v && config_setting_is_group(set_v)) {
+        if (config_setting_lookup_int(set_v, "freq", &int_v) &&
+                (int_v >= 136000) && (int_v <= 138000))
+            rc_data.sdr_center_freq = (uint32_t)int_v * 1000;
+        else {
+            Show_Message("Can't find valid receiver frequency!", "red");
+            Error_Dialog();
 
-  fclose( glrptrc );
+            return FALSE;
+        }
 
-  return( false );
+        if (config_setting_lookup_int(set_v, "bw", &int_v) &&
+                (int_v >= 90000) && (int_v <= 210000))
+            rc_data.sdr_filter_bw = (uint32_t)int_v;
+        else
+            rc_data.sdr_filter_bw = 120000;
+
+        if (config_setting_lookup_float(set_v, "gain", &flt_v) &&
+                (flt_v >= 0.0) && (flt_v <= 100.0))
+            rc_data.tuner_gain = flt_v;
+        else
+            rc_data.tuner_gain = 0.0;
+
+        if (config_setting_lookup_float(set_v, "corr_f", &flt_v) &&
+                (flt_v >= -100.0) && (flt_v <= 100.0))
+            rc_data.freq_correction = flt_v;
+        else
+            rc_data.freq_correction = 0.0;
+    }
+    else {
+        Show_Message("Can't find SDR receiver settings!", "red");
+        Error_Dialog();
+
+        return FALSE;
+    }
+
+    /* Demodulator settings */
+    set_v = config_lookup(&cfg, "demodulator");
+
+    if (set_v && config_setting_is_group(set_v)) {
+        if (config_setting_lookup_int(set_v, "rrc_order", &int_v) &&
+                (int_v >= 0))
+            rc_data.rrc_order = (uint32_t)int_v;
+        else
+            rc_data.rrc_order = 32;
+
+        if (config_setting_lookup_float(set_v, "rrc_alpha", &flt_v) &&
+                (flt_v >= 0.0) && (flt_v <= 1.0))
+            rc_data.rrc_alpha = flt_v;
+        else
+            rc_data.rrc_alpha = 0.6;
+
+        if (config_setting_lookup_int(set_v, "interp_f", &int_v) &&
+                (int_v >= 0))
+            rc_data.interp_factor = (uint32_t)int_v;
+        else
+            rc_data.interp_factor = 4;
+
+        if (config_setting_lookup_float(set_v, "pll_bw", &flt_v) &&
+                (flt_v >= 0.0))
+            rc_data.costas_bandwidth = flt_v;
+        else
+            rc_data.costas_bandwidth = 100.0;
+
+        if (config_setting_lookup_float(set_v, "pll_thresh", &flt_v) &&
+                (flt_v >= 0.0))
+            rc_data.pll_locked = flt_v;
+        else
+            rc_data.pll_locked = 0.8;
+
+        rc_data.pll_unlocked = 1.03 * rc_data.pll_locked;
+
+        if (config_setting_lookup_string(set_v, "mode", &str_v)) {
+            if (strncasecmp(str_v, "QPSK", 4) == 0)
+                rc_data.psk_mode = QPSK;
+            else if (strncasecmp(str_v, "DOQPSK", 6) == 0)
+                rc_data.psk_mode = DOQPSK;
+            else if (strncasecmp(str_v, "IDOQPSK", 7) == 0)
+                rc_data.psk_mode = IDOQPSK;
+            else {
+                Show_Message("QPSK mode is invalid!", "red");
+                Error_Dialog();
+
+                return FALSE;
+            }
+        }
+        else {
+            Show_Message("Can't find QPSK mode!", "red");
+            Error_Dialog();
+
+            return FALSE;
+        }
+
+        if (config_setting_lookup_int(set_v, "rate", &int_v) &&
+                (int_v >= 50000) && (int_v <= 100000))
+            rc_data.symbol_rate = (uint32_t)int_v;
+        else {
+            Show_Message("Can't find valid QPSK symbol rate!",
+                    "red");
+            Error_Dialog();
+
+            return FALSE;
+        }
+    }
+    else {
+        Show_Message("Can't find demodulator settings!", "red");
+        Error_Dialog();
+
+        return FALSE;
+    }
+
+    /* Decoder settings */
+    set_v = config_lookup(&cfg, "decoder");
+
+    if (set_v && config_setting_is_group(set_v)) {
+        arr_v = config_setting_lookup(set_v, "apids");
+
+        if (arr_v && config_setting_is_array(arr_v) &&
+                (config_setting_length(arr_v) == CHANNEL_IMAGE_NUM)) {
+            for (uint8_t idx = 0; idx < CHANNEL_IMAGE_NUM; idx++) {
+                uint8_t apid =
+                    (uint8_t)config_setting_get_int_elem(arr_v, idx);
+
+                if ((apid < 64) || (apid > 69)) {
+                    Show_Message("APIDs are incorrect!", "red");
+                    Error_Dialog();
+
+                    return FALSE;
+                }
+                else
+                    rc_data.apid[idx] = apid;
+            }
+        }
+        else {
+            Show_Message("Can't find valid APIDs!", "red");
+            Error_Dialog();
+
+            return FALSE;
+        }
+
+        arr_v = config_setting_lookup(set_v, "apids_invert");
+
+        if (arr_v && config_setting_is_array(arr_v) &&
+                (config_setting_length(arr_v) == 3)) {
+            for (uint8_t idx = 0; idx < 3; idx++) {
+                uint32_t apid =
+                    (uint32_t)config_setting_get_int_elem(arr_v, idx);
+
+                if ((apid != 0) && ((apid < 64) || (apid > 69)))
+                    rc_data.invert_palette[idx] = 67 + idx;
+                else
+                    rc_data.invert_palette[idx] = apid;
+            }
+        }
+        else {
+            rc_data.invert_palette[0] = 67;
+            rc_data.invert_palette[1] = 68;
+            rc_data.invert_palette[2] = 69;
+        }
+
+        arr_v = config_setting_lookup(set_v, "rgb_chans");
+
+        if (arr_v && config_setting_is_array(arr_v) &&
+                (config_setting_length(arr_v) == 3)) {
+            for (uint8_t idx = 0; idx < 3; idx++) {
+                uint8_t chan =
+                    (uint8_t)config_setting_get_int_elem(arr_v, idx);
+
+                if (chan > 2)
+                    rc_data.color_channel[idx] = idx;
+                else
+                    rc_data.color_channel[idx] = chan;
+            }
+        }
+        else {
+            rc_data.color_channel[0] = 0;
+            rc_data.color_channel[1] = 1;
+            rc_data.color_channel[2] = 2;
+        }
+
+        if (config_setting_lookup_int(set_v, "duration", &int_v) &&
+                (int_v >= 0) && (int_v <= 1200))
+            rc_data.default_timer = (uint32_t)int_v;
+        else
+            rc_data.default_timer = 900;
+
+        if (!rc_data.decode_timer)
+            rc_data.decode_timer = rc_data.default_timer;
+    }
+    else {
+        Show_Message("Can't find decoder settings!", "red");
+        Error_Dialog();
+
+        return FALSE;
+    }
+
+    /* Post-processing settings */
+    set_v = config_lookup(&cfg, "postproc");
+
+    if (set_v && config_setting_is_group(set_v)) {
+        if (config_setting_lookup_bool(set_v, "colorize", &int_v)) {
+            if (int_v)
+                SetFlag(IMAGE_COLORIZE);
+            else
+                ClearFlag(IMAGE_COLORIZE);
+        }
+        else
+            SetFlag(IMAGE_COLORIZE);
+
+        arr_v = config_setting_lookup(set_v, "R_rng");
+
+        if (arr_v && config_setting_is_array(arr_v) &&
+                (config_setting_length(arr_v) == 2)) {
+            uint8_t rng_min =
+                (uint8_t)config_setting_get_int_elem(arr_v, 0);
+            uint8_t rng_max =
+                (uint8_t)config_setting_get_int_elem(arr_v, 1);
+
+            if (rng_min > rng_max) {
+                rc_data.norm_range[RED][NORM_RANGE_BLACK] = 0;
+                rc_data.norm_range[RED][NORM_RANGE_WHITE] = 240;
+            }
+            else {
+                rc_data.norm_range[RED][NORM_RANGE_BLACK] = rng_min;
+                rc_data.norm_range[RED][NORM_RANGE_WHITE] = rng_max;
+            }
+        }
+        else {
+            rc_data.norm_range[RED][NORM_RANGE_BLACK] = 0;
+            rc_data.norm_range[RED][NORM_RANGE_WHITE] = 240;
+        }
+
+        arr_v = config_setting_lookup(set_v, "G_rng");
+
+        if (arr_v && config_setting_is_array(arr_v) &&
+                (config_setting_length(arr_v) == 2)) {
+            uint8_t rng_min =
+                (uint8_t)config_setting_get_int_elem(arr_v, 0);
+            uint8_t rng_max =
+                (uint8_t)config_setting_get_int_elem(arr_v, 1);
+
+            if (rng_min > rng_max) {
+                rc_data.norm_range[GREEN][NORM_RANGE_BLACK] = 0;
+                rc_data.norm_range[GREEN][NORM_RANGE_WHITE] = 255;
+            }
+            else {
+                rc_data.norm_range[GREEN][NORM_RANGE_BLACK] = rng_min;
+                rc_data.norm_range[GREEN][NORM_RANGE_WHITE] = rng_max;
+            }
+        }
+        else {
+            rc_data.norm_range[GREEN][NORM_RANGE_BLACK] = 0;
+            rc_data.norm_range[GREEN][NORM_RANGE_WHITE] = 255;
+        }
+
+        arr_v = config_setting_lookup(set_v, "B_rng");
+
+        if (arr_v && config_setting_is_array(arr_v) &&
+                (config_setting_length(arr_v) == 2)) {
+            uint8_t rng_min =
+                (uint8_t)config_setting_get_int_elem(arr_v, 0);
+            uint8_t rng_max =
+                (uint8_t)config_setting_get_int_elem(arr_v, 1);
+
+            if (rng_min > rng_max) {
+                rc_data.norm_range[BLUE][NORM_RANGE_BLACK] = 60;
+                rc_data.norm_range[BLUE][NORM_RANGE_WHITE] = 255;
+            }
+            else {
+                rc_data.norm_range[BLUE][NORM_RANGE_BLACK] = rng_min;
+                rc_data.norm_range[BLUE][NORM_RANGE_WHITE] = rng_max;
+            }
+        }
+        else {
+            rc_data.norm_range[BLUE][NORM_RANGE_BLACK] = 60;
+            rc_data.norm_range[BLUE][NORM_RANGE_WHITE] = 255;
+        }
+
+        arr_v = config_setting_lookup(set_v, "B_water_rng");
+
+        if (arr_v && config_setting_is_array(arr_v) &&
+                (config_setting_length(arr_v) == 2)) {
+            uint8_t rng_min =
+                (uint8_t)config_setting_get_int_elem(arr_v, 0);
+            uint8_t rng_max =
+                (uint8_t)config_setting_get_int_elem(arr_v, 1);
+
+            if (rng_min > rng_max) {
+                rc_data.colorize_blue_min = 60;
+                rc_data.colorize_blue_max = 80;
+            }
+            else {
+                rc_data.colorize_blue_min = rng_min;
+                rc_data.colorize_blue_max = rng_max;
+            }
+        }
+        else {
+            rc_data.colorize_blue_min = 60;
+            rc_data.colorize_blue_max = 80;
+        }
+
+        if (config_setting_lookup_int(set_v, "B_clouds_thresh", &int_v) &&
+                (int_v >= 0) && (int_v <= 255))
+            rc_data.clouds_threshold = (uint8_t)int_v;
+        else
+            rc_data.clouds_threshold = 210;
+
+        if (config_setting_lookup_bool(set_v, "normalize", &int_v)) {
+            if (int_v)
+                SetFlag(IMAGE_NORMALIZE);
+            else
+                ClearFlag(IMAGE_NORMALIZE);
+        }
+        else
+            SetFlag(IMAGE_NORMALIZE);
+
+        /* TODO deal with CLAHE enabling more carefully */
+        if (config_setting_lookup_bool(set_v, "clahe", &int_v)) {
+            if (int_v)
+                SetFlag(IMAGE_CLAHE);
+            else
+                ClearFlag(IMAGE_CLAHE);
+        }
+        else
+            SetFlag(IMAGE_CLAHE);
+
+        if (config_setting_lookup_string(set_v, "rectify", &str_v)) {
+            if (strncasecmp(str_v, "no", 2) == 0)
+                rc_data.rectify_function = R_NO;
+            else if (strncasecmp(str_v, "W2RG", 4) == 0)
+                rc_data.rectify_function = R_W2RG;
+            else if (strncasecmp(str_v, "5B4AZ", 5) == 0)
+                rc_data.rectify_function = R_5B4AZ;
+            else
+                rc_data.rectify_function = R_5B4AZ;
+        }
+        else
+            rc_data.rectify_function = R_5B4AZ;
+
+        if (rc_data.rectify_function)
+            SetFlag(IMAGE_RECTIFY);
+        else
+            ClearFlag(IMAGE_RECTIFY);
+    }
+    else {
+        SetFlag(IMAGE_COLORIZE);
+
+        rc_data.norm_range[RED][NORM_RANGE_BLACK] = 0;
+        rc_data.norm_range[RED][NORM_RANGE_WHITE] = 240;
+        rc_data.norm_range[GREEN][NORM_RANGE_BLACK] = 0;
+        rc_data.norm_range[GREEN][NORM_RANGE_WHITE] = 255;
+        rc_data.norm_range[BLUE][NORM_RANGE_BLACK] = 60;
+        rc_data.norm_range[BLUE][NORM_RANGE_WHITE] = 255;
+
+        rc_data.colorize_blue_min = 60;
+        rc_data.colorize_blue_max = 80;
+
+        rc_data.clouds_threshold = 210;
+
+        SetFlag(IMAGE_NORMALIZE);
+        SetFlag(IMAGE_CLAHE);
+
+        rc_data.rectify_function = R_5B4AZ;
+        SetFlag(IMAGE_RECTIFY);
+    }
+
+    /* Output settings */
+    set_v = config_lookup(&cfg, "output");
+
+    if (set_v && config_setting_is_group(set_v)) {
+        if (config_setting_lookup_string(set_v, "type", &str_v)) {
+            if (strncasecmp(str_v, "combo", 5) == 0) {
+                SetFlag(IMAGE_OUT_COMBO);
+                ClearFlag(IMAGE_OUT_SPLIT);
+            }
+            else if (strncasecmp(str_v, "chan", 4) == 0) {
+                ClearFlag(IMAGE_OUT_COMBO);
+                SetFlag(IMAGE_OUT_SPLIT);
+            }
+            else if (strncasecmp(str_v, "all", 3) == 0) {
+                SetFlag(IMAGE_OUT_COMBO);
+                SetFlag(IMAGE_OUT_SPLIT);
+            }
+            else {
+                SetFlag(IMAGE_OUT_COMBO);
+                SetFlag(IMAGE_OUT_SPLIT);
+            }
+        }
+        else {
+            SetFlag(IMAGE_OUT_COMBO);
+            SetFlag(IMAGE_OUT_SPLIT);
+        }
+
+        if (config_setting_lookup_string(set_v, "format", &str_v)) {
+            if (strncasecmp(str_v, "JPEG", 4) == 0) {
+                SetFlag(IMAGE_SAVE_JPEG);
+                ClearFlag(IMAGE_SAVE_PPGM);
+            }
+            else if (strncasecmp(str_v, "PGM", 3) == 0) {
+                ClearFlag(IMAGE_SAVE_JPEG);
+                SetFlag(IMAGE_SAVE_PPGM);
+            }
+            else if (strncasecmp(str_v, "all", 3) == 0) {
+                SetFlag(IMAGE_SAVE_JPEG);
+                SetFlag(IMAGE_SAVE_PPGM);
+            }
+            else {
+                SetFlag(IMAGE_SAVE_JPEG);
+                ClearFlag(IMAGE_SAVE_PPGM);
+            }
+        }
+        else {
+            SetFlag(IMAGE_SAVE_JPEG);
+            ClearFlag(IMAGE_SAVE_PPGM);
+        }
+
+        if (config_setting_lookup_int(set_v, "jpeg_qual", &int_v) &&
+                (int_v >= 0) && (int_v <= 100))
+            rc_data.jpeg_quality = int_v;
+        else
+            rc_data.jpeg_quality = 100;
+
+        /* TODO review how raw images are saved */
+        if (config_setting_lookup_bool(set_v, "save_raw", &int_v)) {
+            if (int_v)
+                SetFlag(IMAGE_RAW);
+            else
+                ClearFlag(IMAGE_RAW);
+        }
+        else
+            ClearFlag(IMAGE_RAW);
+    }
+    else {
+        SetFlag(IMAGE_OUT_COMBO);
+        SetFlag(IMAGE_OUT_SPLIT);
+
+        SetFlag(IMAGE_SAVE_JPEG);
+        ClearFlag(IMAGE_SAVE_PPGM);
+
+        rc_data.jpeg_quality = 100;
+
+        ClearFlag(IMAGE_RAW);
+    }
+
+    /* GUI settings */
+    set_v = config_lookup(&cfg, "gui");
+
+    if (set_v && config_setting_is_group(set_v)) {
+        if (config_setting_lookup_int(set_v, "scale_f", &int_v) && (int_v > 0))
+            rc_data.image_scale = (uint32_t)int_v;
+        else
+            rc_data.image_scale = 4;
+    }
+    else {
+            rc_data.image_scale = 4;
+    }
+
+    /* Cleanup */
+    config_destroy(&cfg);
+
+    /* Set Gain control buttons and slider */
+    if (rc_data.tuner_gain != 0.0) {
+        GtkWidget *radiobtn = Builder_Get_Object(
+                main_window_builder, "manual_agc_radiobutton");
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(radiobtn), TRUE);
+        ClearFlag(TUNER_GAIN_AUTO);
+    }
+    else {
+        GtkWidget *radiobtn = Builder_Get_Object(
+                main_window_builder, "auto_agc_radiobutton");
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(radiobtn), TRUE);
+        SetFlag(TUNER_GAIN_AUTO);
+    }
+
+    /* (Re)initialize top window */
+    Initialize_Top_Window();
+
+    return FALSE;
 }
 
 /*****************************************************************************/
 
-/* Find_Config_Files()
+/* findConfigFiles()
  *
- * Searches glrpt's home directory for per-satellite configuration
+ * Searches system-wide and user's directory for per-satellite configuration
  * files and sets up the "Select Satellite" menu item accordingly
  */
-bool Find_Config_Files(void) {
-  char *ext;
-  struct dirent **file_list;
-  int num_files, idx;
-  GtkWidget *sat_menu;
+bool findConfigFiles(void) {
+    struct dirent **s_cfg_list, **u_cfg_list;
 
+    int n_s_cfgs =
+        scandir(glrpt_cfg_dir, &s_cfg_list, cfgNameFilter, alphasort);
+    int n_u_cfgs =
+        scandir(glrpt_ucfg_dir, &u_cfg_list, cfgNameFilter, alphasort);
 
-  /* Build "Select Satellite" Menu item */
-  if( !popup_menu )
-    popup_menu = create_popup_menu( &popup_menu_builder );
-  sat_menu = Builder_Get_Object( popup_menu_builder, "select_satellite" );
+    n_s_cfgs = (n_s_cfgs < 0) ? 0 : n_s_cfgs;
+    n_u_cfgs = (n_u_cfgs < 0) ? 0 : n_u_cfgs;
 
-  /* Look for files with a .cfg extention */
-  errno = 0;
-  found_cfg = 0;
-  num_files = scandir( rc_data.glrpt_cfgs, &file_list, NULL, alphasort );
-  for( idx = 0; idx < num_files; idx++ )
-  {
-    /* Look for files with a ".cfg" extention */
-    if( (ext = strstr(file_list[idx]->d_name, ".cfg")) )
-    {
-      /* Cut off file extention to create a satellite name */
-      *ext = '\0';
+    if ((n_s_cfgs + n_u_cfgs) == 0)
+        return false;
 
-      /* Append new child items to Select Satellite menu */
-      GtkWidget *menu_item =
-        gtk_menu_item_new_with_label( file_list[idx]->d_name );
-      g_signal_connect( menu_item, "activate",
-          G_CALLBACK( on_satellite_menuitem_activate ), NULL );
-      gtk_widget_show(menu_item);
-      gtk_menu_shell_append( GTK_MENU_SHELL(sat_menu), menu_item );
+    /* Build "Select Satellite" popup menu item */
+    if (!popup_menu)
+        popup_menu = create_popup_menu(&popup_menu_builder);
 
-      /* Make first entry the default */
-      if( rc_data.satellite_name[0] == '\0' )
-        Strlcpy( rc_data.satellite_name,
-            file_list[idx]->d_name, sizeof(rc_data.satellite_name) );
+    GtkWidget *sat_menu =
+        Builder_Get_Object(popup_menu_builder, "select_satellite");
 
-      found_cfg++;
-    } /* if( (ext = strstr(file_list[idx]->d_name, ".cfg")) ) */
-  } /* for( idx = 0; idx < num_files; idx++ ) */
+    glrpt_cfg_list =
+        (rc_cfg_t *)malloc(sizeof(rc_cfg_t) * (n_s_cfgs + n_u_cfgs));
 
-  /* Check for number of config files found */
-  if( !found_cfg )
-  {
-    Show_Message( "No configuration file(s) found", "red" );
-    Error_Dialog();
-    return( false );
-  }
+    for (uint16_t i = 0; i < (n_s_cfgs + n_u_cfgs); i++) {
+        struct dirent **w_list = (i >= n_s_cfgs) ? u_cfg_list : s_cfg_list;
+        const char *w_dir = (i >= n_s_cfgs) ? glrpt_ucfg_dir : glrpt_cfg_dir;
+        uint16_t idx = (i >= n_s_cfgs) ? (i - n_s_cfgs) : i;
 
-  return false;
+        size_t prefix_len = strlen(w_dir);
+        size_t fname_len = strlen(w_list[idx]->d_name) - 4;
+
+        glrpt_cfg_list[i].name = (char *)malloc(sizeof(char) * (fname_len + 1));
+        glrpt_cfg_list[i].path =
+            (char *)malloc(sizeof(char) * (prefix_len + fname_len + 6));
+
+        glrpt_cfg_list[i].name[fname_len] = '\0';
+        glrpt_cfg_list[i].path[prefix_len + fname_len + 5] = '\0';
+
+        strncpy(glrpt_cfg_list[i].name, w_list[idx]->d_name, fname_len);
+        snprintf(glrpt_cfg_list[i].path, prefix_len + fname_len + 6,
+                "%s/%s", w_dir, w_list[idx]->d_name);
+
+        /* Append new child items to "Select Satellite" menu */
+        GtkWidget *menu_item =
+            gtk_menu_item_new_with_label(glrpt_cfg_list[i].name);
+        g_signal_connect(menu_item, "activate",
+                G_CALLBACK(on_satellite_menuitem_activate),
+                glrpt_cfg_list[i].path);
+        gtk_widget_show(menu_item);
+        gtk_menu_shell_append(GTK_MENU_SHELL(sat_menu), menu_item);
+
+        /* Add separator between system and user configs */
+        if ((n_s_cfgs > 0) && (n_u_cfgs > 0) && (i == (n_s_cfgs - 1))) {
+            GtkWidget *separator = gtk_separator_menu_item_new();
+            gtk_widget_show(separator);
+            gtk_menu_shell_append(GTK_MENU_SHELL(sat_menu), separator);
+        }
+
+        free(w_list[idx]);
+    }
+
+    free(s_cfg_list);
+    free(u_cfg_list);
+
+    return true;
 }

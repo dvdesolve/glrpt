@@ -22,6 +22,7 @@
 #include "../sdr/filters.h"
 #include "../sdr/ifft.h"
 #include "callback_func.h"
+#include "rc_config.h"
 
 #include <gtk/gtk.h>
 #include <turbojpeg.h>
@@ -39,7 +40,7 @@
 
 /*****************************************************************************/
 
-static bool MkdirRecurse(const char *path);
+static bool mkdirRecurse(const char *path);
 static const char *Filename(const char *fpath);
 
 /*****************************************************************************/
@@ -49,47 +50,48 @@ static int Flags = 0;
 
 /*****************************************************************************/
 
-/* PrepareDirectories
+/* prepareDirectories
  *
- * Find and create (if necessary) dirs with configs and final pictures.
+ * Find and create (if necessary) dirs with user configs and final images.
  * XDG specs are supported:
  * https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
  */
-bool PrepareDirectories(void) {
+bool prepareDirectories(void) {
     char *var_ptr;
 
-    /* system-wide configs are mandatory */
-    snprintf(rc_data.glrpt_cfgs, sizeof(rc_data.glrpt_cfgs),
+    /* System-wide configs are mandatory */
+    snprintf(glrpt_cfg_dir, sizeof(glrpt_cfg_dir),
             "%s/config", PACKAGE_DATADIR);
 
-    /* user-specific configs are optional */
-    /*
+    /* User configs are optional */
+    /* TODO allow user to select his own configs via GUI */
+    /* TODO properly show warnings/errors */
     if ((var_ptr = getenv("XDG_CONFIG_HOME")))
-        snprintf(rc_data.glrpt_ucfgs, sizeof(rc_data.glrpt_ucfgs),
+        snprintf(glrpt_ucfg_dir, sizeof(glrpt_ucfg_dir),
                 "%s/%s", var_ptr, PACKAGE_NAME);
     else
-        snprintf(rc_data.glrpt_ucfgs,sizeof(rc_data.glrpt_ucfgs),
+        snprintf(glrpt_ucfg_dir, sizeof(glrpt_ucfg_dir),
                 "%s/.config/%s", getenv("HOME"), PACKAGE_NAME);
 
-    if (!MkdirRecurse(rc_data.glrpt_ucfgs)) {
+    if (!mkdirRecurse(glrpt_ucfg_dir)) {
         fprintf(stderr, "glrpt: %s\n",
                 "can't access/create user config directory");
 
-        rc_data.glrpt_ucfgs[0] = '\0';
-    }*/
+        memset(glrpt_ucfg_dir, '\0', sizeof(glrpt_ucfg_dir));
+    }
 
-    /* cache for image storage is mandatory */
+    /* Cache for image storage is mandatory */
     /* TODO allow user to select his own directory */
     if ((var_ptr = getenv("XDG_CACHE_HOME")))
-        snprintf(rc_data.glrpt_imgs, sizeof(rc_data.glrpt_imgs),
+        snprintf(glrpt_img_dir, sizeof(glrpt_img_dir),
                 "%s/%s", var_ptr, PACKAGE_NAME);
     else
-        snprintf(rc_data.glrpt_imgs, sizeof(rc_data.glrpt_imgs),
+        snprintf(glrpt_img_dir, sizeof(glrpt_img_dir),
                 "%s/.cache/%s", getenv("HOME"), PACKAGE_NAME);
 
-    if (!MkdirRecurse(rc_data.glrpt_imgs)) {
+    if (!mkdirRecurse(glrpt_img_dir)) {
         fprintf(stderr, "glrpt: %s\n",
-                "can't access/create images cache directory");
+                "can't access/create image cache directory");
 
         return false;
     }
@@ -99,29 +101,29 @@ bool PrepareDirectories(void) {
 
 /*****************************************************************************/
 
-/* MkdirRecurse
+/* mkdirRecurse
  *
  * Create directory and all ancestors.
  * Adapted from:
  * https://gist.github.com/JonathonReinhart/8c0d90191c38af2dcadb102c4e202950
  */
-static bool MkdirRecurse(const char *path) {
+static bool mkdirRecurse(const char *path) {
     const size_t len = strlen(path);
     char _path[MAX_FILE_NAME];
     char *p;
 
-    /* save directory path in a mutable var */
+    /* Save directory path in a mutable var */
     if (len > sizeof(_path) - 1) {
         errno = ENAMETOOLONG;
         return false;
     }
 
-    strcpy(_path, path);
+    strcpy(_path, path); /* TODO use safer version */
 
-    /* walk through the path string */
+    /* Walk through the path string */
     for (p = _path + 1; *p; p++) {
         if (*p == '/') {
-            /* temporarily truncate path */
+            /* Temporarily truncate path */
             *p = '\0';
 
             if (mkdir(_path, S_IRWXU) != 0) {
@@ -129,7 +131,7 @@ static bool MkdirRecurse(const char *path) {
                     return false;
             }
 
-            /* restore path */
+            /* Restore path */
             *p = '/';
         }
     }
@@ -167,11 +169,11 @@ void File_Name(char *file_name, uint32_t chn, const char *ext) {
     /* TODO possibly dangerous because of system string length limits */
     /* Combination pseudo-color image */
     if( chn == 3 )
-      snprintf( file_name, MAX_FILE_NAME-1,
-        "%s/%s-Combo%s", rc_data.glrpt_imgs, tim, ext );
+      snprintf( file_name, MAX_FILE_NAME,
+        "%s/%s-Combo%s", glrpt_img_dir, tim, ext );
     else /* Channel image */
-      snprintf( file_name, MAX_FILE_NAME-1,
-        "%s/%s-Ch%u%s", rc_data.glrpt_imgs, tim, chn, ext );
+      snprintf( file_name, MAX_FILE_NAME,
+        "%s/%s-Ch%u%s", glrpt_img_dir, tim, chn, ext );
   }
   else /* Remove leading spaces from file_name */
   {

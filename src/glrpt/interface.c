@@ -136,7 +136,7 @@ static void Gtk_Builder(GtkBuilder **builder, gchar **object_ids) {
   /* Create a builder from object ids */
   *builder = gtk_builder_new();
   ret = (int)gtk_builder_add_objects_from_file(
-      *builder, rc_data.glrpt_glade, object_ids, &gerror );
+      *builder, glrpt_glade_file, object_ids, &gerror );
   if( !ret )
   {
     fprintf( stderr,
@@ -243,14 +243,10 @@ GtkWidget *create_quit_dialog(GtkBuilder **builder) {
  *  Initializes glrpt's top window
  */
 void Initialize_Top_Window(void) {
-  /* The scrolled window image container */
-  gchar text[48];
-
   /* Show current satellite */
   GtkLabel *label = GTK_LABEL(
       Builder_Get_Object(main_window_builder, "satellite_label") );
-  snprintf( text, sizeof(text), "%s LRPT", rc_data.satellite_name );
-  gtk_label_set_text( label, text );
+  gtk_label_set_text( label, rc_data.sat_name);
 
   /* Show Center_Freq to frequency entry */
   Enter_Center_Freq( rc_data.sdr_center_freq );

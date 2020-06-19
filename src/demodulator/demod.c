@@ -25,6 +25,7 @@
 #include "../decoder/met_jpg.h"
 #include "../decoder/met_to_data.h"
 #include "../sdr/filters.h"
+#include "../sdr/SoapySDR.h"
 #include "agc.h"
 #include "doqpsk.h"
 #include "filters.h"
@@ -58,6 +59,8 @@
 #define DEMOD_BUF_LOWR  32768 // 2 * SOFT_FRAME_LEN
 /* TODO refer directly */
 #define RAW_BUF_REALLOC 73728 // INTLV_BASE_LEN
+
+#define IFFT_DECIMATE   2
 
 /*****************************************************************************/
 
@@ -405,10 +408,10 @@ void Demod_Init(void) {
   /* Initialize the timing recovery variables */
   demodulator->sym_rate   = rc_data.symbol_rate;
   demodulator->sym_period = (double)rc_data.interp_factor *
-    rc_data.demod_samplerate / (double)rc_data.symbol_rate;
+    demod_samplerate / (double)rc_data.symbol_rate;
 
   /* Initialize RRC filter */
-  double osf = rc_data.demod_samplerate / (double)rc_data.symbol_rate;
+  double osf = demod_samplerate / (double)rc_data.symbol_rate;
   demodulator->rrc = Filter_RRC(
       rc_data.rrc_order, rc_data.interp_factor, osf, rc_data.rrc_alpha );
 
@@ -565,7 +568,7 @@ bool Demodulator_Run(void) {
     buf_idx++;
 
     fft_decim_cnt++;
-    if( fft_decim_cnt >= rc_data.ifft_decimate )
+    if( fft_decim_cnt >= IFFT_DECIMATE )
     {
       ifft_data[data_idx++] = (int16_t)sum_i;
       ifft_data[data_idx++] = (int16_t)sum_q;

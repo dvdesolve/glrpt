@@ -29,11 +29,15 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include <limits.h>
 #include <semaphore.h>
 #include <stddef.h>
 #include <stdint.h>
 
 /*****************************************************************************/
+
+/* UI definition */
+extern char glrpt_glade_file[PATH_MAX + 1];
 
 /* Runtime config data */
 extern rc_data_t rc_data;

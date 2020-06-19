@@ -19,6 +19,7 @@
 #include "../sdr/ifft.h"
 #include "callback_func.h"
 #include "interface.h"
+#include "rc_config.h"
 #include "utils.h"
 
 #include <glib.h>
@@ -29,10 +30,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
-/*****************************************************************************/
-
-#define IFFT_DECIMATE   2
 
 /*****************************************************************************/
 
@@ -88,13 +85,13 @@ int main(int argc, char *argv[]) {
         }
 
     /* Find and prepare program directories */
-    if (!PrepareDirectories()) {
+    if (!prepareDirectories()) {
         fprintf(stderr, "glrpt: %s\n", "error during preparing directories");
         exit(-1);
     }
 
     /* Set path to UI file */
-    snprintf(rc_data.glrpt_glade, sizeof(rc_data.glrpt_glade),
+    snprintf(glrpt_glade_file, sizeof(glrpt_glade_file),
             "%s/glrpt.glade", PACKAGE_DATADIR);
 
     /* Start GTK+ */
@@ -102,8 +99,6 @@ int main(int argc, char *argv[]) {
 
     /* Defaults/initialization */
     rc_data.decode_timer = 0;
-    rc_data.ifft_decimate = IFFT_DECIMATE;
-    rc_data.satellite_name[0] = '\0';
 
     /* Create glrpt main window */
     main_window = create_main_window(&main_window_builder);
@@ -180,8 +175,14 @@ int main(int argc, char *argv[]) {
     Show_Message(ver, "bold");
 
     /* Find configuration files and open the first as default */
-    g_idle_add(G_SOURCE_FUNC(Find_Config_Files), NULL);
-    g_idle_add(G_SOURCE_FUNC(Load_Config), NULL);
+/*    g_idle_add(G_SOURCE_FUNC(Find_Config_Files), NULL);*/
+    /* TODO this will change in future when user-selectable configs arrive */
+    if (!findConfigFiles()) {
+        fprintf(stderr, "glrpt: %s\n", "can't find config files!");
+        exit(-1);
+    }
+
+    g_idle_add(G_SOURCE_FUNC(loadConfig), glrpt_cfg_list[0].path);
 
     /* Main loop */
     gtk_main();

@@ -64,6 +64,8 @@ static double  *data_buf_q[2] = { NULL, NULL };
 static size_t   stream_mtu;
 static uint32_t sdr_decimate;
 static double   data_scale;
+static uint32_t sdr_samplerate, sdr_buf_length;
+double demod_samplerate;
 
 /*****************************************************************************/
 
@@ -145,20 +147,20 @@ static void *SoapySDR_Stream(void *pid) {
     sdr_decim_cnt = 0,  /* Samples decimation counter */
     buf_cnt       = 0,  /* Index to current data ring buffer */
     samp_buf_idx  = 0,  /* Output samples buffer index */
-    strm_buf_idx  = rc_data.sdr_buf_length; /* Streaming buffer index */
+    strm_buf_idx  = sdr_buf_length; /* Streaming buffer index */
 
 
   /* Data transfer timeout in uSec,
    * 10x longer to avoid dropped samples */
   timeout  = (long)stream_mtu * 10000000;
-  timeout /= (long)rc_data.sdr_samplerate;
+  timeout /= (long)sdr_samplerate;
 
   /* Loop around SoapySDRDevice_readStream()
    * till reception stopped by the user */
   while( isFlagSet(STATUS_RECEIVING) )
   {
     /* We need sdr_decimate summations to decimate samples */
-    while( samp_buf_idx < rc_data.sdr_buf_length )
+    while( samp_buf_idx < sdr_buf_length )
     {
       /* Summate sdr_decimate samples into one samples buffer */
       temp_i = 0.0;
@@ -166,7 +168,7 @@ static void *SoapySDR_Stream(void *pid) {
       for( sdr_decim_cnt = 0; sdr_decim_cnt < sdr_decimate; sdr_decim_cnt++ )
       {
         /* Read new data from the sample stream when exhausted */
-        if( strm_buf_idx >= rc_data.sdr_buf_length )
+        if( strm_buf_idx >= sdr_buf_length )
         {
           /* Read stream I/Q data from SDR device */
           SoapySDRDevice_readStream(
@@ -488,8 +490,7 @@ bool SoapySDR_Init(void) {
   if( SoapySDRDevice_hasFrequencyCorrection(sdr, SOAPY_SDR_RX, 0) )
   {
     Show_Message( "Device has Frequency Correction", "black" );
-    if( rc_data.freq_correction )
-    {
+    if (rc_data.freq_correction != 0.0) {
       ret = SoapySDRDevice_setFrequencyCorrection(
           sdr, SOAPY_SDR_RX, 0, rc_data.freq_correction );
       if( ret != SUCCESS )
@@ -501,7 +502,7 @@ bool SoapySDR_Init(void) {
       }
 
       snprintf( mesg, sizeof(mesg),
-          "Set Frequency Correction to %d ppm",
+          "Set Frequency Correction to %.1lf ppm",
           rc_data.freq_correction );
       Show_Message( mesg, "green" );
       Display_Icon( status_icon, "gtk-yes" );
@@ -513,8 +514,9 @@ bool SoapySDR_Init(void) {
 
   /*** List sampling rates and select lowest available ***/
   /* Prime this to high value to look for a minimum */
-  rc_data.sdr_samplerate = 100000000;
+  sdr_samplerate = 100000000;
 
+  /* TODO handle this more accurately */
   /* This is the minimum prefered value for the demodulator
    * effective sample rate. It could have been 2 * symbol_rate
    * but this can result in unfavorable sampling rates */
@@ -534,15 +536,15 @@ bool SoapySDR_Init(void) {
 
     /* Select the lowest sample rate above demod sample rate */
     uint32_t min = (uint32_t)range[idx].minimum;
-    if( (rc_data.sdr_samplerate > min) && (temp <= min) )
-      rc_data.sdr_samplerate = (uint32_t)range[idx].minimum;
+    if( (sdr_samplerate > min) && (temp <= min) )
+      sdr_samplerate = (uint32_t)range[idx].minimum;
 
   } /* for( idx = 0; idx < length; idx++ ) */
   free_ptr( (void **)&range );
 
   /* Set SDR Sample Rate */
   ret = SoapySDRDevice_setSampleRate(
-      sdr, SOAPY_SDR_RX, 0, (double)rc_data.sdr_samplerate );
+      sdr, SOAPY_SDR_RX, 0, (double)sdr_samplerate );
   if( ret != SUCCESS )
   {
     Show_Message( "Failed to set ADC Sample Rate", "red" );
@@ -553,15 +555,15 @@ bool SoapySDR_Init(void) {
   }
 
   /* Get actual sample rate and display */
-  rc_data.sdr_samplerate =
+  sdr_samplerate =
     (uint32_t)( SoapySDRDevice_getSampleRate(sdr, SOAPY_SDR_RX, 0) );
   snprintf( mesg, sizeof(mesg),
-      "Set Sampling Rate to %uS/s", rc_data.sdr_samplerate );
+      "Set Sampling Rate to %uS/s", sdr_samplerate );
   Show_Message( mesg, "green" );
 
   /* Find sample rate decimation factor which
    * is the nearest power of 2, up to 32 */
-  sdr_decimate = (uint32_t)rc_data.sdr_samplerate / temp;
+  sdr_decimate = (uint32_t)sdr_samplerate / temp;
   int sav = 1;
   int min = 64; /* Prime to find a min */
   for( int i = 0; i <= 5; i++ )
@@ -578,13 +580,13 @@ bool SoapySDR_Init(void) {
 
   /* We now need to calculate the sample rate decimation factor for
    * high sample rates and the new effective demodulator sample rate */
-  rc_data.demod_samplerate =
-    (double)rc_data.sdr_samplerate / (double)sdr_decimate;
+  demod_samplerate =
+    (double)sdr_samplerate / (double)sdr_decimate;
   snprintf( mesg, sizeof(mesg),
       "Sampling Rate Decimation: %u", sdr_decimate );
   Show_Message( mesg, "green" );
   snprintf( mesg, sizeof(mesg),
-      "Demod Sampling Rate: %8.1f", rc_data.demod_samplerate );
+      "Demod Sampling Rate: %8.1f", demod_samplerate );
   Show_Message( mesg, "green" );
 
   /* Set Tuner Gain Mode to auto or manual as per config file */
@@ -609,7 +611,7 @@ bool SoapySDR_Init(void) {
   snprintf( mesg, sizeof(mesg),
       "Receive Stream MTU: %d", (int)stream_mtu );
   Show_Message( mesg, "green" );
-  rc_data.sdr_buf_length = (uint32_t)stream_mtu;
+  sdr_buf_length = (uint32_t)stream_mtu;
 
   /* Allocate stream buffer */
   mreq = stream_mtu * sizeof( complex short );
@@ -626,18 +628,18 @@ bool SoapySDR_Init(void) {
   /* Init Chebyshev I/Q data Low Pass Filters */
   Init_Chebyshev_Filter(
       &filter_data_i,
-      rc_data.sdr_buf_length,
+      sdr_buf_length,
       rc_data.sdr_filter_bw,
-      rc_data.demod_samplerate,
+      demod_samplerate,
       FILTER_RIPPLE,
       FILTER_POLES,
       FILTER_LOWPASS );
 
   Init_Chebyshev_Filter(
       &filter_data_q,
-      rc_data.sdr_buf_length,
+      sdr_buf_length,
       rc_data.sdr_filter_bw,
-      rc_data.demod_samplerate,
+      demod_samplerate,
       FILTER_RIPPLE,
       FILTER_POLES,
       FILTER_LOWPASS );

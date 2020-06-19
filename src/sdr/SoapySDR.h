@@ -24,6 +24,10 @@
 
 /*****************************************************************************/
 
+extern double demod_samplerate;
+
+/*****************************************************************************/
+
 bool SoapySDR_Set_Center_Freq(uint32_t center_freq);
 void SoapySDR_Set_Tuner_Gain_Mode(void);
 void SoapySDR_Set_Tuner_Gain(double gain);

@@ -119,10 +119,6 @@ void Set_Check_Menu_Item(gchar *item_name, gboolean flag) {
 void Popup_Menu(void) {
   if( isFlagSet(STATUS_PENDING) ) return;
 
-  /* Initialize on first call */
-  if( !popup_menu )
-    popup_menu = create_popup_menu( &popup_menu_builder );
-
   /* If any action is running */
   if( isFlagSet(STATUS_FLAGS_ALL) )
   {
@@ -451,14 +447,6 @@ void Decode_Timer_Setup(void) {
   rc_data.decode_timer = (uint32_t)
     ( 60 * gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(spinbutton)) );
 
-  /* Warn if duration is too long */
-  if( rc_data.decode_timer > MAX_OPERATION_TIME )
-  {
-    snprintf( mesg, MESG_SIZE,
-        "Decode Timer (%u sec) excessive?", rc_data.decode_timer );
-    Show_Message( mesg, "red" );
-    Error_Dialog();
-  }
   snprintf( mesg, MESG_SIZE,
       "Decode Timer set to %u sec", rc_data.decode_timer );
   Show_Message( mesg, "orange" );
@@ -532,15 +520,6 @@ void Auto_Timer_OK_Clicked(void) {
 
   /* Difference between start-stop times in sec */
   rc_data.decode_timer = (uint32_t)( stop_sec - sleep_sec );
-
-  /* Data sanity check */
-  if( rc_data.decode_timer > MAX_OPERATION_TIME )
-  {
-    snprintf( mesg, MESG_SIZE,
-        "Decode Timer (%u sec) excessive?", rc_data.decode_timer );
-    Show_Message( mesg, "red" );
-    Error_Dialog();
-  }
 
   /* Notify sleeping */
   snprintf( mesg, MESG_SIZE,
@@ -766,6 +745,7 @@ void BW_Entry_Activate(GtkEntry *entry) {
     (uint32_t)( 1000 * atoi(gtk_entry_get_text(entry)) );
 
   /* Check low pass filter bandwidth is in range */
+  /* TODO improve that */
   if( (rc_data.sdr_filter_bw < MIN_BANDWIDTH) ||
       (rc_data.sdr_filter_bw > MAX_BANDWIDTH) )
   {

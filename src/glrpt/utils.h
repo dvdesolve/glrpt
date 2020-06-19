@@ -50,7 +50,7 @@ static inline int iClamp(int i, int min, int max) {
 
 /*****************************************************************************/
 
-bool PrepareDirectories(void);
+bool prepareDirectories(void);
 void File_Name(char *file_name, uint32_t chn, const char *ext);
 void Usage(void);
 void Show_Message(const char *mesg, const char *attr);

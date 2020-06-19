@@ -61,14 +61,11 @@
 #define NORM_RANGE_WHITE    1
 
 /* Max and min filter bandwidth */
-#define MIN_BANDWIDTH   100000
-#define MAX_BANDWIDTH   200000
+#define MIN_BANDWIDTH   90000
+#define MAX_BANDWIDTH   210000
 
 /* Size of char arrays (strings) for text messages */
 #define MESG_SIZE   128
-
-/* Maximum time duration in sec of satellite signal processing */
-#define MAX_OPERATION_TIME  1000
 
 /* Neoklis Kyriazis' addition, width (in pixels) of image
  * METEOR_IMAGE_WIDTH = MCU_PER_LINE * 8; MCU_PER_LINE = 196
@@ -81,7 +78,7 @@
 #define SUCCESS     0
 
 /* General definitions for image processing */
-#define MAX_FILE_NAME   PATH_MAX /* Max length for filenames */
+#define MAX_FILE_NAME   (PATH_MAX + 1) /* Max length for filenames */
 
 /* Safe fallback */
 #ifndef M_2PI
@@ -102,13 +99,6 @@ enum {
     RED = 0,
     GREEN,
     BLUE
-};
-
-/* Flags to select images for output */
-enum {
-    OUT_COMBO = 1,
-    OUT_SPLIT,
-    OUT_BOTH
 };
 
 /* Flags to indicate image file type to save as */
