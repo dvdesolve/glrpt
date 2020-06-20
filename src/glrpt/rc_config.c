@@ -72,7 +72,7 @@ static int cfgNameFilter(const struct dirent *entry) {
  *
  * Loads the glrptrc configuration file
  * TODO more detailed error messages (using mesg)
- * TODO use defined default values
+ * TODO use DEFINEd default values
  */
 gboolean loadConfig(gpointer f_path) {
     char mesg[MESG_SIZE];
@@ -122,7 +122,6 @@ gboolean loadConfig(gpointer f_path) {
     set_v = config_lookup(&cfg, "device");
 
     if (set_v && config_setting_is_group(set_v)) {
-        /* TODO re-check behavior in SoapySDR.c and fix docs accordingly */
         if (config_setting_lookup_string(set_v, "driver", &str_v))
             strncpy(rc_data.device_driver, str_v, CFG_STRLEN_MAX);
         else

@@ -399,60 +399,57 @@ bool SoapySDR_Init(void) {
 
   /* Use SDR device specified by index alone
    * if "auto" driver name specified in config */
-  if( isFlagSet(AUTO_DETECT_SDR) )
-  {
-    Show_Message( "Will use Auto-Detected SDR Device", "orange" );
-    idx = rc_data.device_index;
+  if (isFlagSet(AUTO_DETECT_SDR)) {
+      Show_Message("Will use Auto-Detected SDR Device", "orange");
+      idx = rc_data.device_index;
   }
-  else
-  {
-    /* Look for device matching specified driver */
-    snprintf( mesg, sizeof(mesg),
-        "Searching for SDR Device \"%s\"", rc_data.device_driver );
-    Show_Message( mesg, "green" );
+  else {
+      /* Look for device matching specified driver */
+      snprintf(mesg, sizeof(mesg),
+              "Searching for SDR Device \"%s\"", rc_data.device_driver);
+      Show_Message(mesg, "green");
 
-    for( idx = 0; idx < length; idx++)
-    {
-      for( key = 0; key < results[idx].size; key++ )
-      {
-        /* Look for "driver" key */
-        ret = strcmp( results[idx].keys[key], "driver" );
-        if( ret == 0 )
-        {
-          /* Match driver to one specified in config */
-          ret = strcmp( results[idx].vals[key], rc_data.device_driver );
-          if( (ret == 0) && (idx == rc_data.device_index) )
-            break;
-        }
+      for (idx = 0; idx < length; idx++) {
+          for (key = 0; key < results[idx].size; key++) {
+              /* Look for "driver" key */
+              ret = strcmp(results[idx].keys[key], "driver");
+
+              if (ret == 0) {
+                  /* Match driver to one specified in config */
+                  ret = strcmp(results[idx].vals[key], rc_data.device_driver);
+
+                  if ((ret == 0) && (idx == rc_data.device_index))
+                      break;
+              }
+          }
+
+          if ((ret == 0) && (idx == rc_data.device_index))
+              break;
       }
 
-      if( (ret == 0) && (idx == rc_data.device_index) )
-        break;
-    } /* for( idx = 0; idx < length; idx++) */
-
-    /* If no matching device found, abort */
-    if( idx == length )
-    {
-      snprintf( mesg, sizeof(mesg),
-          "No Device: \"%s\"  Index: %u found",
-          rc_data.device_driver, rc_data.device_index );
-      Show_Message( mesg, "red" );
-      Display_Icon( status_icon, "gtk-no" );
-      Error_Dialog();
-      return( false );
-    }
-  } /* if( strcmp(rc_data.device_driver, "auto") == 0 ) */
+      /* If no matching device found, abort */
+      if (idx == length) {
+          snprintf(mesg, sizeof(mesg),
+                  "No Device: \"%s\"  Index: %u found",
+                  rc_data.device_driver, rc_data.device_index);
+          Show_Message(mesg, "red");
+          Display_Icon(status_icon, "gtk-no");
+          Error_Dialog();
+          return false;
+      }
+  }
 
   /* Find SDR driver name for auto detect case */
-  if( isFlagSet(AUTO_DETECT_SDR) )
-    for( key = 0; key < results[idx].size; key++ )
-    {
-      /* Look for "driver" key */
-      ret = strcmp( results[idx].keys[key], "driver" );
-      if( ret == 0 )
-        Strlcpy( rc_data.device_driver,
-            results[idx].vals[key], sizeof(rc_data.device_driver) );
-    }
+  if (isFlagSet(AUTO_DETECT_SDR)) {
+      for (key = 0; key < results[idx].size; key++) {
+          /* Look for "driver" key */
+          ret = strcmp(results[idx].keys[key], "driver");
+
+          if (ret == 0)
+              Strlcpy(rc_data.device_driver, results[idx].vals[key],
+                      sizeof(rc_data.device_driver));
+      }
+  }
 
   /* Report SoapySDR driver to be used */
   snprintf( mesg, sizeof(mesg),

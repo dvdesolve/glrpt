@@ -14,7 +14,7 @@
 
 # global settings
 cmake_minimum_required(VERSION 3.12)
-project(glrpt VERSION 2.5.0 LANGUAGES C)
+project(glrpt VERSION 2.6.0 LANGUAGES C)
 
 
 # use FHS
