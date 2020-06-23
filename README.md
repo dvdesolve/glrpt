@@ -13,17 +13,17 @@ In order to use `glrpt` one should have the following dependencies satisfied:
 - `gtk+` (3.22.0 or higher)
 - `glibc`
 - `glib2`
-- `SoapySDR` (install proper modules to have support for your hardware)
+- `SoapySDR` (install proper modules to get support for your hardware)
 - `libjpeg-turbo`
 - `libconfig`
 
 To compile `glrpt` by hand be sure to have the following packages installed:
-- `gcc` (4.8 or higher)
+- `gcc` (4.8 or higher) / `clang` (3.1 or higher)
 - `make`
 - `cmake` (3.12 or higher)
 
 ## Installation
-First of all check if `glrpt` is already in your distro repository. For example, on Arch Linux you can install it [from AUR](https://aur.archlinux.org/packages/glrpt/). If there is no package for your distro then you must compile it by hands.
+First of all check if `glrpt` is already in your distro repository. For example, on Arch Linux you can install it [from AUR](https://aur.archlinux.org/packages/glrpt/). If there is no package for your distro then you must compile it by hand.
 
 ### Building from source code
 Download latest stable release or clone `master` branch directly:
@@ -32,7 +32,7 @@ git clone https://github.com/dvdesolve/glrpt.git
 cd glrpt
 ```
 
-Prepare your build (for example, the following will install `glrpt` into `/usr` instead of `/usr/local`):
+Prepare your build (for example, the following will install `glrpt` into `/usr`):
 ```
 mkdir build
 cd build
@@ -45,12 +45,12 @@ make
 make install
 ```
 
-Now you're ready to use `glrpt`. You can run it from your favorite WM's menu or directly in console (preferred if something goes wrong because there are always additional debug info in case of troubles).
+Now you're ready to use `glrpt`. You can run it from your favorite WM's menu or directly from terminal (recommended if something goes wrong because there will be additional debug info).
 
 ## Usage
 
 ### Config files
-`glrpt` comes with a set of sample config files that are usually stored in `/usr/share/glrpt/config` (but depends on installation). For more usability you can store your own config files in `$XDG_CONFIG_HOME/glrpt` (or `$HOME/.config/glrpt` if XDG vars are not set). `glrpt`'s config files make use of [libconfig](http://hyperrealm.github.io/libconfig/) syntax. Example config files are well-documented so please consult them for details.
+`glrpt` comes with a set of sample config files that are usually stored in `/usr/share/glrpt/config` (depends on installation). For more usability you can store your own config files in `$XDG_CONFIG_HOME/glrpt` (or `$HOME/.config/glrpt` if XDG vars are not set). `glrpt`'s config files use [libconfig](http://hyperrealm.github.io/libconfig/) syntax. Example config files are well-documented so consult them for details.
 
 Maximum length of string parameters in config files is limited to the 80 characters. Please use ASCII symbols only in strings! Also there are a bunch of mandatory options that should be presented in config files. They are listed below.
 
@@ -83,7 +83,7 @@ decoder: {
 ```
 
 ### Decoding images
-Use [GPredict](https://github.com/csete/gpredict) to get pass time list for the satellite of interest. Connect your SDR receiver and run `glrpt`. Select proper config via right-clicking in LRPT image area (system-wide configs are separated from user's configs and followed by them).. Wait until satellite rises over the horizon to the decent angle and press "Start button". You can tweak gain settings during reception to get the best SNR. When the pass is over or you decided to stop click that button once again. Decoded images will be saved into `$XDG_CACHE_HOME/glrpt` (or in `$HOME/.cache/glrpt` if `$XDG_CACHE_HOME` is not set).
+Use [GPredict](https://github.com/csete/gpredict) to get passes list for the satellite of interest. Connect your SDR receiver and run `glrpt`. Select proper config via right-clicking in LRPT image area (system-wide configs are separated from user's configs and followed by them). Wait until satellite rises over the horizon to the decent angle and press "Start button". You can tweak gain settings during reception to get the best SNR. When the pass is over or you decided to stop click that button once again. Decoded images will be saved into `$XDG_CACHE_HOME/glrpt` (or in `$HOME/.cache/glrpt` if `$XDG_CACHE_HOME` is not set).
 
 ## Troubleshooting
 
@@ -91,13 +91,13 @@ Use [GPredict](https://github.com/csete/gpredict) to get pass time list for the 
 `glrpt` requires connected SDR before starting decoding. Connect your receiver and repeat.
 
 ### PLL never locks
-Try to play with gain settings and find reasonable value to get highest SNR (use FFT waterfall as a reference). Also you can try to increase filter bandwidth in config file to somewhat higher value such as 140 kHz. One more thing to try is to increase PLL lock threshold.
+Try to play with gain settings and find reasonable value to get highest SNR (use FFT waterfall as a reference). Also you can try to increase filter bandwidth in config file to somewhat higher value such as 140 kHz. One more thing you could try is to increase PLL lock threshold.
 
 ### Poor signal quality
-Be sure to properly install your antenna. [V-dipole](https://lna4all.blogspot.com/2017/02/diy-137-mhz-wx-sat-v-dipole-antenna.html) setup in contrast with traditional QFH and turnstile gives you extra advantage that terrestrial broadcasting will be attenuated by ~20 dB. You can try also to switch to manual gain setting and reduce it until you get decent SNR.
+Be sure to properly install and tune your antenna. [V-dipole](https://lna4all.blogspot.com/2017/02/diy-137-mhz-wx-sat-v-dipole-antenna.html) setup is the most simplest solution. Also you can try turnstile, double cross and QFH antennas. Switching to manual gain setting can help you to get decent SNR.
 
 ### My images are rotated upside-down!
-If you've catched South-to-North satellite pass you will end up with inverted image. Use invert feature that `glrpt` provides: right-click on image area in GUI and select menu entry "Invert image".
+If you've catched South-to-North satellite pass you will end up with flipped image. Use invert feature that `glrpt` provides: right-click on image area in GUI and select menu entry "Invert image".
 
 ## Additional information
 
