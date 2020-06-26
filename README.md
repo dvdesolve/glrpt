@@ -1,7 +1,7 @@
 # glrpt
 Originally developed by [Neoklis Kyriazis](http://www.5b4az.org/), `glrpt` provides all-in-one solution to receive, demodulate and decode LRPT images on Linux without tinkering with audio pipes and 3rd-party software as with SDR# and LRPT-decoder.
 
-![Screenshot of version 2.5.0](screen_2.5.0.png "glrpt version 2.5.0")
+![Screenshot of version 2.6.0](screen_2.6.0.png "glrpt version 2.6.0")
 
 ## Requirements
 

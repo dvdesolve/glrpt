@@ -180,14 +180,14 @@ static void *SoapySDR_Stream(void *pid) {
         temp_i += creal( (complex double)stream_buff[strm_buf_idx] );
         temp_q += cimag( (complex double)stream_buff[strm_buf_idx] );
         strm_buf_idx++;
-      } /* for( sdr_decim_cnt = 0; sdr_decim_cnt < ... */
+      }
 
       /* Top up Chebyshev LP filter buffers */
       data_buf_i[buf_cnt][samp_buf_idx] = temp_i / data_scale;
       data_buf_q[buf_cnt][samp_buf_idx] = temp_q / data_scale;
 
       samp_buf_idx++;
-    } /* while( samp_buf_idx < rc_data.sdr_buf_length ) */
+    }
     samp_buf_idx = 0;
 
     // Writes IQ samples to file, for testing only
@@ -196,9 +196,9 @@ static void *SoapySDR_Stream(void *pid) {
       if( fdi == NULL ) fdi = fopen( "i.s", "w" );
       if( fdq == NULL ) fdq = fopen( "q.s", "w" );
       fwrite( data_buf_i[buf_cnt],
-          sizeof(double), (size_t)rc_data.sdr_buf_length, fdi );
+          sizeof(double), (size_t)sdr_buf_length, fdi );
       fwrite( data_buf_q[buf_cnt],
-          sizeof(double), (size_t)rc_data.sdr_buf_length, fdq );
+          sizeof(double), (size_t)sdr_buf_length, fdq );
     }*/
 
     // Reads IQ samples from file, for testing only
@@ -207,9 +207,9 @@ static void *SoapySDR_Stream(void *pid) {
       if( fdi == NULL ) fdi = fopen( "i.s", "r" );
       if( fdq == NULL ) fdq = fopen( "q.s", "r" );
       fread( data_buf_i[buf_cnt],
-          sizeof(double), (size_t)rc_data.sdr_buf_length, fdi );
+          sizeof(double), (size_t)sdr_buf_length, fdi );
       fread( data_buf_q[buf_cnt],
-          sizeof(double), (size_t)rc_data.sdr_buf_length, fdq );
+          sizeof(double), (size_t)sdr_buf_length, fdq );
     } */
 
     /* // Writes the phase angle of samples, for testing only
@@ -217,7 +217,7 @@ static void *SoapySDR_Stream(void *pid) {
        {
        static double prev = 0.0;
        double phase, delta, x, y;
-       for( uint32_t idx = 0; idx < rc_data.sdr_buf_length; idx++ )
+       for( uint32_t idx = 0; idx < sdr_buf_length; idx++ )
        {
         x = (double)(data_buf_i[buf_cnt][idx]);
         y = (double)(data_buf_q[buf_cnt][idx]);
