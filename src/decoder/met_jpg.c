@@ -379,8 +379,8 @@ void Mj_Dec_Mcus(
       Show_Message( "Bad DC huffman code!", "red" );
       return;
     }
-    Bitop_AdvanceNBits( &b, dc_cat_off[dc_cat] );
-    n = (uint16_t)(Bitop_FetchNBits( &b, dc_cat ));
+    Bitop_AdvanceNBits(&b, dc_cat_off[dc_cat]);
+    n = (uint16_t)(Bitop_FetchNBits(&b, dc_cat));
 
     zdct[0] = Map_Range( dc_cat, n ) + prev_dc;
     prev_dc = zdct[0];
@@ -413,7 +413,7 @@ void Mj_Dec_Mcus(
 
       if( ac_size != 0 )
       {
-        n = (uint16_t)(Bitop_FetchNBits( &b, ac_size ));
+        n = (uint16_t)(Bitop_FetchNBits(&b, ac_size));
         zdct[k] = Map_Range( ac_size, n );
         k++;
       }
