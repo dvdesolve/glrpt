@@ -164,7 +164,7 @@ void File_Name(char *file_name, uint32_t chn, const char *ext) {
     /* Prepare file name as UTC date-time. Default path is images/ */
     time( &tp );
     utc = *gmtime( &tp );
-    strftime( tim, sizeof(tim), "%d%b%Y-%H%M", &utc );
+    strftime( tim, sizeof(tim), "%Y%m%d-%H%M%S", &utc );
 
     /* TODO possibly dangerous because of system string length limits */
     /* Combination pseudo-color image */
