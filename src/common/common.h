@@ -101,21 +101,6 @@ enum {
     BLUE
 };
 
-/* Flags to indicate image file type to save as */
-enum {
-    SAVEAS_JPEG = 1,
-    SAVEAS_PGM,
-    SAVEAS_BOTH
-};
-
-/* Flags to indicate images to be saved */
-enum {
-    CH0 = 0,
-    CH1,
-    CH2,
-    COMBO
-};
-
 /*****************************************************************************/
 
 #endif

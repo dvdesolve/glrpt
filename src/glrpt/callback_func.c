@@ -35,6 +35,7 @@
 #include <gtk/gtk.h>
 
 #include <semaphore.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -45,7 +46,7 @@
 /*****************************************************************************/
 
 static void Sensitize_Menu_Item(gchar *item_name, gboolean flag);
-static gboolean Init_Reception(void);
+static bool Init_Reception(void);
 
 /*****************************************************************************/
 
@@ -211,22 +212,21 @@ void Popup_Menu(void) {
  *
  * Initialize Reception of signal from Satellite
  */
-static gboolean Init_Reception(void) {
-  /* Initialize semaphore */
-  sem_init( &demod_semaphore, 0, 0 );
+static bool Init_Reception(void) {
+    /* Initialize semaphore */
+    sem_init(&demod_semaphore, 0, 0);
 
-  /* Initialize SoapySDR device */
-  if( !SoapySDR_Init() )
-  {
-    Show_Message( "Failed to Initialize SoapySDR", "red" );
-    Error_Dialog();
-    return( FALSE );
-  }
+    /* Initialize SoapySDR device */
+    if (!SoapySDR_Init()) {
+        Show_Message("Failed to Initialize SoapySDR", "red");
+        Error_Dialog();
+        return false;
+    }
 
-  /* Create Demodulator object */
-  Demod_Init();
+    /* Init demodulator object */
+    Demod_Init();
 
-  return( TRUE );
+    return true;
 }
 
 /*****************************************************************************/
@@ -267,12 +267,12 @@ void Start_Receiver_Menuitem_Toggled(GtkCheckMenuItem *menuitem) {
      * Decoder will start if enabled by user
      */
 
-    /* Initialize SDR Receiver and QPSK demodulator */
-    SetFlag( STATUS_PENDING );
-    if( !Init_Reception() )
-    {
-      ClearFlag( STATUS_PENDING );
-      return;
+    /* Initialize SDR receiver and QPSK demodulator */
+    SetFlag(STATUS_PENDING);
+
+    if (!Init_Reception()) {
+        ClearFlag(STATUS_PENDING);
+        return;
     }
 
     /* Activate the SoapySDR Receive Stream */
@@ -381,12 +381,12 @@ void Alarm_Action(void) {
     Medet_Init();
     SetFlag( STATUS_DECODING );
 
-    /* Initialize SDR Receiver and QPSK demodulator */
-    SetFlag( STATUS_PENDING );
-    if( !Init_Reception() )
-    {
-      ClearFlag( STATUS_PENDING );
-      return;
+    /* Initialize SDR receiver and QPSK demodulator */
+    SetFlag(STATUS_PENDING);
+
+    if (!Init_Reception()) {
+        ClearFlag(STATUS_PENDING);
+        return;
     }
 
     /* Activate the SoapySDR Receive Stream */

@@ -136,9 +136,9 @@ static void Save_Images(int type) {
       /* Save unprocessed image */
       fname[0] = '\0';
       if( type == IMAGE_RAW )
-        File_Name( fname, COMBO, "-raw.ppm" );
+        File_Name( fname, 3, "-raw.ppm" ); /* TODO Use 3 here to specify that we want combo out */
       else
-        File_Name( fname, COMBO, ".ppm" );
+        File_Name( fname, 3, ".ppm" ); /* TODO Use 3 here to specify that we want combo out */
       Save_Image_Raw( fname, "P6",
           channel_image_width,
           channel_image_height,
@@ -151,9 +151,9 @@ static void Save_Images(int type) {
       /* Save unprocessed image */
       fname[0] = '\0';
       if( type == IMAGE_RAW )
-        File_Name( fname, COMBO, "-raw.jpg" );
+        File_Name( fname, 3, "-raw.jpg" ); /* TODO Use 3 here to specify that we want combo out */
       else
-        File_Name( fname, COMBO, ".jpg" );
+        File_Name( fname, 3, ".jpg" ); /* TODO Use 3 here to specify that we want combo out */
       Save_Image_JPEG(fname,
           (int)channel_image_width,
           (int)channel_image_height,

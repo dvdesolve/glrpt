@@ -52,7 +52,7 @@ static int Flags = 0;
 
 /* prepareDirectories
  *
- * Find and create (if necessary) dirs with user configs and final images.
+ * Find and create (if necessary) dirs for user configs and final images.
  * XDG specs are supported:
  * https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
  */

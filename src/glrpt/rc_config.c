@@ -609,6 +609,7 @@ gboolean loadConfig(gpointer f_path) {
     config_destroy(&cfg);
 
     /* Set Gain control buttons and slider */
+    /* TODO should set flag ASAP */
     if (rc_data.tuner_gain != 0.0) {
         GtkWidget *radiobtn = Builder_Get_Object(
                 main_window_builder, "manual_agc_radiobutton");
