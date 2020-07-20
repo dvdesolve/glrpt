@@ -42,7 +42,7 @@ cmake -DCMAKE_INSTALL_PREFIX=/usr ..
 Build and install `glrpt`:
 ```
 make
-make install
+sudo make install
 ```
 
 Now you're ready to use `glrpt`. You can run it from your favorite WM's menu or directly from terminal (recommended if something goes wrong because there will be additional debug info).

@@ -22,6 +22,7 @@
 #include "../sdr/filters.h"
 #include "../sdr/ifft.h"
 #include "callback_func.h"
+#include "interface.h"
 #include "rc_config.h"
 
 #include <gtk/gtk.h>
@@ -498,3 +499,19 @@ void Strlcpy(char *dest, const char *src, size_t n) {
   /* Terminate dest string */
   dest[idx] = '\0';
 }
+
+/*****************************************************************************/
+
+/* Enter_Filter_BW()
+ *
+ * Enters the Low Pass Filter B/W to the relevant entry widget
+ */
+void Enter_Filter_BW(void) {
+  char text[10];
+  GtkEntry *entry = GTK_ENTRY(
+      Builder_Get_Object(main_window_builder, "sdr_bw_entry") );
+  uint32_t bw = rc_data.sdr_filter_bw / 1000;
+  snprintf( text, sizeof(text), "%4u", bw );
+  gtk_entry_set_text( entry, text );
+}
+

@@ -78,6 +78,7 @@ int isFlagClear(int flag);
 void SetFlag(int flag);
 void ClearFlag(int flag);
 void Strlcpy(char *dest, const char *src, size_t n);
+void Enter_Filter_BW(void);
 
 /*****************************************************************************/
 

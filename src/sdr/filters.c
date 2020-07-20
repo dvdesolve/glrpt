@@ -18,16 +18,12 @@
 
 #include "../common/common.h"
 #include "../common/shared.h"
-#include "../glrpt/interface.h"
 #include "../glrpt/utils.h"
-
-#include <gtk/gtk.h>
 
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
 
 /*****************************************************************************/
 
@@ -66,10 +62,14 @@ bool Init_Chebyshev_Filter(
   mem_alloc( (void **)&tb, mreq );
 
   /* Allocate coefficient arrays */
+  filter_data->a = NULL;
+  filter_data->b = NULL;
   mem_alloc( (void **)&(filter_data->a), mreq );
   mem_alloc( (void **)&(filter_data->b), mreq );
 
   /* Allocate saved input and output arrays */
+  filter_data->x = NULL;
+  filter_data->y = NULL;
   mreq = (size_t)(filter_data->npoles + 1) * sizeof(double);
   mem_alloc( (void **)&(filter_data->x), mreq );
   mem_alloc( (void **)&(filter_data->y), mreq );
@@ -196,26 +196,8 @@ bool Init_Chebyshev_Filter(
     filter_data->a[i] /= gain;
   }
 
-  /* Show Bandwidth to B/W entry */
-  Enter_Filter_BW();
-
   /* TODO no alternative way */
   return true;
-}
-
-/*****************************************************************************/
-
-/* Enter_Filter_BW()
- *
- * Enters the Low Pass Filter B/W to the relevant entry widget
- */
-void Enter_Filter_BW(void) {
-  char text[10];
-  GtkEntry *entry = GTK_ENTRY(
-      Builder_Get_Object(main_window_builder, "sdr_bw_entry") );
-  uint32_t bw = rc_data.sdr_filter_bw / 1000;
-  snprintf( text, sizeof(text), "%4u", bw );
-  gtk_entry_set_text( entry, text );
 }
 
 /*****************************************************************************/

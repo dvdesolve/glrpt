@@ -62,7 +62,6 @@ bool Init_Chebyshev_Filter(
         double ripple,
         uint32_t num_poles,
         uint32_t type);
-void Enter_Filter_BW(void);
 void DSP_Filter(filter_data_t *filter_data);
 void Deinit_Chebyshev_Filter(filter_data_t *data);
 

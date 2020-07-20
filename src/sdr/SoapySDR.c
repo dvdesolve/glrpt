@@ -30,8 +30,8 @@
 #include <SoapySDR/Formats.h>
 
 #include <complex.h>
-#include <semaphore.h>
 #include <pthread.h>
+#include <semaphore.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
