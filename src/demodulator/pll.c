@@ -219,6 +219,10 @@ void Costas_Correct_Phase(Costas_t *self, double error) {
 
     Display_Icon( pll_lock_icon, "gtk-no" );
     Display_Icon( frame_icon, "gtk-no" );
+
+    /* Report zero signal quality */
+    mtd_record.sig_q = 0;
+    gtk_entry_set_text( GTK_ENTRY(sig_quality_entry), "0" );
   }
 
   /* Limit frequency to a sensible range */
