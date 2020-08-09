@@ -85,6 +85,9 @@ decoder: {
 ### Decoding images
 Use [GPredict](https://github.com/csete/gpredict) to get passes list for the satellite of interest. Connect your SDR receiver and run `glrpt`. Select proper config via right-clicking in LRPT image area (system-wide configs are separated from user's configs and followed by them). Wait until satellite rises over the horizon to the decent angle and press "Start button". You can tweak gain settings during reception to get the best SNR. When the pass is over or you decided to stop click that button once again. Decoded images will be saved into `$XDG_CACHE_HOME/glrpt` (or in `$HOME/.cache/glrpt` if `$XDG_CACHE_HOME` is not set).
 
+### Tutorial
+[Here](https://www.youtube.com/watch?v=x3mqAfKLGmI) locates video tutorial on how to build, install and use `glrpt`.
+
 ## Troubleshooting
 
 ### `glrpt` fails to initialize device
