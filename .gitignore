@@ -6,3 +6,6 @@ src/compile_commands.json
 
 # YCM internals
 src/.clangd/
+
+# clang cache
+.cache
