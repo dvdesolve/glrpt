@@ -13,7 +13,7 @@ In order to use `glrpt` one should have the following dependencies satisfied:
 - `gtk+` (3.22.0 or higher)
 - `glibc`
 - `glib2`
-- `SoapySDR` (install proper modules to get support for your hardware)
+- `SoapySDR` (0.8.0 or higher). Be sure to install proper modules to get support for your specific hardware!
 - `libjpeg-turbo`
 - `libconfig`
 

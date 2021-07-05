@@ -593,9 +593,9 @@ bool SoapySDR_Init(void) {
 
   /* Set up receiving stream */
   Show_Message( "Setting up Receive Stream", "black" );
-  ret = SoapySDRDevice_setupStream(
-      sdr, &rxStream, SOAPY_SDR_RX, SOAPY_SDR_CS16, NULL, 0, NULL );
-  if( ret != SUCCESS )
+  rxStream = SoapySDRDevice_setupStream(
+      sdr, SOAPY_SDR_RX, SOAPY_SDR_CS16, NULL, 0, NULL );
+  if(!rxStream)
   {
     Show_Message( "Failed to set up Receive Stream", "red" );
     Show_Message( SoapySDRDevice_lastError(), "red" );
