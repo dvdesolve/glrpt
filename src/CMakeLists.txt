@@ -2,7 +2,7 @@
 find_package(PkgConfig REQUIRED)
 
 find_package(Threads)
-find_package(GLIB REQUIRED COMPONENTS gmodule)
+find_package(GLIB 2.58 REQUIRED COMPONENTS gmodule)
 pkg_check_modules(GTK REQUIRED gtk+-3.0>=3.22.0)
 pkg_check_modules(SOAPYSDR REQUIRED SoapySDR>=0.8.0)
 pkg_check_modules(TURBOJPEG REQUIRED libturbojpeg)
